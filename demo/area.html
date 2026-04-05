@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,18 +33,18 @@
 </head>
 <body>
 <div class="page">
-  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <a href="index.html" class="back-link">&larr; All demos</a>
   <div class="page-header">
     <h1>Area Chart</h1>
-    <p>Gradientfyllda ytor for cashflow, lagerbestand, kumulativa intakter och stacked fordelning over tid.</p>
+    <p>Gradient-filled areas for cash flow, inventory levels, cumulative revenue, and stacked distribution over time.</p>
   </div>
 
   <div class="examples">
     <!-- 1. Cashflow -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Kassaflodesanalys</h2>
-        <p>In- och utflodesserier med gradient-yta</p>
+        <h2>Cash Flow Analysis</h2>
+        <p>Inflow and outflow series with gradient fill</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-cashflow"></div>
@@ -54,8 +54,8 @@
     <!-- 2. Single cumulative -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Kumulativ omsattning</h2>
-        <p>Ackumulerad intakt med fylld yta</p>
+        <h2>Cumulative Revenue</h2>
+        <p>Accumulated revenue with filled area</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-cumulative"></div>
@@ -65,8 +65,8 @@
     <!-- 3. Multi-series area -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Trafikkallor over tid</h2>
-        <p>Flera serier med overlappande gradient-ytor</p>
+        <h2>Traffic Sources Over Time</h2>
+        <p>Multiple series with overlapping gradient fills</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-traffic"></div>
@@ -76,8 +76,8 @@
     <!-- 4. Stacked area -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Intakter per region (stacked)</h2>
-        <p>Staplad area-vy visar total och per-region-bidrag</p>
+        <h2>Revenue by Region (stacked)</h2>
+        <p>Stacked area view showing total and per-region contribution</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-stacked-area"></div>
@@ -87,8 +87,8 @@
     <!-- 5. Inventory levels -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Lagervarde over tid</h2>
-        <p>Mjuk area med ljus gradient — visar lagerniva per manad</p>
+        <h2>Inventory Value Over Time</h2>
+        <p>Smooth area with light gradient — showing inventory level per month</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-inventory"></div>
@@ -99,7 +99,7 @@
 
 <script src="/newchartjs.umd.js"></script>
 <script>
-const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 // 1. Cashflow
 NewChart.create('#chart-cashflow', {
@@ -107,8 +107,8 @@ NewChart.create('#chart-cashflow', {
   data: {
     labels: MONTHS,
     datasets: [
-      { label: 'Inflode', values: [3200,3500,3100,3800,3600,4000,3300,3700,3900,3400,4200,4500], color: '#0ca678' },
-      { label: 'Utflode', values: [2800,2900,3000,2700,3100,2900,3200,3000,2800,3100,3000,3200], color: '#e03131' }
+      { label: 'Inflow', values: [3200,3500,3100,3800,3600,4000,3300,3700,3900,3400,4200,4500], color: '#0ca678' },
+      { label: 'Outflow', values: [2800,2900,3000,2700,3100,2900,3200,3000,2800,3100,3000,3200], color: '#e03131' }
     ]
   }
 });
@@ -123,7 +123,7 @@ NewChart.create('#chart-cumulative', {
   data: {
     labels: MONTHS,
     datasets: [{
-      label: 'Kumulativ omsattning (tkr)',
+      label: 'Cumulative Revenue (k)',
       values: cumulative,
       color: '#4c6ef5'
     }]
@@ -136,9 +136,9 @@ NewChart.create('#chart-traffic', {
   data: {
     labels: MONTHS,
     datasets: [
-      { label: 'Direkt', values: [12000,13200,12800,14500,13800,15200,12500,14000,14800,13000,16000,17200], color: '#4c6ef5' },
-      { label: 'Organisk', values: [8400,9200,8800,10100,9600,10800,8900,10000,10500,9100,11200,12400], color: '#0ca678' },
-      { label: 'Betald', values: [5600,6100,5800,6800,6400,7200,5900,6600,7000,6100,7500,8200], color: '#f08c00' }
+      { label: 'Direct', values: [12000,13200,12800,14500,13800,15200,12500,14000,14800,13000,16000,17200], color: '#4c6ef5' },
+      { label: 'Organic', values: [8400,9200,8800,10100,9600,10800,8900,10000,10500,9100,11200,12400], color: '#0ca678' },
+      { label: 'Paid', values: [5600,6100,5800,6800,6400,7200,5900,6600,7000,6100,7500,8200], color: '#f08c00' }
     ]
   },
   style: {
@@ -152,10 +152,10 @@ NewChart.create('#chart-stacked-area', {
   data: {
     labels: MONTHS,
     datasets: [
-      { label: 'Sverige', values: [1800,2000,1900,2200,2100,2400,1850,2150,2300,2000,2500,2700], color: '#4c6ef5' },
-      { label: 'Norge', values: [600,680,640,750,710,800,620,700,750,650,800,880], color: '#0ca678' },
+      { label: 'Sweden', values: [1800,2000,1900,2200,2100,2400,1850,2150,2300,2000,2500,2700], color: '#4c6ef5' },
+      { label: 'Norway', values: [600,680,640,750,710,800,620,700,750,650,800,880], color: '#0ca678' },
       { label: 'Finland', values: [350,400,380,430,410,460,370,420,450,380,480,530], color: '#f08c00' },
-      { label: 'Danmark', values: [200,240,220,280,260,290,210,250,270,230,310,340], color: '#7048e8' }
+      { label: 'Denmark', values: [200,240,220,280,260,290,210,250,270,230,310,340], color: '#7048e8' }
     ]
   },
   options: { stacked: true },
@@ -170,7 +170,7 @@ NewChart.create('#chart-inventory', {
   data: {
     labels: MONTHS,
     datasets: [{
-      label: 'Lagervarde (tkr)',
+      label: 'Inventory Value (k)',
       values: [8200,7800,8500,7600,8900,8100,7400,8300,9200,8800,9500,8600],
       color: '#1098ad'
     }]

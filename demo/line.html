@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,18 +33,18 @@
 </head>
 <body>
 <div class="page">
-  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <a href="index.html" class="back-link">&larr; All demos</a>
   <div class="page-header">
     <h1>Line Chart</h1>
-    <p>Trendlinjer, multi-serie, jamforelser med streckade linjer, och crosshair-interaktion.</p>
+    <p>Trend lines, multi-series, comparisons with dashed lines, and crosshair interaction.</p>
   </div>
 
   <div class="examples">
     <!-- 1. Single trend -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Orderingangstrend</h2>
-        <p>Enkel linje med crosshair och punkter</p>
+        <h2>Order Intake Trend</h2>
+        <p>Single line with crosshair and data points</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-trend"></div>
@@ -54,8 +54,8 @@
     <!-- 2. Multi-series -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Forsaljning per kanal</h2>
-        <p>Flera serier med legenden for att togla synlighet</p>
+        <h2>Sales by Channel</h2>
+        <p>Multiple series with legend toggle for visibility</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-multi"></div>
@@ -65,8 +65,8 @@
     <!-- 3. Comparison with dashed previous period -->
     <div class="example-card">
       <div class="example-header">
-        <h2>2026 vs 2025 (streckad referens)</h2>
-        <p>Jamfor innevarande ar mot foregaende med streckad linje</p>
+        <h2>2026 vs 2025 (dashed reference)</h2>
+        <p>Compare current year against previous with a dashed line</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-compare"></div>
@@ -76,8 +76,8 @@
     <!-- 4. Line with area fill -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Kumulativ intakt med area-fill</h2>
-        <p>LineChart med fill: true for att visualisera ackumulerade intakter</p>
+        <h2>Cumulative Revenue with Area Fill</h2>
+        <p>LineChart with fill: true to visualize accumulated revenue</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-fill"></div>
@@ -87,8 +87,8 @@
     <!-- 5. Straight lines (no smooth) -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Lagernivaer (raka linjer)</h2>
-        <p>smooth: false for stegvisa forandringar</p>
+        <h2>Inventory Levels (straight lines)</h2>
+        <p>smooth: false for step changes</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-straight"></div>
@@ -99,7 +99,7 @@
 
 <script src="/newchartjs.umd.js"></script>
 <script>
-const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 // 1. Single trend
 NewChart.create('#chart-trend', {
@@ -107,7 +107,7 @@ NewChart.create('#chart-trend', {
   data: {
     labels: MONTHS,
     datasets: [{
-      label: 'Ordrar',
+      label: 'Orders',
       values: [412,468,431,502,478,528,419,487,519,453,564,611],
       color: '#4c6ef5'
     }]
@@ -120,9 +120,9 @@ NewChart.create('#chart-multi', {
   data: {
     labels: MONTHS,
     datasets: [
-      { label: 'Direkt', values: [980,1120,1050,1250,1180,1340,1020,1210,1290,1100,1420,1520], color: '#4c6ef5' },
+      { label: 'Direct', values: [980,1120,1050,1250,1180,1340,1020,1210,1290,1100,1420,1520], color: '#4c6ef5' },
       { label: 'Google Ads', values: [640,720,680,810,760,870,660,780,840,720,920,1000], color: '#0ca678' },
-      { label: 'Organisk', values: [480,560,520,630,590,680,500,600,650,540,720,790], color: '#f08c00' },
+      { label: 'Organic', values: [480,560,520,630,590,680,500,600,650,540,720,790], color: '#f08c00' },
       { label: 'Email', values: [320,380,350,420,390,450,340,400,430,360,480,530], color: '#7048e8' }
     ]
   }
@@ -149,7 +149,7 @@ NewChart.create('#chart-fill', {
   data: {
     labels: MONTHS,
     datasets: [{
-      label: 'Kumulativ (tkr)',
+      label: 'Cumulative (k)',
       values: cumulative,
       color: '#0ca678'
     }]
@@ -163,8 +163,8 @@ NewChart.create('#chart-straight', {
   data: {
     labels: MONTHS,
     datasets: [
-      { label: 'Lager A', values: [1200,1150,1080,1250,1180,1100,1050,1200,1320,1280,1350,1400], color: '#4c6ef5' },
-      { label: 'Lager B', values: [800,820,780,850,830,790,810,870,900,880,920,950], color: '#0ca678' }
+      { label: 'Warehouse A', values: [1200,1150,1080,1250,1180,1100,1050,1200,1320,1280,1350,1400], color: '#4c6ef5' },
+      { label: 'Warehouse B', values: [800,820,780,850,830,790,810,870,900,880,920,950], color: '#0ca678' }
     ]
   },
   options: { smooth: false }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,18 +65,18 @@
 </head>
 <body>
 <div class="page">
-  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <a href="index.html" class="back-link">&larr; All demos</a>
   <div class="page-header">
     <h1>Sparkline Chart</h1>
-    <p>Kompakta inline-diagram utan axlar — for KPI-kort, tabellceller och statusoversikter.</p>
+    <p>Compact inline charts without axes — for KPI cards, table cells, and status overviews.</p>
   </div>
 
   <div class="examples">
     <!-- 1. KPI Cards with sparklines -->
     <div class="example-card">
       <div class="example-header">
-        <h2>KPI-kort med trendlinjer</h2>
-        <p>Typisk ERP-dashboard-oversta-raden — stort varde + sparkline trend</p>
+        <h2>KPI Cards with Trend Lines</h2>
+        <p>Typical ERP dashboard top row — large value + sparkline trend</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid" id="kpi-grid"></div>
@@ -86,17 +86,17 @@
     <!-- 2. Data table with sparklines -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Produkttabell med trendkolumn</h2>
-        <p>Sparklines i tabellceller — visar 12-manaderstrend per produktrad</p>
+        <h2>Product Table with Trend Column</h2>
+        <p>Sparklines in table cells — showing 12-month trend per product row</p>
       </div>
       <div class="example-body">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Produkt</th>
-              <th class="right">Omsattning</th>
+              <th>Product</th>
+              <th class="right">Revenue</th>
               <th>Trend (12m)</th>
-              <th class="right">Forandring</th>
+              <th class="right">Change</th>
             </tr>
           </thead>
           <tbody id="product-table"></tbody>
@@ -107,8 +107,8 @@
     <!-- 3. Variant showcase -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Varianter: line, area, bar</h2>
-        <p>Tre renderingslage — samma data, olika visuell stil</p>
+        <h2>Variants: line, area, bar</h2>
+        <p>Three rendering modes — same data, different visual style</p>
       </div>
       <div class="example-body">
         <div class="variant-row" id="variant-row"></div>
@@ -118,8 +118,8 @@
     <!-- 4. Bar sparklines with negative values -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Bar-sparklines med negativa varden</h2>
-        <p>Visar dagliga forandringar — negativa staplar i rott</p>
+        <h2>Bar Sparklines with Negative Values</h2>
+        <p>Shows daily changes — negative bars in red</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid" id="change-grid"></div>
@@ -129,8 +129,8 @@
     <!-- 5. Reference lines -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Med referenslinje</h2>
-        <p>Streckad nolllinje eller malvarde — visar var trend ligger relativt mal</p>
+        <h2>With Reference Line</h2>
+        <p>Dashed zero line or target value — shows where trend sits relative to target</p>
       </div>
       <div class="example-body">
         <div class="variant-row" id="ref-row"></div>
@@ -142,13 +142,13 @@
 <script src="/newchartjs.umd.js"></script>
 <script>
 // Helper data
-const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 const kpis = [
-  { label: 'Omsattning', value: '38.9M', change: 12.4, data: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210], color: '#4c6ef5' },
-  { label: 'Ordrar', value: '5,872', change: 8.2, data: [412,468,431,502,478,528,419,487,519,453,564,611], color: '#0ca678' },
-  { label: 'Snittorder', value: '6,624', change: 3.8, data: [6917,6667,6868,6932,6715,6913,6897,6861,6898,6887,6898,6891], color: '#7048e8' },
-  { label: 'Returandel', value: '3.8%', change: -0.6, data: [4.2,4.0,4.5,3.9,4.1,3.7,3.8,3.5,3.6,3.9,3.4,3.8], color: '#e03131' }
+  { label: 'Revenue', value: '38.9M', change: 12.4, data: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210], color: '#4c6ef5' },
+  { label: 'Orders', value: '5,872', change: 8.2, data: [412,468,431,502,478,528,419,487,519,453,564,611], color: '#0ca678' },
+  { label: 'Avg Order', value: '6,624', change: 3.8, data: [6917,6667,6868,6932,6715,6913,6897,6861,6898,6887,6898,6891], color: '#7048e8' },
+  { label: 'Return Rate', value: '3.8%', change: -0.6, data: [4.2,4.0,4.5,3.9,4.1,3.7,3.8,3.5,3.6,3.9,3.4,3.8], color: '#e03131' }
 ];
 
 // 1. KPI Cards
@@ -178,12 +178,12 @@ kpis.forEach(kpi => {
 
 // 2. Product table
 const products = [
-  { name: 'Madrasser', revenue: '14,200', change: 15.2, trend: [980,1050,1020,1180,1120,1280,1050,1200,1300,1100,1380,1480] },
-  { name: 'Kuddar', revenue: '8,900', change: 9.8, trend: [680,720,700,780,740,820,680,760,800,700,860,940] },
-  { name: 'Sangramar', revenue: '6,300', change: -2.1, trend: [580,540,560,520,500,530,480,520,500,490,510,480] },
-  { name: 'Baddtextil', revenue: '4,800', change: 22.4, trend: [320,340,360,380,400,420,380,410,440,400,460,500] },
-  { name: 'Tacken', revenue: '3,200', change: 5.6, trend: [240,250,260,270,265,280,260,275,290,270,300,310] },
-  { name: 'Tillbehor', revenue: '1,520', change: 18.9, trend: [100,105,110,120,125,135,115,130,140,120,150,165] }
+  { name: 'Mattresses', revenue: '14,200', change: 15.2, trend: [980,1050,1020,1180,1120,1280,1050,1200,1300,1100,1380,1480] },
+  { name: 'Pillows', revenue: '8,900', change: 9.8, trend: [680,720,700,780,740,820,680,760,800,700,860,940] },
+  { name: 'Bed Frames', revenue: '6,300', change: -2.1, trend: [580,540,560,520,500,530,480,520,500,490,510,480] },
+  { name: 'Bath Textiles', revenue: '4,800', change: 22.4, trend: [320,340,360,380,400,420,380,410,440,400,460,500] },
+  { name: 'Duvets', revenue: '3,200', change: 5.6, trend: [240,250,260,270,265,280,260,275,290,270,300,310] },
+  { name: 'Accessories', revenue: '1,520', change: 18.9, trend: [100,105,110,120,125,135,115,130,140,120,150,165] }
 ];
 
 const tbody = document.getElementById('product-table');
@@ -192,7 +192,7 @@ products.forEach((p, i) => {
   const isUp = p.change >= 0;
   tr.innerHTML = `
     <td class="name">${p.name}</td>
-    <td class="right">${p.revenue} tkr</td>
+    <td class="right">${p.revenue} k</td>
     <td><div class="table-spark" id="table-spark-${i}"></div></td>
     <td class="right"><span class="badge ${isUp?'up':'down'}">${isUp?'&#9650;':'&#9660;'} ${Math.abs(p.change).toFixed(1)}%</span></td>
   `;
@@ -231,8 +231,8 @@ variants.forEach(v => {
 
 // 4. Bar sparklines with negatives
 const changes = [
-  { label: 'Marginalforandring', data: [1.2,-0.8,0.5,1.5,-0.3,0.8,-1.2,0.6,1.0,-0.5,1.4,0.9] },
-  { label: 'Lagerniva delta', data: [-200,150,-350,400,-100,280,-180,320,500,-150,400,-80] }
+  { label: 'Margin Change', data: [1.2,-0.8,0.5,1.5,-0.3,0.8,-1.2,0.6,1.0,-0.5,1.4,0.9] },
+  { label: 'Inventory Level Delta', data: [-200,150,-350,400,-100,280,-180,320,500,-150,400,-80] }
 ];
 const changeGrid = document.getElementById('change-grid');
 changes.forEach((c, i) => {
@@ -257,9 +257,9 @@ changes.forEach((c, i) => {
 // 5. Reference lines
 const refRow = document.getElementById('ref-row');
 const refExamples = [
-  { label: 'Nolllinje', data: [2,-1,3,-2,1,4,-1,2,3,-1,2,5], ref: 0, color: '#4c6ef5' },
-  { label: 'Mallinje (400)', data: [380,390,410,395,420,405,430,415,440,425,450,460], ref: 400, color: '#0ca678' },
-  { label: 'Snitt-ref', data: [50,55,48,62,58,70,52,65,72,60,78,82], ref: 62.7, color: '#7048e8' }
+  { label: 'Zero Line', data: [2,-1,3,-2,1,4,-1,2,3,-1,2,5], ref: 0, color: '#4c6ef5' },
+  { label: 'Target Line (400)', data: [380,390,410,395,420,405,430,415,440,425,450,460], ref: 400, color: '#0ca678' },
+  { label: 'Avg Ref', data: [50,55,48,62,58,70,52,65,72,60,78,82], ref: 62.7, color: '#7048e8' }
 ];
 refExamples.forEach((r, i) => {
   const item = document.createElement('div');

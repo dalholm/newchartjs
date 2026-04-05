@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NewChart JS — Sovfabriken Dashboard</title>
+  <title>NewChart JS — The Sleep Factory Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -193,8 +193,8 @@
         </svg>
       </div>
       <div>
-        <h1>Forsaljningsoversikt</h1>
-        <span class="subtitle">Sovfabriken &middot; <span id="today-date"></span></span>
+        <h1>Sales Overview</h1>
+        <span class="subtitle">The Sleep Factory &middot; <span id="today-date"></span></span>
       </div>
     </div>
     <div class="header-right">
@@ -215,8 +215,8 @@
   <div class="chart-card">
     <!-- Tab bar -->
     <div class="tab-bar">
-      <button class="active" data-tab="bar">Tidserie</button>
-      <button data-tab="donut">Fordelning</button>
+      <button class="active" data-tab="bar">Time Series</button>
+      <button data-tab="donut">Distribution</button>
       <div class="spacer"></div>
       <div class="live"><span class="live-dot"></span> Live &middot; <span id="live-time"></span></div>
     </div>
@@ -226,27 +226,27 @@
       <div class="chart-toolbar">
         <div class="toolbar-left">
           <div class="breadcrumbs" id="breadcrumbs" style="display:none;"></div>
-          <span class="toolbar-title" id="chart-title">Omsattning</span>
+          <span class="toolbar-title" id="chart-title">Revenue</span>
         </div>
         <div class="toolbar-right">
           <div class="chart-type-switch" id="chart-type-switch">
-            <button class="active" data-type="bar" title="Stapeldiagram">
+            <button class="active" data-type="bar" title="Bar chart">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="7" width="3" height="7" rx="0.5"/><rect x="6.5" y="4" width="3" height="10" rx="0.5"/><rect x="11" y="2" width="3" height="12" rx="0.5"/>
               </svg>
             </button>
-            <button data-type="line" title="Linjediagram">
+            <button data-type="line" title="Line chart">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="2,12 5,7 8,9 11,4 14,6"/><circle cx="14" cy="6" r="1" fill="currentColor"/>
               </svg>
             </button>
           </div>
           <div class="seg" id="view-mode-seg">
-            <button data-val="chart" class="active">Graf</button>
-            <button data-val="table">Tabell</button>
-            <button data-val="split">Delad</button>
+            <button data-val="chart" class="active">Chart</button>
+            <button data-val="table">Table</button>
+            <button data-val="split">Split</button>
           </div>
-          <button class="tool-btn" id="btn-export" title="Exportera CSV">
+          <button class="tool-btn" id="btn-export" title="Export CSV">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M3 12v1.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V12"/>
             </svg>
@@ -269,17 +269,17 @@
     <div id="panel-donut" style="display:none;">
       <div class="chart-toolbar">
         <div class="toolbar-left">
-          <span class="toolbar-title">Fordelning</span>
+          <span class="toolbar-title">Distribution</span>
         </div>
         <div class="toolbar-right">
           <div class="seg" id="donut-source-seg">
-            <button data-val="channel" class="active">Per kanal</button>
-            <button data-val="category">Per kategori</button>
+            <button data-val="channel" class="active">By Channel</button>
+            <button data-val="category">By Category</button>
           </div>
           <div class="seg" id="donut-view-seg">
-            <button data-val="chart">Graf</button>
-            <button data-val="table">Tabell</button>
-            <button data-val="split" class="active">Delad</button>
+            <button data-val="chart">Chart</button>
+            <button data-val="table">Table</button>
+            <button data-val="split" class="active">Split</button>
           </div>
           <button class="tool-btn" id="btn-donut-export">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -303,8 +303,8 @@
 
   <!-- FOOTER -->
   <div class="dashboard-footer">
-    <span>Kalla: Nyehandel Platform API &middot; Alla belopp i SEK exkl. moms &middot; Powered by NewChart.js v0.1.0</span>
-    <span>Klicka KPI-kort for att byta metric &middot; Dubbelklicka stapel for drill-down</span>
+    <span>Source: Nyehandel Platform API &middot; All amounts in SEK excl. VAT &middot; Powered by NewChart.js v0.1.0</span>
+    <span>Click KPI card to switch metric &middot; Double-click bar for drill-down</span>
   </div>
 </div>
 
@@ -318,7 +318,7 @@
 /* ═══════════════════════════════════════════════════════════════
    DATA
    ═══════════════════════════════════════════════════════════════ */
-const MONTHS = ["Jan","Feb","Mar","Apr","Maj","Jun","Jul","Aug","Sep","Okt","Nov","Dec"];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const REV_26 = [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210];
 const REV_25 = [2200,2450,2380,2710,2590,2840,2310,2680,2920,2510,3120,3580];
 const ORD_26 = [412,468,431,502,478,528,419,487,519,453,564,611];
@@ -328,21 +328,21 @@ const AOV_25 = REV_25.map((r,i) => Math.round(r*1000/ORD_25[i]));
 const BUDGET = [2700,2900,3000,3200,3100,3400,3000,3200,3500,3300,3700,4000];
 
 const CHANNEL_DATA = [
-  { label:"Direkt", value:12480, prev:9860 },
+  { label:"Direct", value:12480, prev:9860 },
   { label:"Google Ads", value:8320, prev:7110 },
-  { label:"Organisk", value:6940, prev:5230 },
+  { label:"Organic", value:6940, prev:5230 },
   { label:"Email", value:4680, prev:3920 },
   { label:"Social", value:2510, prev:2180 },
   { label:"Referral", value:1590, prev:1340 },
 ];
 
 const CATEGORY_DATA = [
-  { label:"Madrasser", value:14200, orders:284, margin:42.3 },
-  { label:"Kuddar", value:8900, orders:1780, margin:51.2 },
-  { label:"Sangramar", value:6300, orders:126, margin:38.7 },
-  { label:"Baddtextil", value:4800, orders:960, margin:55.1 },
-  { label:"Tacken", value:3200, orders:640, margin:48.6 },
-  { label:"Tillbehor", value:1520, orders:304, margin:62.4 },
+  { label:"Mattresses", value:14200, orders:284, margin:42.3 },
+  { label:"Pillows", value:8900, orders:1780, margin:51.2 },
+  { label:"Bed Frames", value:6300, orders:126, margin:38.7 },
+  { label:"Bed Linen", value:4800, orders:960, margin:55.1 },
+  { label:"Duvets", value:3200, orders:640, margin:48.6 },
+  { label:"Accessories", value:1520, orders:304, margin:62.4 },
 ];
 
 const SERIES_COLORS = ["#4c6ef5","#0ca678","#f08c00","#e03131","#7048e8","#1098ad","#d6336c","#5c7cfa","#20c997","#fcc419"];
@@ -351,10 +351,10 @@ const COMPARE_COLOR = "#b3bac5";
 /* Drill-down generators */
 function genWeeks(monthVal) {
   const w = [0.22,0.26,0.28,0.24];
-  return w.map((f,i) => ({ label: "V"+(i+1), value: Math.round(monthVal*f*(0.9+Math.random()*0.2)) }));
+  return w.map((f,i) => ({ label: "W"+(i+1), value: Math.round(monthVal*f*(0.9+Math.random()*0.2)) }));
 }
 function genDays(weekVal) {
-  const days = ["Man","Tis","Ons","Tor","Fre","Lor","Son"];
+  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   const wt = [0.16,0.15,0.14,0.14,0.13,0.16,0.12];
   return days.map((d,i) => ({ label:d, value: Math.round(weekVal*wt[i]*(0.85+Math.random()*0.3)) }));
 }
@@ -366,10 +366,10 @@ function fmt(n) {
   if(n>=1e6) return (n/1e6).toFixed(1)+"M";
   if(n>=1e4) return Math.round(n/1e3)+"k";
   if(n>=1e3) return (n/1e3).toFixed(1)+"k";
-  return n.toLocaleString("sv-SE");
+  return n.toLocaleString("en-US");
 }
-function fmtSEK(n) { return fmt(n)+" kr"; }
-function fmtFull(n) { return n.toLocaleString("sv-SE")+" kr"; }
+function fmtSEK(n) { return fmt(n)+" SEK"; }
+function fmtFull(n) { return n.toLocaleString("en-US")+" SEK"; }
 function pctChange(c,p) { return p===0?0:((c-p)/p*100); }
 
 function makeBadge(value) {
@@ -413,13 +413,13 @@ function renderKPIs() {
   const budgetTarget = BUDGET.reduce((s,v)=>s+v,0)*1000;
 
   const kpis = [
-    { id:"revenue", label:"Omsattning", value:totR26, previous:totR25, suffix:" kr",
+    { id:"revenue", label:"Revenue", value:totR26, previous:totR25, suffix:" SEK",
       sparkline:{ values:REV_26, color:SERIES_COLORS[0] }, target:budgetTarget },
-    { id:"orders", label:"Ordrar", value:totO26, previous:totO25, suffix:"",
+    { id:"orders", label:"Orders", value:totO26, previous:totO25, suffix:"",
       sparkline:{ values:ORD_26, color:SERIES_COLORS[1] }, target:null },
-    { id:"aov", label:"AOV", value:aov26, previous:aov25, suffix:" kr",
+    { id:"aov", label:"AOV", value:aov26, previous:aov25, suffix:" SEK",
       sparkline:{ values:AOV_26, color:SERIES_COLORS[2] }, target:null },
-    { id:"margin", label:"Bruttomarginal", value:47.2, previous:44.8, suffix:"%", decimals:1,
+    { id:"margin", label:"Gross Margin", value:47.2, previous:44.8, suffix:"%", decimals:1,
       sparkline:{ values:[42,43,44,45,44,46,45,47,48,46,48,47], color:SERIES_COLORS[3] }, target:null },
   ];
 
@@ -485,7 +485,7 @@ function renderBarChart() {
 
   // Update title
   document.getElementById("chart-title").textContent =
-    state.metric==="revenue"?"Omsattning":state.metric==="orders"?"Ordrar":"Snittorder";
+    state.metric==="revenue"?"Revenue":state.metric==="orders"?"Orders":"Avg Order";
 
   // Always show container — Chart base class handles hiding SVG in table-only mode
   container.style.display = "block";
@@ -504,14 +504,14 @@ function renderBarChart() {
     const datasets = [];
     if(state.legendVis.current) {
       datasets.push({
-        label: state.drillStack.length===0 ? "2026" : "Nuvarande",
+        label: state.drillStack.length===0 ? "2026" : "Current",
         values: data.map(d => d.value),
         color: SERIES_COLORS[0]
       });
     }
     if(state.legendVis.previous) {
       datasets.push({
-        label: state.drillStack.length===0 ? "2025" : "Foregaende",
+        label: state.drillStack.length===0 ? "2025" : "Previous",
         values: data.map(d => d.prev || 0),
         color: COMPARE_COLOR,
         dash: true,
@@ -526,7 +526,7 @@ function renderBarChart() {
     if(state.legendVis.average) {
       referenceLines.push({
         value: "average",
-        label: "Snitt",
+        label: "Average",
         color: "#868e96",
         dash: "4 3",
         strokeWidth: 1
@@ -573,11 +573,11 @@ function renderBarChart() {
       maxHeight: 200,
       columns: [
         { key:"_label", label:"Period", align:"left" },
-        { key: datasets[0]?.label || "Value", label: isSEK?"Omsattning":"Antal", align:"right", mono:true,
+        { key: datasets[0]?.label || "Value", label: isSEK?"Revenue":"Count", align:"right", mono:true,
           render: (row, ri) => isSEK ? fmtSEK(data[ri].value*mult) : fmt(data[ri].value) },
-        ...(datasets.length > 1 ? [{ key: datasets[1]?.label || "Prev", label:"Fg. period", align:"right", mono:true,
+        ...(datasets.length > 1 ? [{ key: datasets[1]?.label || "Prev", label:"Prev. Period", align:"right", mono:true,
           render: (row, ri) => data[ri].prev ? (isSEK ? fmtSEK(data[ri].prev*mult) : fmt(data[ri].prev)) : "–" }] : []),
-        { key:"_change", label:"Forandring", align:"right",
+        { key:"_change", label:"Change", align:"right",
           render: (row, ri) => data[ri].prev ? makeBadge(pctChange(data[ri].value, data[ri].prev)) : "–" },
         ...(hasBudget ? [{ key:"_budget", label:"Budget", align:"right", mono:true,
           render: (row, ri) => data[ri].budget ? fmtSEK(data[ri].budget*mult) : "" }] : []),
@@ -676,7 +676,7 @@ function updateBreadcrumbs() {
   bc.style.display = "flex";
   title.style.display = "none";
 
-  let html = '<button onclick="drillTo(-1)" title="Hem">' +
+  let html = '<button onclick="drillTo(-1)" title="Home">' +
     '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#4c6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
     '<path d="M2 8l6-5.5L14 8"/><path d="M3.5 9v5a.5.5 0 00.5.5h3v-3.5h2v3.5h3a.5.5 0 00.5-.5V9"/></svg></button>';
 
@@ -704,7 +704,7 @@ function renderBarLegend() {
     { key:"current", label:"2026", color:SERIES_COLORS[0] },
     { key:"previous", label:"2025", color:COMPARE_COLOR, ref:true },
     ...(state.metric==="revenue" ? [{ key:"budget", label:"Budget", color:"#f08c00", ref:true }] : []),
-    { key:"average", label:"Snitt", color:"#868e96", ref:true },
+    { key:"average", label:"Average", color:"#868e96", ref:true },
   ];
 
   const el = document.getElementById("bar-legend");
@@ -813,7 +813,7 @@ function renderDonutChart() {
       { labels: data.map(d=>d.label), datasets: [{ label:"Value", values: data.map(d=>d.value) }] },
       {
         columns: [
-          { key:"_label", label: isChannel?"Kanal":"Kategori", align:"left",
+          { key:"_label", label: isChannel?"Channel":"Category", align:"left",
             render: (row, ri) => {
               const color = colors[ri] || SERIES_COLORS[ri % SERIES_COLORS.length];
               return '<span style="display:inline-flex;align-items:center;gap:8px">' +
@@ -821,11 +821,11 @@ function renderDonutChart() {
                 data[ri].label+'</span>';
             }
           },
-          { key:"_revenue", label:"Omsattning", align:"right", mono:true,
+          { key:"_revenue", label:"Revenue", align:"right", mono:true,
             render: (row, ri) => fmtSEK(data[ri].value*1000) },
-          { key:"_share", label:"Andel", align:"right", mono:true,
+          { key:"_share", label:"Share", align:"right", mono:true,
             render: (row, ri) => ((data[ri].value/rawTotal)*100).toFixed(1)+"%" },
-          { key:"_extra", label: isChannel?"YoY":"Marginal", align:"right",
+          { key:"_extra", label: isChannel?"YoY":"Margin", align:"right",
             render: (row, ri) => {
               const d = data[ri];
               return isChannel ? makeBadge(pctChange(d.value, d.prev)) : '<span style="font-family:var(--mono)">'+d.margin+'%</span>';
@@ -867,7 +867,7 @@ function exportCSV() {
   const data = getCurrentData();
   const isSEK = state.metric==="revenue"||state.metric==="aov";
   const mult = state.metric==="aov"?1:1000;
-  const header = ["Period", state.metric==="revenue"?"Omsattning":state.metric==="orders"?"Ordrar":"AOV", "Foregaende"];
+  const header = ["Period", state.metric==="revenue"?"Revenue":state.metric==="orders"?"Orders":"AOV", "Previous"];
   const csv = [header.join(";"), ...data.map(d => [d.label, d.value*mult, (d.prev||0)*mult].join(";"))].join("\n");
   downloadCSV(csv, state.metric+"_export.csv");
 }
@@ -875,7 +875,7 @@ function exportCSV() {
 function exportDonutCSV() {
   const raw = state.donutSource==="channel" ? CHANNEL_DATA : CATEGORY_DATA;
   const isChannel = state.donutSource==="channel";
-  const header = [isChannel?"Kanal":"Kategori","Omsattning",isChannel?"Foregaende":"Marginal"];
+  const header = [isChannel?"Channel":"Category","Revenue",isChannel?"Previous":"Margin"];
   const csv = [header.join(";"), ...raw.map(d => {
     return [d.label, d.value*1000, isChannel?(d.prev*1000):d.margin].join(";");
   })].join("\n");
@@ -947,12 +947,12 @@ function setupSeg(id, onChange) {
    ═══════════════════════════════════════════════════════════════ */
 function init() {
   // Set date/time
-  document.getElementById("today-date").textContent = new Date().toLocaleDateString("sv-SE");
-  document.getElementById("live-time").textContent = new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("today-date").textContent = new Date().toLocaleDateString("en-US");
+  document.getElementById("live-time").textContent = new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
 
   // Update live time every minute
   setInterval(() => {
-    document.getElementById("live-time").textContent = new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+    document.getElementById("live-time").textContent = new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
   }, 60000);
 
   setupEvents();

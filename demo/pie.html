@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,10 +36,10 @@
 </head>
 <body>
 <div class="page">
-  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <a href="index.html" class="back-link">&larr; All demos</a>
   <div class="page-header">
     <h1>Pie & Donut Chart</h1>
-    <p>Fordelningsdiagram for kanaler, kategorier och kostnadsposter — med hover-explode och center-text.</p>
+    <p>Distribution charts for channels, categories, and cost items — with hover-explode and center text.</p>
   </div>
 
   <div class="examples">
@@ -47,8 +47,8 @@
     <div class="row">
       <div class="example-card">
         <div class="example-header">
-          <h2>Forsaljning per kanal (Pie)</h2>
-          <p>Klassisk pie med procent-etiketter</p>
+          <h2>Sales by Channel (Pie)</h2>
+          <p>Classic pie with percentage labels</p>
         </div>
         <div class="example-body">
           <div class="chart-container small" id="chart-pie"></div>
@@ -58,8 +58,8 @@
       <!-- 2. Donut -->
       <div class="example-card">
         <div class="example-header">
-          <h2>Forsaljning per kanal (Donut)</h2>
-          <p>Donut med totalsumma i mitten — hover visar detaljer</p>
+          <h2>Sales by Channel (Donut)</h2>
+          <p>Donut with total in the center — hover shows details</p>
         </div>
         <div class="example-body">
           <div class="chart-container small" id="chart-donut"></div>
@@ -71,8 +71,8 @@
     <div class="row">
       <div class="example-card">
         <div class="example-header">
-          <h2>Produktkategorier</h2>
-          <p>Fordelning av intakter per produktgrupp</p>
+          <h2>Product Categories</h2>
+          <p>Revenue breakdown by product group</p>
         </div>
         <div class="example-body">
           <div class="chart-container small" id="chart-category"></div>
@@ -82,8 +82,8 @@
       <!-- 4. Cost breakdown -->
       <div class="example-card">
         <div class="example-header">
-          <h2>Kostnadsfordelning</h2>
-          <p>Donut med varde-etiketter istallet for procent</p>
+          <h2>Cost Breakdown</h2>
+          <p>Donut with value labels instead of percentages</p>
         </div>
         <div class="example-body">
           <div class="chart-container small" id="chart-costs"></div>
@@ -94,8 +94,8 @@
     <!-- 5. Large donut with many slices -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Leverantorsandel — topp 8</h2>
-        <p>Donut med manga segment och legend till hoger</p>
+        <h2>Supplier Share — Top 8</h2>
+        <p>Donut with many segments and legend to the right</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-suppliers" style="max-width: 500px;"></div>
@@ -106,7 +106,7 @@
 
 <script src="/newchartjs.umd.js"></script>
 <script>
-const channelLabels = ['Direkt','Google Ads','Organisk','Email','Social','Referral'];
+const channelLabels = ['Direct','Google Ads','Organic','Email','Social','Referral'];
 const channelValues = [12480,8320,6940,4680,2510,1590];
 
 // 1. Pie
@@ -140,7 +140,7 @@ NewChart.create('#chart-donut', {
 NewChart.create('#chart-category', {
   type: 'pie',
   data: {
-    labels: ['Madrasser','Kuddar','Sangramar','Baddtextil','Tacken','Tillbehor'],
+    labels: ['Mattresses','Pillows','Bed Frames','Bed Linen','Duvets','Accessories'],
     datasets: [{ values: [14200,8900,6300,4800,3200,1520] }]
   },
   style: {
@@ -155,7 +155,7 @@ NewChart.create('#chart-category', {
 NewChart.create('#chart-costs', {
   type: 'pie',
   data: {
-    labels: ['Personal','Material','Logistik','Marknadsforing','Lokaler','IT'],
+    labels: ['Personnel','Materials','Logistics','Marketing','Premises','IT'],
     datasets: [{ values: [5200,3400,1800,1200,900,600] }]
   },
   style: {
@@ -170,7 +170,7 @@ NewChart.create('#chart-costs', {
 NewChart.create('#chart-suppliers', {
   type: 'pie',
   data: {
-    labels: ['Hilding Anders','Bico','Jensen','Hastens','Carpe Diem','Dux','Tempur','Ovriga'],
+    labels: ['Hilding Anders','Bico','Jensen','Hastens','Carpe Diem','Dux','Tempur','Others'],
     datasets: [{ values: [28,18,14,12,9,7,5,7] }]
   },
   style: {

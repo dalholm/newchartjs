@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,18 +36,18 @@
 </head>
 <body>
 <div class="page">
-  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <a href="index.html" class="back-link">&larr; All demos</a>
   <div class="page-header">
     <h1>Bar Chart</h1>
-    <p>Vertikala och horisontella staplar, grupperade, stacked, och 100% stacked — typiska ERP-scenarion.</p>
+    <p>Vertical and horizontal bars, grouped, stacked, and 100% stacked — typical ERP scenarios.</p>
   </div>
 
   <div class="examples">
     <!-- 1. Basic revenue bars -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Manatlig omsattning</h2>
-        <p>Enkel stapelserie med referenslinje for budget</p>
+        <h2>Monthly Revenue</h2>
+        <p>Simple bar series with a budget reference line</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-revenue"></div>
@@ -57,8 +57,8 @@
     <!-- 2. Grouped comparison -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Innevarande ar vs foregaende ar</h2>
-        <p>Grupperade staplar for periodjamforelse</p>
+        <h2>Current Year vs Previous Year</h2>
+        <p>Grouped bars for period comparison</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-comparison"></div>
@@ -68,8 +68,8 @@
     <!-- 3. Stacked -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Intakter per produktkategori (stacked)</h2>
-        <p>Staplad vy visar total och fordelning per kategori</p>
+        <h2>Revenue by Product Category (stacked)</h2>
+        <p>Stacked view shows totals and breakdown by category</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-stacked"></div>
@@ -79,8 +79,8 @@
     <!-- 4. 100% Stacked -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Kostnadfordelning (100% stacked)</h2>
-        <p>Visar proportionell fordelning per manad — varje stapel summerar till 100%</p>
+        <h2>Cost Breakdown (100% stacked)</h2>
+        <p>Shows proportional breakdown per month — each bar sums to 100%</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-percent"></div>
@@ -90,8 +90,8 @@
     <!-- 5. With bar markers -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Budget vs utfall med markers</h2>
-        <p>Per-stapel budgetmarkorer visar mal per manad</p>
+        <h2>Budget vs Actual with Markers</h2>
+        <p>Per-bar budget markers show targets per month</p>
       </div>
       <div class="example-body">
         <div class="chart-container" id="chart-markers"></div>
@@ -102,7 +102,7 @@
 
 <script src="/newchartjs.umd.js"></script>
 <script>
-const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 // 1. Basic revenue
 NewChart.create('#chart-revenue', {
@@ -110,14 +110,14 @@ NewChart.create('#chart-revenue', {
   data: {
     labels: MONTHS,
     datasets: [{
-      label: 'Omsattning (tkr)',
+      label: 'Revenue (k)',
       values: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210],
       color: '#4c6ef5'
     }]
   },
   options: {
     referenceLines: [
-      { value: 3200, label: 'Budget snitt', color: '#868e96', dash: '6 4' }
+      { value: 3200, label: 'Budget average', color: '#868e96', dash: '6 4' }
     ]
   }
 });
@@ -140,10 +140,10 @@ NewChart.create('#chart-stacked', {
   data: {
     labels: ['Q1','Q2','Q3','Q4'],
     datasets: [
-      { label: 'Madrasser', values: [4200,4800,3900,5100], color: '#4c6ef5' },
-      { label: 'Kuddar', values: [2800,2600,2900,3100], color: '#0ca678' },
-      { label: 'Sangramar', values: [1800,2100,1600,2400], color: '#f08c00' },
-      { label: 'Tillbehor', values: [900,1100,800,1200], color: '#7048e8' }
+      { label: 'Mattresses', values: [4200,4800,3900,5100], color: '#4c6ef5' },
+      { label: 'Pillows', values: [2800,2600,2900,3100], color: '#0ca678' },
+      { label: 'Bed Frames', values: [1800,2100,1600,2400], color: '#f08c00' },
+      { label: 'Accessories', values: [900,1100,800,1200], color: '#7048e8' }
     ]
   },
   options: { stacked: true }
@@ -155,10 +155,10 @@ NewChart.create('#chart-percent', {
   data: {
     labels: MONTHS,
     datasets: [
-      { label: 'Personal', values: [420,430,440,445,450,460,465,470,480,490,500,510], color: '#4c6ef5' },
-      { label: 'Material', values: [280,290,285,300,310,295,305,315,320,310,325,330], color: '#0ca678' },
-      { label: 'Logistik', values: [180,175,185,190,195,200,205,210,215,220,225,230], color: '#f08c00' },
-      { label: 'Ovrigt', values: [120,105,90,65,45,45,25,5,85,80,50,30], color: '#e03131' }
+      { label: 'Personnel', values: [420,430,440,445,450,460,465,470,480,490,500,510], color: '#4c6ef5' },
+      { label: 'Materials', values: [280,290,285,300,310,295,305,315,320,310,325,330], color: '#0ca678' },
+      { label: 'Logistics', values: [180,175,185,190,195,200,205,210,215,220,225,230], color: '#f08c00' },
+      { label: 'Other', values: [120,105,90,65,45,45,25,5,85,80,50,30], color: '#e03131' }
     ]
   },
   options: { stacked: 'percent' }
@@ -171,7 +171,7 @@ NewChart.create('#chart-markers', {
   data: {
     labels: MONTHS,
     datasets: [{
-      label: 'Utfall (tkr)',
+      label: 'Actual (k)',
       values: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210],
       color: '#4c6ef5'
     }]

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,19 +43,19 @@
 </head>
 <body>
 <div class="page">
-  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <a href="index.html" class="back-link">&larr; All demos</a>
   <div class="page-header">
     <h1>KPI Card</h1>
-    <p>Config-driven KPI-kort med varde, forandringsbadge, sparkline, progress bar och statusindikator.
-      Byggt som en forstaklassig komponent i NewChart — perfekt for ERP-dashboards.</p>
+    <p>Config-driven KPI cards with value, change badge, sparkline, progress bar, and status indicator.
+      Built as a first-class component in NewChart — perfect for ERP dashboards.</p>
   </div>
 
   <div class="examples">
     <!-- 1. Full featured row (like dashboard) -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Forsaljningsoversikt — komplett KPI-rad</h2>
-        <p>Fyra kort med sparkline, forandring, och progress bar — som i ett riktigt ERP-dashboard</p>
+        <h2>Sales Overview — Complete KPI Row</h2>
+        <p>Four cards with sparkline, change indicator, and progress bar — just like a real ERP dashboard</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid" id="kpi-full"></div>
@@ -65,8 +65,8 @@
     <!-- 2. With target and progress -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Budget-uppfoljning med progress</h2>
-        <p>Statusindikator (gron/gul/rod) och progress bar baserat pa mal</p>
+        <h2>Budget Tracking with Progress</h2>
+        <p>Status indicator (green/yellow/red) and progress bar based on target</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid kpi-grid-3" id="kpi-progress"></div>
@@ -76,8 +76,8 @@
     <!-- 3. Different sparkline variants -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Sparkline-varianter</h2>
-        <p>Line, area och bar — olika visuella stilar for trenddata</p>
+        <h2>Sparkline Variants</h2>
+        <p>Line, area, and bar — different visual styles for trend data</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid kpi-grid-3" id="kpi-variants"></div>
@@ -87,8 +87,8 @@
     <!-- 4. Active/selectable cards -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Valbara kort (klicka for att aktivera)</h2>
-        <p>onClick-handler med aktiv-tillstand — typiskt for metric-val i dashboard</p>
+        <h2>Selectable Cards (click to activate)</h2>
+        <p>onClick handler with active state — typical for metric selection in dashboards</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid" id="kpi-selectable"></div>
@@ -98,8 +98,8 @@
     <!-- 5. Custom formatting -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Anpassad formatering</h2>
-        <p>Custom formatValue, prefix/suffix, och decimaler</p>
+        <h2>Custom Formatting</h2>
+        <p>Custom formatValue, prefix/suffix, and decimals</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid kpi-grid-3" id="kpi-format"></div>
@@ -109,8 +109,8 @@
     <!-- 6. Minimal cards (no sparkline) -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Minimala kort</h2>
-        <p>Utan sparkline — snabb oversikt med varde och forandring</p>
+        <h2>Minimal Cards</h2>
+        <p>No sparkline — quick overview with value and change indicator</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid" id="kpi-minimal"></div>
@@ -120,26 +120,26 @@
     <!-- 7. Update example -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Reaktiv uppdatering</h2>
-        <p>Klicka "Simulera uppdatering" for att se kortet uppdateras med nya varden</p>
+        <h2>Reactive Update</h2>
+        <p>Click "Simulate Update" to see the card update with new values</p>
       </div>
       <div class="example-body">
         <div class="kpi-grid kpi-single" id="kpi-update"></div>
         <button id="btn-update" style="margin-top:12px; padding:8px 16px; font-size:12px; font-family:var(--font);
           border:1px solid var(--border); border-radius:6px; cursor:pointer; background:var(--primary);
-          color:#fff; font-weight:600;">Simulera uppdatering</button>
+          color:#fff; font-weight:600;">Simulate Update</button>
       </div>
     </div>
 
     <!-- Code example -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Anvandning</h2>
-        <p>Sa har skapar du ett KPI-kort</p>
+        <h2>Usage</h2>
+        <p>How to create a KPI card</p>
       </div>
       <div class="example-body">
         <div class="code-hint">const card = NewChart.kpiCard('#my-element', {
-  label: 'Omsattning',
+  label: 'Revenue',
   value: 38920000,
   previous: 32410000,
   suffix: ' kr',
@@ -152,7 +152,7 @@
   onClick: ({ config }) => console.log(config.label)
 });
 
-// Uppdatera reaktivt
+// Update reactively
 card.update({ value: 41500000 });</div>
       </div>
     </div>
@@ -167,21 +167,21 @@ const AOV_DATA = MONTHS_DATA.map((r,i) => Math.round(r*1000/ORDERS_DATA[i]));
 
 // 1. Full featured row
 const fullKpis = [
-  { label:'Omsattning', value:38920000, previous:32410000, suffix:' kr',
+  { label:'Revenue', value:38920000, previous:32410000, suffix:' kr',
     sparkline:{ values:MONTHS_DATA, color:'#4c6ef5' }, target:42000000 },
-  { label:'Ordrar', value:5872, previous:5453, suffix:'',
+  { label:'Orders', value:5872, previous:5453, suffix:'',
     sparkline:{ values:ORDERS_DATA, color:'#0ca678' } },
-  { label:'Snittorder', value:6624, previous:5943, suffix:' kr',
+  { label:'Avg Order', value:6624, previous:5943, suffix:' kr',
     sparkline:{ values:AOV_DATA, color:'#7048e8' } },
-  { label:'Bruttomarginal', value:47.2, previous:44.8, suffix:'%', decimals:1,
+  { label:'Gross Margin', value:47.2, previous:44.8, suffix:'%', decimals:1,
     sparkline:{ values:[42,43,44,45,44,46,45,47,48,46,48,47], color:'#e03131' } }
 ];
 createRow('kpi-full', fullKpis);
 
 // 2. Progress/target
 const progressKpis = [
-  { label:'Arsbudget', value:38920000, previous:null, suffix:' kr', target:42000000 },
-  { label:'Ordrar Q4', value:1628, previous:null, suffix:'', target:1500,
+  { label:'Annual Budget', value:38920000, previous:null, suffix:' kr', target:42000000 },
+  { label:'Orders Q4', value:1628, previous:null, suffix:'', target:1500,
     thresholds:{ good:1.0, warning:0.85 } },
   { label:'NPS Score', value:72, previous:68, suffix:'', target:80,
     sparkline:{ values:[65,68,66,70,71,69,72,71,73,72,74,72], color:'#0ca678' } }
@@ -203,10 +203,10 @@ createRow('kpi-variants', variantKpis);
 // 4. Selectable
 const selectableCards = [];
 const selectableKpis = [
-  { label:'Omsattning', value:38920000, suffix:' kr', previous:32410000 },
-  { label:'Ordrar', value:5872, suffix:'', previous:5453 },
-  { label:'Snittorder', value:6624, suffix:' kr', previous:5943 },
-  { label:'Marginal', value:47.2, suffix:'%', previous:44.8, decimals:1 }
+  { label:'Revenue', value:38920000, suffix:' kr', previous:32410000 },
+  { label:'Orders', value:5872, suffix:'', previous:5453 },
+  { label:'Avg Order', value:6624, suffix:' kr', previous:5943 },
+  { label:'Margin', value:47.2, suffix:'%', previous:44.8, decimals:1 }
 ];
 const selGrid = document.getElementById('kpi-selectable');
 selectableKpis.forEach((k, i) => {
@@ -224,23 +224,23 @@ selectableKpis.forEach((k, i) => {
 
 // 5. Custom formatting
 const formatKpis = [
-  { label:'Lagervarde', value:12450000,
+  { label:'Inventory Value', value:12450000,
     formatValue: (v) => (v/1e6).toFixed(1) + ' MSEK',
     previous:11200000,
-    formatPrevious: (v) => 'fg. ' + (v/1e6).toFixed(1) + ' MSEK' },
-  { label:'Leveranstid', value:3.2, suffix:' dagar', decimals:1, previous:4.1,
+    formatPrevious: (v) => 'prev. ' + (v/1e6).toFixed(1) + ' MSEK' },
+  { label:'Delivery Time', value:3.2, suffix:' days', decimals:1, previous:4.1,
     sparkline:{ values:[4.5,4.2,4.0,3.8,3.6,3.5,3.4,3.3,3.2,3.1,3.2,3.2], color:'#0ca678' } },
-  { label:'Returandel', value:3.8, prefix:'', suffix:'%', decimals:1, previous:4.2,
+  { label:'Return Rate', value:3.8, prefix:'', suffix:'%', decimals:1, previous:4.2,
     sparkline:{ values:[4.2,4.0,4.5,3.9,4.1,3.7,3.8,3.5,3.6,3.9,3.4,3.8], color:'#e03131', variant:'bar' } }
 ];
 createRow('kpi-format', formatKpis);
 
 // 6. Minimal (no sparkline)
 const minimalKpis = [
-  { label:'Aktiva kunder', value:2847, previous:2612, suffix:'' },
+  { label:'Active Customers', value:2847, previous:2612, suffix:'' },
   { label:'Pipeline', value:4200000, previous:3800000, suffix:' kr' },
-  { label:'Konvertering', value:12.4, previous:10.8, suffix:'%', decimals:1 },
-  { label:'Artiklar', value:1423, previous:1380, suffix:' st' }
+  { label:'Conversion', value:12.4, previous:10.8, suffix:'%', decimals:1 },
+  { label:'Items', value:1423, previous:1380, suffix:' pcs' }
 ];
 createRow('kpi-minimal', minimalKpis);
 
@@ -248,7 +248,7 @@ createRow('kpi-minimal', minimalKpis);
 const updateEl = document.createElement('div');
 document.getElementById('kpi-update').appendChild(updateEl);
 const updateCard = NewChart.kpiCard(updateEl, {
-  label: 'Realtidsomsattning',
+  label: 'Real-time Revenue',
   value: 38920000,
   previous: 32410000,
   suffix: ' kr',

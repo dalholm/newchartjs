@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,10 +37,10 @@
 </head>
 <body>
 <div class="page">
-  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <a href="index.html" class="back-link">&larr; All demos</a>
   <div class="page-header">
     <h1>Gauge Chart</h1>
-    <p>KPI-matare med troskelzoner, nal och malmarkorer — perfekt for ERP-dashboards och styrkort.</p>
+    <p>KPI gauges with threshold zones, needle and target markers — perfect for ERP dashboards and scorecards.</p>
   </div>
 
   <div class="examples">
@@ -48,8 +48,8 @@
     <div class="row">
       <div class="example-card">
         <div class="example-header">
-          <h2>Omsattningsmal</h2>
-          <p>Procent av arsbudget uppnadd — gron/gul/rod zoner</p>
+          <h2>Revenue Target</h2>
+          <p>Percent of annual budget achieved — green/yellow/red zones</p>
         </div>
         <div class="example-body">
           <div class="chart-container wide" id="chart-revenue"></div>
@@ -58,8 +58,8 @@
 
       <div class="example-card">
         <div class="example-header">
-          <h2>Bruttomarginal</h2>
-          <p>Aktuell marginal vs mal pa 45%</p>
+          <h2>Gross Margin</h2>
+          <p>Current margin vs target of 45%</p>
         </div>
         <div class="example-body">
           <div class="chart-container wide" id="chart-margin"></div>
@@ -71,8 +71,8 @@
     <div class="row">
       <div class="example-card">
         <div class="example-header">
-          <h2>SLA Uppfyllnad</h2>
-          <p>Systemupptid med strikt troskel (99% = gult, 99.9% = gront)</p>
+          <h2>SLA Compliance</h2>
+          <p>System uptime with strict threshold (99% = yellow, 99.9% = green)</p>
         </div>
         <div class="example-body">
           <div class="chart-container wide" id="chart-sla"></div>
@@ -81,8 +81,8 @@
 
       <div class="example-card">
         <div class="example-header">
-          <h2>Lagerkapacitet</h2>
-          <p>Andel utnyttjad — inverterade zoner (hogt = rod)</p>
+          <h2>Warehouse Capacity</h2>
+          <p>Utilization rate — inverted zones (high = red)</p>
         </div>
         <div class="example-body">
           <div class="chart-container wide" id="chart-capacity"></div>
@@ -93,8 +93,8 @@
     <!-- 3. Row of compact gauges -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Operativa KPI:er</h2>
-        <p>Kompakta gauges for overblick — typisk KPI-panel i ERP</p>
+        <h2>Operational KPIs</h2>
+        <p>Compact gauges for overview — typical ERP KPI panel</p>
       </div>
       <div class="example-body" style="flex-wrap: wrap; gap: 12px;">
         <div class="chart-container compact" id="gauge-orders"></div>
@@ -107,8 +107,8 @@
     <!-- 4. Custom format -->
     <div class="example-card">
       <div class="example-header">
-        <h2>Omsattning med anpassat format</h2>
-        <p>Visar varde i MSEK med prefix och suffix — custom formatValue</p>
+        <h2>Revenue with Custom Format</h2>
+        <p>Displays value in millions with prefix and suffix — custom formatValue</p>
       </div>
       <div class="example-body">
         <div class="chart-container wide" id="chart-custom"></div>
@@ -123,7 +123,7 @@
 NewChart.create('#chart-revenue', {
   type: 'gauge',
   data: {
-    datasets: [{ label: 'Arsbudget', values: [78] }]
+    datasets: [{ label: 'Annual Budget', values: [78] }]
   },
   options: {
     min: 0, max: 100, target: 100,
@@ -140,7 +140,7 @@ NewChart.create('#chart-revenue', {
 NewChart.create('#chart-margin', {
   type: 'gauge',
   data: {
-    datasets: [{ label: 'Bruttomarginal', values: [42.3] }]
+    datasets: [{ label: 'Gross Margin', values: [42.3] }]
   },
   options: {
     min: 0, max: 60, target: 45,
@@ -158,7 +158,7 @@ NewChart.create('#chart-margin', {
 NewChart.create('#chart-sla', {
   type: 'gauge',
   data: {
-    datasets: [{ label: 'SLA Uppfyllnad', values: [99.7] }]
+    datasets: [{ label: 'SLA Compliance', values: [99.7] }]
   },
   options: {
     min: 95, max: 100, target: 99.9,
@@ -177,7 +177,7 @@ NewChart.create('#chart-sla', {
 NewChart.create('#chart-capacity', {
   type: 'gauge',
   data: {
-    datasets: [{ label: 'Lagerkapacitet', values: [87] }]
+    datasets: [{ label: 'Warehouse Capacity', values: [87] }]
   },
   options: {
     min: 0, max: 100, target: 75,
@@ -194,7 +194,7 @@ NewChart.create('#chart-capacity', {
 // 5. Compact gauges
 NewChart.create('#gauge-orders', {
   type: 'gauge',
-  data: { datasets: [{ label: 'Orderfyllnad', values: [94] }] },
+  data: { datasets: [{ label: 'Order Fulfillment', values: [94] }] },
   options: { min: 0, max: 100, valueSuffix: '%', ticks: 4, showMax: false },
   style: { gauge: { valueFontSize: 22 } }
 });
@@ -215,14 +215,14 @@ NewChart.create('#gauge-nps', {
 
 NewChart.create('#gauge-delivery', {
   type: 'gauge',
-  data: { datasets: [{ label: 'Leveransprecision', values: [96.2] }] },
+  data: { datasets: [{ label: 'Delivery Accuracy', values: [96.2] }] },
   options: { min: 80, max: 100, valueSuffix: '%', valueDecimals: 1, ticks: 4, showMax: false },
   style: { gauge: { valueFontSize: 22 } }
 });
 
 NewChart.create('#gauge-returns', {
   type: 'gauge',
-  data: { datasets: [{ label: 'Returandel', values: [3.8] }] },
+  data: { datasets: [{ label: 'Return Rate', values: [3.8] }] },
   options: {
     min: 0, max: 10, valueSuffix: '%', valueDecimals: 1, ticks: 5, showMax: false,
     zones: [
@@ -238,12 +238,12 @@ NewChart.create('#gauge-returns', {
 NewChart.create('#chart-custom', {
   type: 'gauge',
   data: {
-    datasets: [{ label: 'Total omsattning', values: [38.9] }]
+    datasets: [{ label: 'Total Revenue', values: [38.9] }]
   },
   options: {
     min: 0, max: 50, target: 42,
-    targetLabel: 'Mal: 42 MSEK',
-    formatValue: (v) => v.toFixed(1) + ' MSEK',
+    targetLabel: 'Target: 42M',
+    formatValue: (v) => v.toFixed(1) + 'M',
     zones: [
       { from: 0, to: 0.6, color: '#e03131' },
       { from: 0.6, to: 0.85, color: '#f08c00' },
