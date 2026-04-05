@@ -223,17 +223,54 @@ export class Chart {
     if (!this.config.options.legend?.enabled) return;
 
     const items = this.config.data.datasets.map((dataset, index) => ({
+      key: dataset.key || dataset.label || `Series ${index + 1}`,
       label: dataset.label || `Series ${index + 1}`,
       color: dataset.color || this.getPaletteColor(index),
-      onClick: () => {} // Can be extended
+      style: dataset.dash ? 'dashed' : undefined,
+      ref: dataset.ref || false
     }));
+
+    const legendOptions = {
+      ...this.config.options.legend,
+      onToggle: (key, visible, visibilityMap) => {
+        this._legendVisibility = visibilityMap;
+        // Re-render chart with updated visibility
+        this.cancelAnimations();
+        this.removeElementListeners();
+        this.renderer.clear();
+        if (this.config.style.background) {
+          this.renderer.rect(0, 0, this.width, this.height, {
+            fill: this.config.style.background
+          });
+        }
+        this.render();
+        if (this.config.style.animation?.duration > 0) {
+          this.animate();
+        }
+      }
+    };
 
     if (this.legend) {
       this.legend.update(items);
     } else {
-      this.legend = new Legend(this.element, items, this.config.options.legend);
+      this.legend = new Legend(this.element, items, legendOptions);
       this.legend.mount();
     }
+
+    // Store visibility reference
+    this._legendVisibility = this.legend.getVisibility();
+  }
+
+  /**
+   * Check if a dataset is visible via legend toggle
+   * @param {Object} dataset - Dataset object
+   * @param {number} index - Dataset index
+   * @returns {boolean} Whether dataset should be rendered
+   */
+  isDatasetVisible(dataset, index) {
+    if (!this._legendVisibility) return true;
+    const key = dataset.key || dataset.label || `Series ${index + 1}`;
+    return this._legendVisibility[key] !== false;
   }
 
   /**

@@ -1,5 +1,5 @@
 /**
- * Legend component for charts
+ * Interactive legend component for charts
  */
 
 import { createElement } from './utils.js';
@@ -17,13 +17,21 @@ export class Legend {
     this.options = {
       position: 'top',
       enabled: true,
-      fontSize: 12,
-      color: '#374151',
-      marker: { size: 8 },
+      fontSize: 11,
+      color: '#172b4d',
+      marker: { size: 10, height: 3 },
+      interactive: true,
       ...options
     };
 
     this.element = null;
+    this._visibility = {};
+    this._onToggle = options.onToggle || null;
+
+    // Initialize visibility state
+    items.forEach(item => {
+      this._visibility[item.key || item.label] = true;
+    });
   }
 
   /**
@@ -37,7 +45,7 @@ export class Legend {
       style: {
         display: 'flex',
         flexWrap: 'wrap',
-        gap: '20px',
+        gap: '4px',
         padding: '10px 0',
         fontSize: this.options.fontSize + 'px',
         color: this.options.color,
@@ -46,45 +54,7 @@ export class Legend {
       }
     });
 
-    this.items.forEach(item => {
-      const itemEl = createElement('div', {
-        style: {
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          cursor: 'pointer'
-        }
-      });
-
-      // Marker
-      const marker = createElement('div', {
-        style: {
-          width: this.options.marker.size + 'px',
-          height: this.options.marker.size + 'px',
-          backgroundColor: item.color,
-          borderRadius: '2px',
-          flexShrink: 0
-        }
-      });
-
-      // Label
-      const label = createElement('span', {
-        textContent: item.label,
-        style: {
-          whiteSpace: 'nowrap'
-        }
-      });
-
-      itemEl.appendChild(marker);
-      itemEl.appendChild(label);
-
-      // Click handler for toggling datasets (optional)
-      itemEl.addEventListener('click', () => {
-        item.onClick?.(item);
-      });
-
-      this.element.appendChild(itemEl);
-    });
+    this._renderItems();
 
     if (this.options.position === 'top') {
       this.container.insertBefore(this.element, this.container.firstChild);
@@ -99,6 +69,92 @@ export class Legend {
         this.container.appendChild(this.element);
       }
     }
+  }
+
+  /**
+   * Render legend item buttons
+   */
+  _renderItems() {
+    if (!this.element) return;
+    this.element.innerHTML = '';
+
+    this.items.forEach(item => {
+      const key = item.key || item.label;
+      const vis = this._visibility[key] !== false;
+
+      const itemEl = createElement('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          padding: '3px 8px',
+          fontSize: this.options.fontSize + 'px',
+          fontFamily: 'inherit',
+          border: `1px solid ${vis ? '#dfe1e6' : '#ebecf0'}`,
+          borderRadius: '3px',
+          cursor: 'pointer',
+          background: vis ? '#ffffff' : '#f8f9fb',
+          color: vis ? '#172b4d' : '#b3bac5',
+          opacity: vis ? '1' : '0.5',
+          transition: 'all 0.15s',
+          whiteSpace: 'nowrap',
+          userSelect: 'none'
+        }
+      });
+
+      // Marker swatch — thin line style like prototype
+      const marker = createElement('span', {
+        style: {
+          width: (this.options.marker.size || 10) + 'px',
+          height: (this.options.marker.height || 3) + 'px',
+          borderRadius: '2px',
+          backgroundColor: vis ? item.color : '#b3bac5',
+          flexShrink: '0',
+          transition: 'background-color 0.15s'
+        }
+      });
+
+      // Label
+      const label = createElement('span', {
+        textContent: item.label,
+        style: { whiteSpace: 'nowrap' }
+      });
+
+      itemEl.appendChild(marker);
+      itemEl.appendChild(label);
+
+      // Reference indicator for dashed/compare series
+      if (item.style === 'dashed' || item.ref) {
+        const refTag = createElement('span', {
+          textContent: '(ref)',
+          style: {
+            fontSize: '9px',
+            color: '#8993a4',
+            marginLeft: '2px'
+          }
+        });
+        itemEl.appendChild(refTag);
+      }
+
+      // Click handler for toggling
+      if (this.options.interactive) {
+        itemEl.addEventListener('click', () => {
+          this._visibility[key] = !vis;
+          this._renderItems();
+
+          if (typeof item.onClick === 'function') {
+            item.onClick(item);
+          }
+          if (typeof this._onToggle === 'function') {
+            this._onToggle(key, this._visibility[key], this._visibility);
+          }
+        });
+      } else if (typeof item.onClick === 'function') {
+        itemEl.addEventListener('click', () => item.onClick(item));
+      }
+
+      this.element.appendChild(itemEl);
+    });
   }
 
   /**
@@ -120,13 +176,51 @@ export class Legend {
   }
 
   /**
+   * Check if a series key is visible
+   * @param {string} key - Series key
+   * @returns {boolean} Visibility state
+   */
+  isVisible(key) {
+    return this._visibility[key] !== false;
+  }
+
+  /**
+   * Get full visibility map
+   * @returns {Object} Visibility state map
+   */
+  getVisibility() {
+    return { ...this._visibility };
+  }
+
+  /**
+   * Set visibility for a key
+   * @param {string} key - Series key
+   * @param {boolean} visible - Visibility state
+   */
+  setVisibility(key, visible) {
+    this._visibility[key] = visible;
+    this._renderItems();
+  }
+
+  /**
    * Update legend items
    * @param {Object[]} items - New items
    */
   update(items) {
     this.items = items;
-    this.destroy();
-    this.mount();
+    // Preserve existing visibility, add new keys as visible
+    items.forEach(item => {
+      const key = item.key || item.label;
+      if (this._visibility[key] === undefined) {
+        this._visibility[key] = true;
+      }
+    });
+    if (this.element) {
+      this._renderItems();
+    } else {
+      this.destroy();
+      this.mount();
+    }
   }
 
   /**
