@@ -258,6 +258,11 @@ export class BarChart extends Chart {
 
         const color = dataset.color || this.getPaletteColor(visibleIndex);
 
+        // Only round top corners — bottom sits flat on the axis
+        const isTopOfStack = isStacked
+          ? visibleIndex === visibleDatasets.length - 1
+          : true;
+
         const barElement = this.renderer.rect(
           x, y,
           isStacked ? availableWidth : datasetWidth,
@@ -265,6 +270,7 @@ export class BarChart extends Chart {
           {
             fill: color,
             borderRadius: style.bar?.borderRadius || 0,
+            borderRadiusTop: isTopOfStack,
             opacity: 1
           }
         );

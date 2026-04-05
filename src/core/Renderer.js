@@ -103,12 +103,36 @@ export class SVGRenderer extends Renderer {
    * @returns {Element} Rect element
    */
   rect(x, y, width, height, style = {}) {
+    const r = style.borderRadius || 0;
+    const topOnly = style.borderRadiusTop || false;
+
+    // Use path for top-only rounding since SVG rx rounds all corners
+    if (r > 0 && topOnly) {
+      const clampedR = Math.min(r, width / 2, height / 2);
+      const d = `M ${x + clampedR} ${y}`
+        + ` Q ${x} ${y} ${x} ${y + clampedR}`
+        + ` L ${x} ${y + height}`
+        + ` L ${x + width} ${y + height}`
+        + ` L ${x + width} ${y + clampedR}`
+        + ` Q ${x + width} ${y} ${x + width - clampedR} ${y}`
+        + ` Z`;
+      const path = this.createElement('path', {
+        d,
+        fill: style.fill || 'none',
+        stroke: style.stroke || 'none',
+        'stroke-width': style.strokeWidth || 1,
+        opacity: style.opacity !== undefined ? style.opacity : 1
+      });
+      this.svg.appendChild(path);
+      return path;
+    }
+
     const rect = this.createElement('rect', {
       x: x,
       y: y,
       width: width,
       height: height,
-      rx: style.borderRadius || 0,
+      rx: r,
       fill: style.fill || 'none',
       stroke: style.stroke || 'none',
       'stroke-width': style.strokeWidth || 1,
@@ -406,17 +430,26 @@ export class CanvasRenderer extends Renderer {
 
     const radius = style.borderRadius || 0;
 
+    const topOnly = style.borderRadiusTop || false;
+
     if (radius > 0) {
+      const r = Math.min(radius, width / 2, height / 2);
       this.ctx.beginPath();
-      this.ctx.moveTo(x + radius, y);
-      this.ctx.lineTo(x + width - radius, y);
-      this.ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-      this.ctx.lineTo(x + width, y + height - radius);
-      this.ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-      this.ctx.lineTo(x + radius, y + height);
-      this.ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-      this.ctx.lineTo(x, y + radius);
-      this.ctx.quadraticCurveTo(x, y, x + radius, y);
+      this.ctx.moveTo(x + r, y);
+      this.ctx.lineTo(x + width - r, y);
+      this.ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      if (topOnly) {
+        // Flat bottom corners
+        this.ctx.lineTo(x + width, y + height);
+        this.ctx.lineTo(x, y + height);
+      } else {
+        this.ctx.lineTo(x + width, y + height - r);
+        this.ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        this.ctx.lineTo(x + r, y + height);
+        this.ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      }
+      this.ctx.lineTo(x, y + r);
+      this.ctx.quadraticCurveTo(x, y, x + r, y);
       this.ctx.closePath();
     } else {
       this.ctx.beginPath();
