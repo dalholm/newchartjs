@@ -662,26 +662,36 @@ export class GaugeChart extends Chart {
     if (this._gaugeValue == null) return;
 
     const targetValue = this._gaugeValue;
+    const origValues = this.config.data.datasets[0].values;
 
-    // Redraw with animated value
+    // Redraw with animated value — guard against re-entrant animate()
+    this._isAnimatingGauge = true;
+
     this.animateValue({
       from: this.config.options.min ?? 0,
       to: targetValue,
       duration,
       easing,
       onUpdate: (currentValue) => {
-        // Store original value, set animated value, re-render
-        const origValues = this.config.data.datasets[0].values;
         this.config.data.datasets[0].values = [currentValue];
 
         this.renderer.clear();
         if (this.config.style.background) {
           this.renderer.rect(0, 0, this.width, this.height, { fill: this.config.style.background });
         }
-        this.render();
-
-        // Restore original
+        // Call variant render directly, bypassing draw() lifecycle
+        const variant = this.config.options.variant || 'arc';
+        switch (variant) {
+          case 'ring': this.renderRing(); break;
+          case 'linear': this.renderLinear(); break;
+          case 'compact': this.renderCompact(); break;
+          default: this.renderArc(); break;
+        }
+      },
+      onComplete: () => {
+        // Restore original values
         this.config.data.datasets[0].values = origValues;
+        this._isAnimatingGauge = false;
       }
     });
   }

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LineChart } from './LineChart.js';
+import { getBezierPath } from '../core/utils.js';
 
 describe('LineChart', () => {
   let container;
@@ -91,19 +92,15 @@ describe('LineChart', () => {
   });
 
   it('getBezierPath returns valid SVG path', () => {
-    const chart = createChart();
     const points = [[0, 0], [50, 50], [100, 25]];
-    const path = chart.getBezierPath(points, 0.4);
+    const path = getBezierPath(points, 0.4);
     expect(path).toMatch(/^M /);
     expect(path).toContain('C ');
-    chart.destroy();
   });
 
   it('getBezierPath returns empty string for < 2 points', () => {
-    const chart = createChart();
-    expect(chart.getBezierPath([[0, 0]])).toBe('');
-    expect(chart.getBezierPath([])).toBe('');
-    chart.destroy();
+    expect(getBezierPath([[0, 0]])).toBe('');
+    expect(getBezierPath([])).toBe('');
   });
 
   // ═══ NEW FEATURE TESTS ═══

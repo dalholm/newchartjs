@@ -4,43 +4,13 @@
 
 import Chart from '../core/Chart.js';
 import { BAR_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, generateScale, formatNumber, deepMerge, lerp } from '../core/utils.js';
+import { getMinMax, generateScale, formatNumber, deepMerge } from '../core/utils.js';
+import { delay } from '../core/Animation.js';
 
 export class BarChart extends Chart {
   constructor(element, config = {}) {
     const mergedConfig = deepMerge(BAR_DEFAULTS, config);
     super(element, mergedConfig);
-  }
-
-  /**
-   * Calculate layout and scales
-   */
-  calculateLayout() {
-    const padding = this.config.options.padding || 20;
-    const hasXAxis = this.config.options.axis?.x?.enabled !== false;
-    const hasYAxis = this.config.options.axis?.y?.enabled !== false;
-
-    const topSpace = this.config.options.legend?.enabled ? 40 : 0;
-    const bottomSpace = hasXAxis ? 40 : padding;
-    const leftSpace = hasYAxis ? 60 : padding;
-    const rightSpace = padding;
-
-    const chartWidth = this.width - leftSpace - rightSpace;
-    const chartHeight = this.height - topSpace - bottomSpace - padding;
-
-    return {
-      padding,
-      chartX: leftSpace,
-      chartY: topSpace,
-      chartWidth,
-      chartHeight,
-      leftSpace,
-      rightSpace,
-      topSpace,
-      bottomSpace,
-      hasXAxis,
-      hasYAxis
-    };
   }
 
   /**
@@ -535,9 +505,9 @@ export class BarChart extends Chart {
     if (!this.bars || !this.bars.length) return;
 
     this.bars.forEach((bar, index) => {
-      const delay = (index / this.bars.length) * (duration * 0.3);
+      const staggerDelay = (index / this.bars.length) * (duration * 0.3);
 
-      setTimeout(() => {
+      const cancelDelay = delay(staggerDelay, () => {
         this.animateValue({
           from: 0,
           to: 1,
@@ -553,7 +523,8 @@ export class BarChart extends Chart {
             }
           }
         });
-      }, delay);
+      });
+      this.animationCancels.push(cancelDelay);
     });
   }
 }

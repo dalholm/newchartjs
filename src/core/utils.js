@@ -45,10 +45,16 @@ export function formatNumber(num, decimals = 0) {
  * @param {string} color - CSS color (hex, rgb, named)
  * @returns {Object} { r, g, b, a } object
  */
-export function parseColor(color) {
-  const ctx = typeof document !== 'undefined' ? document.createElement('canvas').getContext('2d') : null;
+let _parseColorCtx = null;
 
-  if (!ctx) {
+export function parseColor(color) {
+  if (!_parseColorCtx) {
+    _parseColorCtx = typeof document !== 'undefined'
+      ? document.createElement('canvas').getContext('2d')
+      : null;
+  }
+
+  if (!_parseColorCtx) {
     // Fallback for non-browser environments
     if (color.startsWith('#')) {
       const hex = color.slice(1);
@@ -63,9 +69,10 @@ export function parseColor(color) {
     return { r: 0, g: 0, b: 0, a: 1 };
   }
 
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, 1, 1);
-  const imageData = ctx.getImageData(0, 0, 1, 1).data;
+  _parseColorCtx.clearRect(0, 0, 1, 1);
+  _parseColorCtx.fillStyle = color;
+  _parseColorCtx.fillRect(0, 0, 1, 1);
+  const imageData = _parseColorCtx.getImageData(0, 0, 1, 1).data;
 
   return {
     r: imageData[0],
@@ -188,10 +195,15 @@ export function getMinMax(values) {
     return { min: 0, max: 0 };
   }
 
-  return {
-    min: Math.min(...values),
-    max: Math.max(...values)
-  };
+  let min = values[0];
+  let max = values[0];
+  for (let i = 1; i < values.length; i++) {
+    const v = values[i];
+    if (v < min) min = v;
+    if (v > max) max = v;
+  }
+
+  return { min, max };
 }
 
 /**
@@ -202,14 +214,125 @@ export function getMinMax(values) {
  * @returns {number[]} Array of scale values
  */
 export function generateScale(min, max, steps = 5) {
-  const scale = [];
-  const step = (max - min) / (steps - 1);
+  const range = max - min;
+  if (range === 0 || steps <= 1) {
+    return [min];
+  }
 
-  for (let i = 0; i < steps; i++) {
-    scale.push(min + step * i);
+  // Nice-number algorithm for ERP-quality scale ticks
+  const roughStep = range / (steps - 1);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+  const fraction = roughStep / magnitude;
+
+  let niceStep;
+  if (fraction <= 1) niceStep = 1 * magnitude;
+  else if (fraction <= 2) niceStep = 2 * magnitude;
+  else if (fraction <= 2.5) niceStep = 2.5 * magnitude;
+  else if (fraction <= 5) niceStep = 5 * magnitude;
+  else niceStep = 10 * magnitude;
+
+  const niceMin = Math.floor(min / niceStep) * niceStep;
+  const niceMax = Math.ceil(max / niceStep) * niceStep;
+
+  const scale = [];
+  for (let v = niceMin; v <= niceMax + niceStep * 0.5; v += niceStep) {
+    scale.push(Math.round(v * 1e10) / 1e10); // avoid floating-point artifacts
   }
 
   return scale;
+}
+
+/**
+ * Bezier curve interpolation for smooth chart lines
+ * @param {Array} points - Array of [x, y] coordinate pairs
+ * @param {number} tension - Curve tension (0-1)
+ * @returns {string} SVG path data
+ */
+export function getBezierPath(points, tension = 0.4) {
+  if (points.length < 2) return '';
+
+  const path = [`M ${points[0][0]} ${points[0][1]}`];
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = i > 0 ? points[i - 1] : points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = i < points.length - 2 ? points[i + 2] : p2;
+
+    const cp1x = p1[0] + (p2[0] - p0[0]) * tension;
+    const cp1y = p1[1] + (p2[1] - p0[1]) * tension;
+    const cp2x = p2[0] - (p3[0] - p1[0]) * tension;
+    const cp2y = p2[1] - (p3[1] - p1[1]) * tension;
+
+    path.push(`C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2[0]} ${p2[1]}`);
+  }
+
+  return path.join(' ');
+}
+
+/**
+ * Monotone cubic interpolation (Fritsch-Carlson) for smooth lines that never overshoot data points.
+ * Ideal for business charts where accuracy matters more than artistic smoothness.
+ * @param {Array} points - Array of [x, y] coordinate pairs
+ * @returns {string} SVG path data
+ */
+export function getMonotonePath(points) {
+  const n = points.length;
+  if (n < 2) return '';
+  if (n === 2) return `M ${points[0][0]} ${points[0][1]} L ${points[1][0]} ${points[1][1]}`;
+
+  // Step 1: compute slopes (deltas) and secants
+  const dx = [];
+  const dy = [];
+  const m = []; // tangent slopes
+  for (let i = 0; i < n - 1; i++) {
+    dx.push(points[i + 1][0] - points[i][0]);
+    dy.push(points[i + 1][1] - points[i][1]);
+    m.push(dx[i] === 0 ? 0 : dy[i] / dx[i]);
+  }
+
+  // Step 2: initialize tangent values as average of secants
+  const tangents = [m[0]];
+  for (let i = 1; i < n - 1; i++) {
+    if (m[i - 1] * m[i] <= 0) {
+      // Sign change or zero — flat tangent to prevent overshoot
+      tangents.push(0);
+    } else {
+      tangents.push((m[i - 1] + m[i]) / 2);
+    }
+  }
+  tangents.push(m[n - 2]);
+
+  // Step 3: Fritsch-Carlson monotonicity constraint
+  for (let i = 0; i < n - 1; i++) {
+    if (m[i] === 0) {
+      tangents[i] = 0;
+      tangents[i + 1] = 0;
+    } else {
+      const alpha = tangents[i] / m[i];
+      const beta = tangents[i + 1] / m[i];
+      // Restrict to circle of radius 3 to ensure monotonicity
+      const s = alpha * alpha + beta * beta;
+      if (s > 9) {
+        const tau = 3 / Math.sqrt(s);
+        tangents[i] = tau * alpha * m[i];
+        tangents[i + 1] = tau * beta * m[i];
+      }
+    }
+  }
+
+  // Step 4: build cubic bezier path from hermite tangents
+  const path = [`M ${points[0][0]} ${points[0][1]}`];
+  for (let i = 0; i < n - 1; i++) {
+    const seg = dx[i] / 3;
+    const cp1x = points[i][0] + seg;
+    const cp1y = points[i][1] + tangents[i] * seg;
+    const cp2x = points[i + 1][0] - seg;
+    const cp2y = points[i + 1][1] - tangents[i + 1] * seg;
+    path.push(`C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${points[i + 1][0]} ${points[i + 1][1]}`);
+  }
+
+  return path.join(' ');
 }
 
 /**

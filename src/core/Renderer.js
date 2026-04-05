@@ -263,6 +263,45 @@ export class SVGRenderer extends Renderer {
   }
 
   /**
+   * Create a linear gradient definition for area fills
+   * @param {string} color - Base color
+   * @param {string} id - Gradient ID
+   * @param {number} topOpacity - Opacity at the top (0-1)
+   * @param {number} bottomOpacity - Opacity at the bottom (0-1)
+   * @returns {string|null} Gradient fill URL, or null if not SVG
+   */
+  createGradient(color, id, topOpacity = 0.12, bottomOpacity = 0.01) {
+    let defs = this.svg.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      this.svg.insertBefore(defs, this.svg.firstChild);
+    }
+
+    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    gradient.setAttribute('id', id);
+    gradient.setAttribute('x1', '0');
+    gradient.setAttribute('y1', '0');
+    gradient.setAttribute('x2', '0');
+    gradient.setAttribute('y2', '1');
+
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', color);
+    stop1.setAttribute('stop-opacity', String(topOpacity));
+
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', color);
+    stop2.setAttribute('stop-opacity', String(bottomOpacity));
+
+    gradient.appendChild(stop1);
+    gradient.appendChild(stop2);
+    defs.appendChild(gradient);
+
+    return `url(#${id})`;
+  }
+
+  /**
    * Clear all rendered elements
    */
   clear() {
@@ -315,7 +354,6 @@ export class CanvasRenderer extends Renderer {
     this.canvas.style.height = this.height + 'px';
     this.canvas.style.display = 'block';
     this.canvas.style.maxWidth = '100%';
-    this.canvas.style.height = 'auto';
 
     this.container.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
@@ -334,6 +372,9 @@ export class CanvasRenderer extends Renderer {
    * @param {Object} style - Style object
    */
   circle(x, y, r, style = {}) {
+    const prevAlpha = this.ctx.globalAlpha;
+    if (style.opacity !== undefined) this.ctx.globalAlpha = style.opacity;
+
     this.ctx.beginPath();
     this.ctx.arc(x, y, r, 0, Math.PI * 2);
 
@@ -347,6 +388,8 @@ export class CanvasRenderer extends Renderer {
       this.ctx.lineWidth = style.strokeWidth || 1;
       this.ctx.stroke();
     }
+
+    this.ctx.globalAlpha = prevAlpha;
   }
 
   /**
@@ -358,6 +401,9 @@ export class CanvasRenderer extends Renderer {
    * @param {Object} style - Style object
    */
   rect(x, y, width, height, style = {}) {
+    const prevAlpha = this.ctx.globalAlpha;
+    if (style.opacity !== undefined) this.ctx.globalAlpha = style.opacity;
+
     const radius = style.borderRadius || 0;
 
     if (radius > 0) {
@@ -387,6 +433,8 @@ export class CanvasRenderer extends Renderer {
       this.ctx.lineWidth = style.strokeWidth || 1;
       this.ctx.stroke();
     }
+
+    this.ctx.globalAlpha = prevAlpha;
   }
 
   /**

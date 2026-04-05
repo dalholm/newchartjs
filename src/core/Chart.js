@@ -227,6 +227,38 @@ export class Chart {
   }
 
   /**
+   * Calculate standard chart layout for axis-based charts (bar, line, area)
+   * @returns {Object} Layout dimensions and flags
+   */
+  calculateLayout() {
+    const padding = this.config.options.padding || 20;
+    const hasXAxis = this.config.options.axis?.x?.enabled !== false;
+    const hasYAxis = this.config.options.axis?.y?.enabled !== false;
+
+    const topSpace = this.config.options.legend?.enabled ? 40 : 0;
+    const bottomSpace = hasXAxis ? 40 : padding;
+    const leftSpace = hasYAxis ? 60 : padding;
+    const rightSpace = padding;
+
+    const chartWidth = this.width - leftSpace - rightSpace;
+    const chartHeight = this.height - topSpace - bottomSpace - padding;
+
+    return {
+      padding,
+      chartX: leftSpace,
+      chartY: topSpace,
+      chartWidth,
+      chartHeight,
+      leftSpace,
+      rightSpace,
+      topSpace,
+      bottomSpace,
+      hasXAxis,
+      hasYAxis
+    };
+  }
+
+  /**
    * Render chart content (must be implemented by subclasses)
    */
   render() {
@@ -330,17 +362,20 @@ export class Chart {
       );
     }
 
-    // Wire chart→table hover via onHover option
-    const origOnHover = this.config.options.onHover;
-    const origOnHoverEnd = this.config.options.onHoverEnd;
-    this.config.options.onHover = (index, label) => {
-      if (this.dataTable) this.dataTable.highlightRow(index);
-      if (origOnHover) origOnHover(index, label);
-    };
-    this.config.options.onHoverEnd = () => {
-      if (this.dataTable) this.dataTable.clearHighlight();
-      if (origOnHoverEnd) origOnHoverEnd();
-    };
+    // Wire chart→table hover via onHover option (wrap only once)
+    if (!this._dataTableHoverWrapped) {
+      const origOnHover = this.config.options.onHover;
+      const origOnHoverEnd = this.config.options.onHoverEnd;
+      this.config.options.onHover = (index, label) => {
+        if (this.dataTable) this.dataTable.highlightRow(index);
+        if (origOnHover) origOnHover(index, label);
+      };
+      this.config.options.onHoverEnd = () => {
+        if (this.dataTable) this.dataTable.clearHighlight();
+        if (origOnHoverEnd) origOnHoverEnd();
+      };
+      this._dataTableHoverWrapped = true;
+    }
 
     // Pass data to table
     this.dataTable.setData(this.config.data, {

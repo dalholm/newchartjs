@@ -138,7 +138,7 @@ export class PieChart extends Chart {
 
           this.showTooltip(e, {
             [slice.label]: formatNumber(slice.value, 0),
-            'Andel': formatNumber(slice.percent, 1) + '%'
+            'Share': formatNumber(slice.percent, 1) + '%'
           });
 
           if (typeof options.onHover === 'function') {

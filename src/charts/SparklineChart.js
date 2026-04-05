@@ -6,7 +6,7 @@
 
 import Chart from '../core/Chart.js';
 import { SPARKLINE_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, deepMerge } from '../core/utils.js';
+import { getMinMax, deepMerge, getBezierPath } from '../core/utils.js';
 
 export class SparklineChart extends Chart {
   constructor(element, config = {}) {
@@ -26,73 +26,6 @@ export class SparklineChart extends Chart {
       this.renderer.width = this.width;
       this.renderer.height = this.height;
     }
-  }
-
-  /**
-   * Bezier curve interpolation for smooth sparklines
-   * @param {Array} points - [x, y] coordinate pairs
-   * @param {number} tension - Curve tension (0-1)
-   * @returns {string} SVG path data
-   */
-  getBezierPath(points, tension = 0.3) {
-    if (points.length < 2) return '';
-
-    const path = [`M ${points[0][0]} ${points[0][1]}`];
-
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = i > 0 ? points[i - 1] : points[i];
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const p3 = i < points.length - 2 ? points[i + 2] : p2;
-
-      const cp1x = p1[0] + (p2[0] - p0[0]) * tension;
-      const cp1y = p1[1] + (p2[1] - p0[1]) * tension;
-      const cp2x = p2[0] - (p3[0] - p1[0]) * tension;
-      const cp2y = p2[1] - (p3[1] - p1[1]) * tension;
-
-      path.push(`C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2[0]} ${p2[1]}`);
-    }
-
-    return path.join(' ');
-  }
-
-  /**
-   * Create gradient for area fill
-   * @param {string} color - Base color
-   * @param {string} id - Gradient ID
-   * @returns {string|null} Gradient URL
-   */
-  _createGradientDef(color, id) {
-    if (!this.renderer.svg) return null;
-
-    let defs = this.renderer.svg.querySelector('defs');
-    if (!defs) {
-      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-      this.renderer.svg.insertBefore(defs, this.renderer.svg.firstChild);
-    }
-
-    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-    gradient.setAttribute('id', id);
-    gradient.setAttribute('x1', '0');
-    gradient.setAttribute('y1', '0');
-    gradient.setAttribute('x2', '0');
-    gradient.setAttribute('y2', '1');
-
-    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    stop1.setAttribute('offset', '0%');
-    stop1.setAttribute('stop-color', color);
-    stop1.setAttribute('stop-opacity', '0.2');
-
-    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    stop2.setAttribute('offset', '100%');
-    stop2.setAttribute('stop-color', color);
-    stop2.setAttribute('stop-opacity', '0.02');
-
-    gradient.appendChild(stop1);
-    gradient.appendChild(stop2);
-    defs.appendChild(gradient);
-
-    return `url(#${id})`;
   }
 
   /**
@@ -163,11 +96,11 @@ export class SparklineChart extends Chart {
     // Area fill
     if (isArea) {
       const gradientId = 'spark-area-0';
-      const gradientFill = this._createGradientDef(color, gradientId);
+      const gradientFill = this.renderer.createGradient?.(color, gradientId, 0.2, 0.02) || null;
       const baseline = padY + h;
 
       if (gradientFill) {
-        const linePath = this.getBezierPath(points, tension);
+        const linePath = getBezierPath(points, tension);
         const areaD = `${linePath} L ${points[points.length - 1][0]},${baseline} L ${points[0][0]},${baseline} Z`;
         this.renderer.path(areaD, { fill: gradientFill });
       } else {
@@ -180,7 +113,7 @@ export class SparklineChart extends Chart {
     // Line
     let linePath;
     if (tension > 0) {
-      linePath = this.getBezierPath(points, tension);
+      linePath = getBezierPath(points, tension);
     } else {
       linePath = `M ${points.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;
     }

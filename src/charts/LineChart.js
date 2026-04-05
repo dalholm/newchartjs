@@ -4,43 +4,12 @@
 
 import Chart from '../core/Chart.js';
 import { LINE_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, generateScale, formatNumber, deepMerge, lerp } from '../core/utils.js';
+import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath } from '../core/utils.js';
 
 export class LineChart extends Chart {
   constructor(element, config = {}) {
     const mergedConfig = deepMerge(LINE_DEFAULTS, config);
     super(element, mergedConfig);
-  }
-
-  /**
-   * Calculate layout and scales
-   */
-  calculateLayout() {
-    const padding = this.config.options.padding || 20;
-    const hasXAxis = this.config.options.axis?.x?.enabled !== false;
-    const hasYAxis = this.config.options.axis?.y?.enabled !== false;
-
-    const topSpace = this.config.options.legend?.enabled ? 40 : 0;
-    const bottomSpace = hasXAxis ? 40 : padding;
-    const leftSpace = hasYAxis ? 60 : padding;
-    const rightSpace = padding;
-
-    const chartWidth = this.width - leftSpace - rightSpace;
-    const chartHeight = this.height - topSpace - bottomSpace - padding;
-
-    return {
-      padding,
-      chartX: leftSpace,
-      chartY: topSpace,
-      chartWidth,
-      chartHeight,
-      leftSpace,
-      rightSpace,
-      topSpace,
-      bottomSpace,
-      hasXAxis,
-      hasYAxis
-    };
   }
 
   /**
@@ -79,71 +48,6 @@ export class LineChart extends Chart {
       numPoints,
       pointSpacing
     };
-  }
-
-  /**
-   * Bezier curve interpolation
-   */
-  getBezierPath(points, tension = 0.4) {
-    if (points.length < 2) return '';
-
-    const path = [];
-    path.push(`M ${points[0][0]} ${points[0][1]}`);
-
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = i > 0 ? points[i - 1] : points[i];
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const p3 = i < points.length - 2 ? points[i + 2] : p2;
-
-      const cp1x = p1[0] + (p2[0] - p0[0]) * tension;
-      const cp1y = p1[1] + (p2[1] - p0[1]) * tension;
-      const cp2x = p2[0] - (p3[0] - p1[0]) * tension;
-      const cp2y = p2[1] - (p3[1] - p1[1]) * tension;
-
-      path.push(`C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2[0]} ${p2[1]}`);
-    }
-
-    return path.join(' ');
-  }
-
-  /**
-   * Create SVG gradient definition for area fill
-   * @param {string} color - Base color
-   * @param {string} id - Gradient ID
-   */
-  _createGradientDef(color, id) {
-    if (!this.renderer.svg) return null;
-
-    // Check if defs element exists, create if not
-    let defs = this.renderer.svg.querySelector('defs');
-    if (!defs) {
-      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-      this.renderer.svg.insertBefore(defs, this.renderer.svg.firstChild);
-    }
-
-    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-    gradient.setAttribute('id', id);
-    gradient.setAttribute('x1', '0');
-    gradient.setAttribute('y1', '0');
-    gradient.setAttribute('x2', '0');
-    gradient.setAttribute('y2', '1');
-
-    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    stop1.setAttribute('offset', '0%');
-    stop1.setAttribute('stop-color', color);
-    stop1.setAttribute('stop-opacity', '0.12');
-
-    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-    stop2.setAttribute('offset', '100%');
-    stop2.setAttribute('stop-color', color);
-    stop2.setAttribute('stop-opacity', '0.01');
-
-    gradient.appendChild(stop1);
-    gradient.appendChild(stop2);
-    defs.appendChild(gradient);
-
-    return `url(#${id})`;
   }
 
   /**
@@ -219,11 +123,11 @@ export class LineChart extends Chart {
       // Draw area fill with gradient if enabled
       if (options.fill && !isDashed) {
         const gradientId = `area-grad-${datasetIndex}`;
-        const gradientFill = this._createGradientDef(color, gradientId);
+        const gradientFill = this.renderer.createGradient?.(color, gradientId) || null;
 
         if (gradientFill) {
           // Build closed area path
-          const linePath = this.getBezierPath(points, tension);
+          const linePath = getBezierPath(points, tension);
           const lastX = points[points.length - 1][0];
           const firstX = points[0][0];
           const baseline = chartY + chartHeight;
@@ -240,7 +144,7 @@ export class LineChart extends Chart {
             [indexToX(points.length - 1), chartY + chartHeight],
             [indexToX(0), chartY + chartHeight]
           ];
-          const areaPath = this.getBezierPath(areaPoints, tension);
+          const areaPath = getBezierPath(areaPoints, tension);
           this.renderer.path(areaPath, {
             fill: color,
             opacity: 0.1
@@ -251,7 +155,7 @@ export class LineChart extends Chart {
       // Draw line
       let linePath;
       if (tension > 0) {
-        linePath = this.getBezierPath(points, tension);
+        linePath = getBezierPath(points, tension);
       } else {
         linePath = `M ${points.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;
       }

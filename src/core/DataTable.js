@@ -219,13 +219,8 @@ export class DataTable {
 
     table.appendChild(tbody);
 
-    // Add CSS for hover state
-    if (!document.getElementById('newchart-datatable-styles')) {
-      const style = document.createElement('style');
-      style.id = 'newchart-datatable-styles';
-      style.textContent = '.newchart-datatable tr.hovered { background: #edf2ff !important; }';
-      document.head.appendChild(style);
-    }
+    // Add CSS for hover state (once per document)
+    DataTable._ensureStyles();
 
     this.element.innerHTML = '';
     this.element.appendChild(table);
@@ -263,6 +258,18 @@ export class DataTable {
    */
   hide() {
     if (this.element) this.element.style.display = 'none';
+  }
+
+  /**
+   * Inject shared CSS once per document
+   */
+  static _ensureStyles() {
+    if (DataTable._stylesInjected) return;
+    const style = document.createElement('style');
+    style.id = 'newchart-datatable-styles';
+    style.textContent = '.newchart-datatable tr.hovered { background: #edf2ff !important; }';
+    document.head.appendChild(style);
+    DataTable._stylesInjected = true;
   }
 
   /**

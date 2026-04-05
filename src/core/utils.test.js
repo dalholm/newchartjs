@@ -192,8 +192,7 @@ describe('generateScale', () => {
   it('handles single step (division by zero edge case)', () => {
     const scale = generateScale(0, 100, 1);
     expect(scale).toHaveLength(1);
-    // step = (100-0) / (1-1) = Infinity, 0 + Infinity*0 = NaN
-    expect(scale[0]).toBeNaN();
+    expect(scale[0]).toBe(0);
   });
 });
 
