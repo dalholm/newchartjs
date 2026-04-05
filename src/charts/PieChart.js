@@ -84,6 +84,8 @@ export class PieChart extends Chart {
     const innerRadius = slices[0]?.innerRadius || 0;
     const isDonut = innerRadius > 0;
     const total = slices.reduce((sum, s) => sum + s.value, 0);
+    const cx = slices[0].centerX;
+    const cy = slices[0].centerY;
 
     // Store slice elements for hover interaction
     this._sliceElements = [];
@@ -111,7 +113,7 @@ export class PieChart extends Chart {
       if (sliceElement) {
         sliceElement.style.cursor = 'pointer';
         sliceElement.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out, filter 0.15s ease-out';
-        sliceElement.style.transformOrigin = `${slice.centerX}px ${slice.centerY}px`;
+        sliceElement.style.transformOrigin = `${cx}px ${cy}px`;
 
         this.addElementListener(sliceElement, 'mouseenter', (e) => {
           // Explode hovered slice outward
@@ -204,10 +206,11 @@ export class PieChart extends Chart {
       }
     });
 
-    // Draw center text for donut charts
+    // White center circle + center text for donut charts
     if (isDonut) {
-      const cx = slices[0].centerX;
-      const cy = slices[0].centerY;
+      this.renderer.circle(cx, cy, innerRadius - 2, {
+        fill: '#ffffff'
+      });
 
       this._centerTextValue = this.renderer.text(formatNumber(total, 0), cx, cy - 3, {
         fill: style.fontColor || '#172b4d',
@@ -231,118 +234,45 @@ export class PieChart extends Chart {
   }
 
   /**
-   * Animate pie slices
+   * Animate pie slices with scale-in effect matching prototype
+   * Each slice scales from 0→1 from the center with staggered delays
+   * and a bounce easing curve.
    */
   animate() {
     const duration = this.config.style.animation?.duration || 600;
-    const easing = this.config.style.animation?.easing || 'easeOutCubic';
 
     if (!this.slices || !this.slices.length) return;
+    if (!this._sliceElements || !this._sliceElements.length) return;
 
-    this.slices.forEach((slice, index) => {
-      const delay = (index / this.slices.length) * (duration * 0.3);
+    const cx = this.slices[0].centerX;
+    const cy = this.slices[0].centerY;
 
+    // Set all slices to scale(0) initially
+    this._sliceElements.forEach(({ element }) => {
+      if (!element) return;
+      element.style.transformOrigin = `${cx}px ${cy}px`;
+      element.style.transform = 'scale(0)';
+      // Use a bouncy cubic-bezier for the scale-in, with stagger delay
+      element.style.transition = `transform ${duration}ms cubic-bezier(0.34, 1.56, 0.64, 1)`;
+    });
+
+    // Stagger: trigger scale(1) per slice with increasing delay
+    this._sliceElements.forEach(({ element }, i) => {
+      if (!element) return;
+      const delay = i * 40;
       setTimeout(() => {
-        this.animateValue({
-          from: slice.startAngle,
-          to: slice.endAngle,
-          duration: duration,
-          easing: easing,
-          onUpdate: (endAngle) => {
-            // Redraw with animated slice
-            this.renderer.clear();
-
-            // Redraw background
-            if (this.config.style.background) {
-              this.renderer.rect(0, 0, this.width, this.height, {
-                fill: this.config.style.background
-              });
-            }
-
-            const borderColor = this.config.style.pie?.borderColor || '#ffffff';
-            const borderWidth = this.config.style.pie?.borderWidth || 2;
-            const labelPosition = this.config.options.labels?.position || 'outside';
-            const labelFormat = this.config.options.labels?.format || 'percent';
-            const innerRadius = this.slices[0]?.innerRadius || 0;
-            const isDonut = innerRadius > 0;
-            const total = this.slices.reduce((sum, s) => sum + s.value, 0);
-
-            // Clear stored elements for hover
-            this._sliceElements = [];
-
-            // Redraw slices up to current animation
-            this.slices.forEach((s, i) => {
-              const drawEnd = i < index ? s.endAngle : (i === index ? endAngle : null);
-              if (drawEnd === null) return;
-
-              const el = this.renderer.arc(
-                s.centerX, s.centerY, s.radius,
-                s.startAngle, drawEnd, s.innerRadius,
-                { fill: s.color, stroke: borderColor, strokeWidth: borderWidth, opacity: 1 }
-              );
-
-              if (el) {
-                el.style.cursor = 'pointer';
-                el.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out, filter 0.15s ease-out';
-                el.style.transformOrigin = `${s.centerX}px ${s.centerY}px`;
-                this._sliceElements.push({ element: el, slice: s });
-              }
-
-              // Redraw label for completed slices
-              if (i < index && labelPosition !== 'none') {
-                const labelDistance = labelPosition === 'inside'
-                  ? (s.radius + s.innerRadius) / 2
-                  : s.radius + 20;
-                const labelX = s.centerX + labelDistance * Math.cos(s.midAngle);
-                const labelY = s.centerY + labelDistance * Math.sin(s.midAngle);
-
-                let labelText;
-                switch (labelFormat) {
-                  case 'value': labelText = formatNumber(s.value, 0); break;
-                  case 'label': labelText = s.label; break;
-                  default: labelText = formatNumber(s.percent, 1) + '%';
-                }
-
-                this.renderer.text(labelText, labelX, labelY, {
-                  fill: this.config.style.fontColor,
-                  fontSize: this.config.style.fontSize,
-                  fontFamily: this.config.style.fontFamily,
-                  textAnchor: 'middle',
-                  dominantBaseline: 'middle'
-                });
-              }
-            });
-
-            // Redraw center text for donut
-            if (isDonut) {
-              const cx = this.slices[0].centerX;
-              const cy = this.slices[0].centerY;
-
-              // White center circle
-              this.renderer.circle(cx, cy, innerRadius - 2, {
-                fill: '#ffffff'
-              });
-
-              this._centerTextValue = this.renderer.text(formatNumber(total, 0), cx, cy - 3, {
-                fill: this.config.style.fontColor || '#172b4d',
-                fontSize: 16,
-                fontFamily: this.config.style.monoFamily || this.config.style.fontFamily,
-                textAnchor: 'middle',
-                dominantBaseline: 'middle'
-              });
-
-              this._centerTextLabel = this.renderer.text('total', cx, cy + 14, {
-                fill: '#8993a4',
-                fontSize: 9,
-                fontFamily: this.config.style.fontFamily,
-                textAnchor: 'middle',
-                dominantBaseline: 'middle'
-              });
-            }
-          }
-        });
+        element.style.transform = 'scale(1)';
       }, delay);
     });
+
+    // After all animations complete, restore transition for hover effects
+    const totalTime = duration + this._sliceElements.length * 40;
+    setTimeout(() => {
+      this._sliceElements.forEach(({ element }) => {
+        if (!element) return;
+        element.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out, filter 0.15s ease-out';
+      });
+    }, totalTime);
   }
 }
 
