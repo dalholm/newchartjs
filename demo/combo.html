@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Combo Chart Examples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4;
+      --primary: #4c6ef5;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; }
+    .chart-container { width: 100%; min-height: 350px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; All demos</a>
+  <div class="page-header">
+    <h1>Combo Chart</h1>
+    <p>Mix bars and lines on shared axes — ideal for revenue vs. margin, volume vs. price, and other dual-metric views.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. Revenue bars + margin line -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Revenue & Margin</h2>
+        <p>Monthly revenue as bars with profit margin as an overlay line</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-revenue"></div>
+      </div>
+    </div>
+
+    <!-- 2. Multi-bar + line -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Sales by Channel + Growth Rate</h2>
+        <p>Two bar datasets (Direct, Online) with a growth line overlay</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-multi"></div>
+      </div>
+    </div>
+
+    <!-- 3. Bars + dashed target line -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Actual vs Forecast</h2>
+        <p>Actual revenue bars with a dashed forecast line and budget reference</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-forecast"></div>
+      </div>
+    </div>
+
+    <!-- 4. Straight line (no smooth) -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Inventory Volume & Turnover Rate</h2>
+        <p>Combo with smooth: false for step-style line</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-inventory"></div>
+      </div>
+    </div>
+
+    <!-- 5. Single bar + multiple lines -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Orders with Conversion & Return Rate</h2>
+        <p>One bar dataset with two line overlays</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-rates"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// 1. Revenue & Margin
+NewChart.create('#chart-revenue', {
+  type: 'combo',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      {
+        label: 'Revenue (k)',
+        values: [320, 380, 350, 420, 390, 460, 410, 480, 450, 520, 490, 560],
+        type: 'bar',
+        color: '#4c6ef5'
+      },
+      {
+        label: 'Margin %',
+        values: [28, 31, 29, 33, 30, 35, 32, 36, 34, 38, 35, 40],
+        type: 'line',
+        color: '#0ca678'
+      }
+    ]
+  }
+});
+
+// 2. Multi-bar + growth line
+NewChart.create('#chart-multi', {
+  type: 'combo',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      {
+        label: 'Direct Sales',
+        values: [180, 210, 195, 240, 220, 260, 230, 270, 255, 290, 275, 310],
+        type: 'bar',
+        color: '#4c6ef5'
+      },
+      {
+        label: 'Online Sales',
+        values: [140, 160, 155, 180, 170, 200, 180, 210, 195, 230, 215, 250],
+        type: 'bar',
+        color: '#7048e8'
+      },
+      {
+        label: 'Growth %',
+        values: [5, 8, 6, 12, 9, 15, 10, 16, 13, 18, 14, 20],
+        type: 'line',
+        color: '#f08c00'
+      }
+    ]
+  }
+});
+
+// 3. Actual vs forecast
+NewChart.create('#chart-forecast', {
+  type: 'combo',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      {
+        label: 'Actual',
+        values: [290, 340, 310, 380, 355, 410, 370, 430, 405, 470, 440, 510],
+        type: 'bar',
+        color: '#4c6ef5'
+      },
+      {
+        label: 'Forecast',
+        values: [300, 330, 320, 370, 360, 400, 390, 420, 410, 450, 440, 480],
+        type: 'line',
+        color: '#868e96',
+        dash: true,
+        dashPattern: '6 4'
+      }
+    ]
+  },
+  options: {
+    referenceLines: [
+      { value: 400, label: 'Budget target', color: '#e03131', dash: '4 4' }
+    ]
+  }
+});
+
+// 4. Inventory + turnover
+NewChart.create('#chart-inventory', {
+  type: 'combo',
+  data: {
+    labels: ['Q1','Q2','Q3','Q4'],
+    datasets: [
+      {
+        label: 'Volume (units)',
+        values: [12400, 11800, 13200, 14500],
+        type: 'bar',
+        color: '#1098ad'
+      },
+      {
+        label: 'Turnover rate',
+        values: [4.2, 4.8, 4.5, 5.1],
+        type: 'line',
+        color: '#d6336c'
+      }
+    ]
+  },
+  options: { smooth: false }
+});
+
+// 5. Orders + rates
+NewChart.create('#chart-rates', {
+  type: 'combo',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      {
+        label: 'Orders',
+        values: [1200, 1350, 1280, 1500, 1420, 1600, 1480, 1700, 1620, 1800, 1720, 1900],
+        type: 'bar',
+        color: '#4c6ef5'
+      },
+      {
+        label: 'Conversion %',
+        values: [3.2, 3.5, 3.3, 3.8, 3.6, 4.0, 3.7, 4.2, 3.9, 4.4, 4.1, 4.6],
+        type: 'line',
+        color: '#0ca678'
+      },
+      {
+        label: 'Return %',
+        values: [2.1, 1.8, 2.0, 1.6, 1.9, 1.5, 1.7, 1.4, 1.6, 1.3, 1.5, 1.2],
+        type: 'line',
+        color: '#e03131'
+      }
+    ]
+  }
+});
+</script>
+</body>
+</html>

@@ -9,6 +9,8 @@ import LineChart from './charts/LineChart.js';
 import AreaChart from './charts/AreaChart.js';
 import GaugeChart from './charts/GaugeChart.js';
 import SparklineChart from './charts/SparklineChart.js';
+import ComboChart from './charts/ComboChart.js';
+import ScatterChart from './charts/ScatterChart.js';
 import { KPICard, createKPICard } from './core/KPICard.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
 import { COMPARE_COLOR, COLOR_PALETTE } from './core/defaults.js';
@@ -60,6 +62,13 @@ const NewChart = {
       case 'sparkline':
         ChartClass = SparklineChart;
         break;
+      case 'combo':
+        ChartClass = ComboChart;
+        break;
+      case 'scatter':
+      case 'bubble':
+        ChartClass = ScatterChart;
+        break;
       default:
         throw new Error(`Unknown chart type: ${chartType}`);
     }
@@ -81,6 +90,8 @@ const NewChart = {
   AreaChart,
   GaugeChart,
   SparklineChart,
+  ComboChart,
+  ScatterChart,
 
   /**
    * KPI Card component
@@ -112,15 +123,7 @@ const NewChart = {
   PALETTE: COLOR_PALETTE
 };
 
-// Export chart classes as properties of NewChart for better bundling
-NewChart.BarChart = BarChart;
-NewChart.PieChart = PieChart;
-NewChart.LineChart = LineChart;
-NewChart.AreaChart = AreaChart;
-NewChart.GaugeChart = GaugeChart;
-NewChart.SparklineChart = SparklineChart;
-NewChart.KPICard = KPICard;
-NewChart.kpiCard = createKPICard;
+// DataTable not in the object literal above — attach here
 NewChart.DataTable = DataTable;
 
 export default NewChart;

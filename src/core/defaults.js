@@ -271,6 +271,65 @@ export const SPARKLINE_DEFAULTS = {
 };
 
 /**
+ * Default configuration for Combo charts (bar + line on shared axes)
+ */
+export const COMBO_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'combo',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    bar: {
+      borderRadius: 4,
+      gap: 0.2
+    },
+    combo: {
+      barGap: 0.2,
+      barBorderRadius: 4,
+      lineWidth: 2,
+      pointRadius: 4,
+      tension: 0.4
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    smooth: true,
+    showPoints: true,
+    axis: {
+      x: { enabled: true, label: '' },
+      y: { enabled: true, label: '' }
+    }
+  }
+};
+
+/**
+ * Default configuration for Scatter / Bubble charts
+ */
+export const SCATTER_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'scatter',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    scatter: {
+      pointRadius: 5,
+      pointBorderColor: '#ffffff',
+      pointBorderWidth: 2,
+      pointOpacity: 0.85,
+      minRadius: 4,
+      maxRadius: 30,
+      bubbleOpacity: 0.6
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    axis: {
+      x: { enabled: true, label: '' },
+      y: { enabled: true, label: '' }
+    },
+    sizeLabel: 'Size'
+  }
+};
+
+/**
  * Color palette
  */
 export const COLOR_PALETTE = PALETTE;
