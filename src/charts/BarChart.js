@@ -379,7 +379,7 @@ export class BarChart extends Chart {
             }
           });
 
-          // Build rich tooltip content
+          // Build rich tooltip content — bars + markers + reference lines
           const rows = group.bars.map(bar => ({
             color: bar.color,
             label: bar.datasetLabel || 'Value',
@@ -387,6 +387,35 @@ export class BarChart extends Chart {
               ? `${formatNumber(bar.value, 0)} (${formatNumber(bar.displayValue, 1)}%)`
               : formatNumber(bar.value, 0)
           }));
+
+          // Add per-bar marker values (e.g. budget per bar)
+          const barMarkers = options.barMarkers || [];
+          barMarkers.forEach(marker => {
+            const markerValue = marker.values?.[group.labelIndex];
+            if (markerValue == null) return;
+            rows.push({
+              color: marker.color || '#f08c00',
+              label: marker.label || 'Target',
+              value: formatNumber(markerValue, 0)
+            });
+          });
+
+          // Add reference line values (snitt, budget average, etc.)
+          refLines.forEach(ref => {
+            let refValue = ref.value;
+            if (ref.value === 'average' || ref.value === 'mean') {
+              const firstDs = visibleDatasets[0];
+              if (firstDs?.values) {
+                refValue = Math.round(firstDs.values.reduce((s, v) => s + v, 0) / firstDs.values.length);
+              }
+            }
+            if (typeof refValue !== 'number') return;
+            rows.push({
+              color: ref.color || '#868e96',
+              label: ref.label || 'Ref',
+              value: formatNumber(refValue, 0)
+            });
+          });
 
           this.showTooltip(e, {
             header: group.label,
