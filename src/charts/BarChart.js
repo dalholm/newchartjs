@@ -20,7 +20,6 @@ export class BarChart extends Chart {
     const hasXAxis = this.config.options.axis?.x?.enabled !== false;
     const hasYAxis = this.config.options.axis?.y?.enabled !== false;
 
-    // Calculate available space
     const topSpace = this.config.options.legend?.enabled ? 40 : 0;
     const bottomSpace = hasXAxis ? 40 : padding;
     const leftSpace = hasYAxis ? 60 : padding;
@@ -50,10 +49,11 @@ export class BarChart extends Chart {
   calculateBars() {
     const layout = this.calculateLayout();
     const { data, options } = this.config;
-    const { datasets } = data;
 
+    // Filter datasets by legend visibility
+    const visibleDatasets = data.datasets.filter((ds, i) => this.isDatasetVisible(ds, i));
     const numBars = data.labels?.length || 0;
-    const numDatasets = datasets.length;
+    const numDatasets = visibleDatasets.length;
 
     if (numBars === 0) return [];
 
@@ -65,16 +65,26 @@ export class BarChart extends Chart {
     if (options.stacked) {
       datasetWidth = availableWidth;
     } else {
-      datasetWidth = availableWidth / numDatasets;
+      datasetWidth = availableWidth / Math.max(numDatasets, 1);
     }
 
-    // Find min/max values
+    // Find min/max values across visible datasets
     let allValues = [];
-    datasets.forEach(ds => {
+    visibleDatasets.forEach(ds => {
       if (ds.values) {
         allValues = allValues.concat(ds.values);
       }
     });
+
+    // Include reference line values in scale
+    const refLines = options.referenceLines || [];
+    refLines.forEach(ref => {
+      if (typeof ref.value === 'number') {
+        allValues.push(ref.value);
+      }
+    });
+
+    if (allValues.length === 0) allValues = [0];
 
     const { min: minValue, max: maxValue } = getMinMax(allValues);
     const valueRange = maxValue - minValue || 1;
@@ -86,6 +96,7 @@ export class BarChart extends Chart {
       datasetWidth,
       numBars,
       numDatasets,
+      visibleDatasets,
       minValue,
       maxValue,
       valueRange,
@@ -104,7 +115,7 @@ export class BarChart extends Chart {
     if (bars.length === 0) return;
 
     const { chartX, chartY, chartWidth, chartHeight, hasXAxis, hasYAxis } = bars.layout;
-    const { barWidth, availableWidth, datasetWidth, numBars, numDatasets, minValue, maxValue, valueRange, scale } = bars;
+    const { barWidth, availableWidth, datasetWidth, numBars, numDatasets, visibleDatasets, minValue, maxValue, valueRange, scale } = bars;
 
     // Draw grid
     if (style.grid?.color) {
@@ -116,7 +127,6 @@ export class BarChart extends Chart {
           opacity: 0.5
         });
 
-        // Y axis labels
         if (hasYAxis) {
           this.renderer.text(formatNumber(value, 0), chartX - 10, y, {
             fill: style.axis.color,
@@ -144,13 +154,77 @@ export class BarChart extends Chart {
       });
     }
 
-    // Draw bars
+    // Draw reference lines
+    const refLines = options.referenceLines || [];
+    refLines.forEach(ref => {
+      let refValue = ref.value;
+
+      // Handle computed reference values
+      if (ref.value === 'average' || ref.value === 'mean') {
+        const firstDs = visibleDatasets[0];
+        if (firstDs?.values) {
+          refValue = Math.round(firstDs.values.reduce((s, v) => s + v, 0) / firstDs.values.length);
+        }
+      }
+
+      if (typeof refValue !== 'number') return;
+
+      const ry = chartY + chartHeight - ((refValue - minValue) / valueRange) * chartHeight;
+
+      this.renderer.line(chartX, ry, chartX + chartWidth, ry, {
+        stroke: ref.color || '#868e96',
+        strokeWidth: ref.strokeWidth || 1.5,
+        strokeDasharray: ref.dash || '6 4',
+        strokeLinecap: 'round'
+      });
+
+      // Label
+      if (ref.label) {
+        const labelX = ref.labelPosition === 'right' ? chartX + chartWidth + 4 : chartX + 4;
+        const labelY = ry - 6;
+
+        // Background pill for label
+        if (ref.labelBackground) {
+          this.renderer.rect(labelX - 2, labelY - 8, ref.label.length * 6 + 12, 16, {
+            fill: ref.labelBackground,
+            borderRadius: 3
+          });
+        }
+
+        this.renderer.text(ref.label, labelX, labelY, {
+          fill: ref.color || '#868e96',
+          fontSize: 9,
+          fontFamily: style.monoFamily || style.fontFamily,
+          textAnchor: 'start',
+          dominantBaseline: 'auto'
+        });
+      }
+    });
+
+    // Draw bars with hover interaction
     const bars_ = [];
+    const barGroups = []; // group hitboxes for column hover
 
     data.labels.forEach((label, labelIndex) => {
       const baseX = chartX + labelIndex * barWidth + barWidth / 2;
+      const groupX = chartX + labelIndex * barWidth;
 
-      data.datasets.forEach((dataset, datasetIndex) => {
+      // Invisible hitbox for column hover
+      const hitbox = this.renderer.rect(groupX, chartY, barWidth, chartHeight, {
+        fill: 'transparent',
+        opacity: 0
+      });
+
+      // Column highlight background (hidden by default)
+      const highlight = this.renderer.rect(groupX + 1, chartY, barWidth - 2, chartHeight, {
+        fill: '#4c6ef5',
+        opacity: 0,
+        borderRadius: 2
+      });
+
+      const groupBars = [];
+
+      visibleDatasets.forEach((dataset, visibleIndex) => {
         const value = dataset.values?.[labelIndex] || 0;
         const normalizedValue = (value - minValue) / valueRange;
         const barHeight = normalizedValue * chartHeight;
@@ -158,36 +232,38 @@ export class BarChart extends Chart {
         let x, y;
 
         if (options.stacked) {
-          // Stacked bars
           let stackedHeight = 0;
-          for (let i = 0; i < datasetIndex; i++) {
-            const prevValue = data.datasets[i].values?.[labelIndex] || 0;
+          for (let i = 0; i < visibleIndex; i++) {
+            const prevValue = visibleDatasets[i].values?.[labelIndex] || 0;
             const prevNormalized = (prevValue - minValue) / valueRange;
             stackedHeight += prevNormalized * chartHeight;
           }
           y = chartY + chartHeight - stackedHeight - barHeight;
           x = baseX - availableWidth / 2;
         } else {
-          // Grouped bars — position from left edge of available width
-          x = baseX - availableWidth / 2 + datasetIndex * datasetWidth;
+          x = baseX - availableWidth / 2 + visibleIndex * datasetWidth;
           y = chartY + chartHeight - barHeight;
         }
 
-        const color = dataset.color || this.getPaletteColor(datasetIndex);
+        const color = dataset.color || this.getPaletteColor(visibleIndex);
 
         const barElement = this.renderer.rect(
-          x,
-          y,
+          x, y,
           options.stacked ? availableWidth : datasetWidth,
           barHeight,
           {
             fill: color,
             borderRadius: style.bar?.borderRadius || 0,
-            opacity: 0.85
+            opacity: 1
           }
         );
 
-        bars_.push({
+        if (barElement) {
+          barElement.style.cursor = 'pointer';
+          barElement.style.transition = 'opacity 0.12s, filter 0.12s';
+        }
+
+        const barInfo = {
           element: barElement,
           value,
           label: label,
@@ -196,34 +272,90 @@ export class BarChart extends Chart {
           x,
           y,
           width: options.stacked ? availableWidth : datasetWidth,
-          height: barHeight
-        });
+          height: barHeight,
+          labelIndex,
+          datasetIndex: visibleIndex
+        };
 
-        // Hover effect
-        if (barElement) {
-          barElement.style.cursor = 'pointer';
-          this.addElementListener(barElement, 'mouseenter', (e) => {
-            barElement.setAttribute('opacity', '1');
-            this.showTooltip(e, {
-              [dataset.label || 'Value']: formatNumber(value, 2),
-              [label]: ''
-            });
-          });
-
-          this.addElementListener(barElement, 'mouseleave', () => {
-            barElement.setAttribute('opacity', '0.85');
-          });
-        }
+        bars_.push(barInfo);
+        groupBars.push(barInfo);
       });
+
+      // Per-bar reference markers (e.g. budget line per bar)
+      const barMarkers = options.barMarkers || [];
+      barMarkers.forEach(marker => {
+        const markerValue = marker.values?.[labelIndex];
+        if (markerValue == null) return;
+
+        const markerY = chartY + chartHeight - ((markerValue - minValue) / valueRange) * chartHeight;
+        this.renderer.line(
+          groupX + barWidth * 0.08, markerY,
+          groupX + barWidth * 0.92, markerY,
+          {
+            stroke: marker.color || '#f08c00',
+            strokeWidth: marker.strokeWidth || 2,
+            strokeLinecap: 'round'
+          }
+        );
+      });
+
+      barGroups.push({ hitbox, highlight, bars: groupBars, label, labelIndex });
 
       // X axis labels
       if (hasXAxis) {
-        this.renderer.text(label, baseX, chartY + chartHeight + 15, {
+        const labelEl = this.renderer.text(label, baseX, chartY + chartHeight + 15, {
           fill: style.axis.color,
           fontSize: style.axis.fontSize,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',
           dominantBaseline: 'top'
+        });
+        if (labelEl) {
+          labelEl.style.transition = 'fill 0.12s, font-weight 0.12s';
+          labelEl._labelIndex = labelIndex;
+        }
+      }
+    });
+
+    // Setup column hover interactions
+    barGroups.forEach(group => {
+      if (group.hitbox) {
+        group.hitbox.style.cursor = 'pointer';
+
+        this.addElementListener(group.hitbox, 'mouseenter', (e) => {
+          // Show column highlight
+          group.highlight.setAttribute('opacity', '0.03');
+
+          // Brighten hovered bars, dim all others
+          bars_.forEach(bar => {
+            if (!bar.element) return;
+            if (bar.labelIndex === group.labelIndex) {
+              bar.element.setAttribute('opacity', '1');
+              bar.element.style.filter = 'brightness(1.08)';
+            } else {
+              bar.element.setAttribute('opacity', '0.3');
+              bar.element.style.filter = '';
+            }
+          });
+
+          // Build tooltip content
+          const tooltipData = {};
+          group.bars.forEach(bar => {
+            tooltipData[bar.datasetLabel || 'Value'] = formatNumber(bar.value, 0);
+          });
+
+          this.showTooltip(e, tooltipData);
+        });
+
+        this.addElementListener(group.hitbox, 'mouseleave', () => {
+          group.highlight.setAttribute('opacity', '0');
+
+          // Restore all bars
+          bars_.forEach(bar => {
+            if (!bar.element) return;
+            bar.element.setAttribute('opacity', '1');
+            bar.element.style.filter = '';
+          });
         });
       }
     });
