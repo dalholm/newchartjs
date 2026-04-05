@@ -46,7 +46,6 @@ export class Tooltip {
         pointerEvents: 'none',
         zIndex: '1000',
         display: 'none',
-        whiteSpace: 'nowrap',
         maxWidth: '300px',
         wordWrap: 'break-word',
         whiteSpace: 'normal',
@@ -66,12 +65,21 @@ export class Tooltip {
   show(x, y, content) {
     this.mount();
 
+    this.element.textContent = '';
+
     if (typeof content === 'object') {
-      this.element.innerHTML = Object.entries(content)
-        .map(([key, value]) => `<div><strong>${key}:</strong> ${value}</div>`)
-        .join('');
+      Object.entries(content).forEach(([key, value]) => {
+        const row = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = key + ':';
+        row.appendChild(strong);
+        if (value) {
+          row.appendChild(document.createTextNode(' ' + value));
+        }
+        this.element.appendChild(row);
+      });
     } else {
-      this.element.innerHTML = content;
+      this.element.textContent = content;
     }
 
     // Position tooltip

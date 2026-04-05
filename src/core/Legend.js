@@ -86,10 +86,18 @@ export class Legend {
       this.element.appendChild(itemEl);
     });
 
-    if (this.options.position === 'top' || this.options.position === 'bottom') {
+    if (this.options.position === 'top') {
       this.container.insertBefore(this.element, this.container.firstChild);
-    } else {
+    } else if (this.options.position === 'bottom') {
       this.container.appendChild(this.element);
+    } else if (this.options.position === 'left' || this.options.position === 'right') {
+      this.element.style.flexDirection = 'column';
+      this.container.style.display = 'flex';
+      if (this.options.position === 'left') {
+        this.container.insertBefore(this.element, this.container.firstChild);
+      } else {
+        this.container.appendChild(this.element);
+      }
     }
   }
 

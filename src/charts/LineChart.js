@@ -210,18 +210,18 @@ export class LineChart extends Chart {
           opacity: 0.85
         });
 
-        if (pointEl && pointEl.style) {
+        if (pointEl) {
           pointEl.style.cursor = 'pointer';
-          pointEl.addEventListener('mouseenter', (event) => {
-            pointEl.style.opacity = '1';
-            this.showTooltip(event, {
+          this.addElementListener(pointEl, 'mouseenter', (e) => {
+            pointEl.setAttribute('opacity', '1');
+            this.showTooltip(e, {
               [dataset.label || 'Value']: formatNumber(dataset.values[pointIndex], 2),
               [data.labels?.[pointIndex] || `Point ${pointIndex}`]: ''
             });
           });
 
-          pointEl.addEventListener('mouseleave', () => {
-            pointEl.style.opacity = '0.85';
+          this.addElementListener(pointEl, 'mouseleave', () => {
+            pointEl.setAttribute('opacity', '0.85');
           });
         }
 

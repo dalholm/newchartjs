@@ -5,7 +5,6 @@
 import Chart from '../core/Chart.js';
 import { BAR_DEFAULTS } from '../core/defaults.js';
 import { getMinMax, generateScale, formatNumber, deepMerge, lerp } from '../core/utils.js';
-import { deepMerge as merge } from '../core/utils.js';
 
 export class BarChart extends Chart {
   constructor(element, config = {}) {
@@ -203,16 +202,16 @@ export class BarChart extends Chart {
         // Hover effect
         if (barElement) {
           barElement.style.cursor = 'pointer';
-          barElement.addEventListener('mouseenter', () => {
-            barElement.style.opacity = '1';
-            this.showTooltip(event, {
+          this.addElementListener(barElement, 'mouseenter', (e) => {
+            barElement.setAttribute('opacity', '1');
+            this.showTooltip(e, {
               [dataset.label || 'Value']: formatNumber(value, 2),
               [label]: ''
             });
           });
 
-          barElement.addEventListener('mouseleave', () => {
-            barElement.style.opacity = '0.85';
+          this.addElementListener(barElement, 'mouseleave', () => {
+            barElement.setAttribute('opacity', '0.85');
           });
         }
       });

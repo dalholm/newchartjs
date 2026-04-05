@@ -38,6 +38,10 @@ export class Chart {
     this.container.style.width = '100%';
     this.container.style.height = '100%';
     this.container.style.position = 'relative';
+    this.container.setAttribute('role', 'img');
+    this.container.setAttribute('aria-label',
+      this.config.options.ariaLabel || `${this.config.type || 'data'} chart`
+    );
     this.element.appendChild(this.container);
 
     // Dimensions
@@ -64,6 +68,9 @@ export class Chart {
     // Animation state
     this.animationCancels = [];
     this.isAnimating = false;
+
+    // Track element event listeners for cleanup
+    this._elementListeners = [];
 
     // Event listeners
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -165,6 +172,9 @@ export class Chart {
     // Cancel previous animations
     this.cancelAnimations();
 
+    // Remove previously attached element listeners
+    this.removeElementListeners();
+
     // Validate data
     if (!this.config.data || !this.config.data.datasets) {
       return;
@@ -263,6 +273,27 @@ export class Chart {
   }
 
   /**
+   * Add an event listener to a chart element with automatic cleanup tracking
+   * @param {Element} element - DOM element
+   * @param {string} event - Event name
+   * @param {Function} handler - Event handler
+   */
+  addElementListener(element, event, handler) {
+    element.addEventListener(event, handler);
+    this._elementListeners.push({ element, event, handler });
+  }
+
+  /**
+   * Remove all tracked element event listeners
+   */
+  removeElementListeners() {
+    this._elementListeners.forEach(({ element, event, handler }) => {
+      element.removeEventListener(event, handler);
+    });
+    this._elementListeners = [];
+  }
+
+  /**
    * Show tooltip
    * @param {MouseEvent} event - Mouse event
    * @param {string|Object} content - Tooltip content
@@ -307,6 +338,11 @@ export class Chart {
    */
   destroy() {
     this.cancelAnimations();
+    this.removeElementListeners();
+
+    if (this.resizeHandler && this.resizeHandler.cancel) {
+      this.resizeHandler.cancel();
+    }
 
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();

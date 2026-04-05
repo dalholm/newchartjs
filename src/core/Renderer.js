@@ -418,6 +418,30 @@ export class CanvasRenderer extends Renderer {
   }
 
   /**
+   * Draw a path
+   * @param {string} d - SVG path data string
+   * @param {Object} style - Style object
+   */
+  path(d, style = {}) {
+    const path2d = new Path2D(d);
+
+    this.ctx.globalAlpha = style.opacity !== undefined ? style.opacity : 1;
+
+    if (style.fill && style.fill !== 'none') {
+      this.ctx.fillStyle = style.fill;
+      this.ctx.fill(path2d);
+    }
+
+    if (style.stroke && style.stroke !== 'none') {
+      this.ctx.strokeStyle = style.stroke;
+      this.ctx.lineWidth = style.strokeWidth || 1;
+      this.ctx.stroke(path2d);
+    }
+
+    this.ctx.globalAlpha = 1;
+  }
+
+  /**
    * Draw text
    * @param {string} text - Text content
    * @param {number} x - X position

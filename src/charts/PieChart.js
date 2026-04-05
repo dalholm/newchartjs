@@ -46,9 +46,7 @@ export class PieChart extends Chart {
       const sliceAngle = (Math.abs(value) / total) * availableAngle;
       const midAngle = currentAngle + sliceAngle / 2;
 
-      const color = dataset.colors
-        ? dataset.colors[index]
-        : data.datasets[index]?.color || this.getPaletteColor(index);
+      const color = dataset.colors?.[index] || this.getPaletteColor(index);
 
       slices.push({
         index,
@@ -104,18 +102,17 @@ export class PieChart extends Chart {
       // Hover effect
       if (sliceElement) {
         sliceElement.style.cursor = 'pointer';
-        const originalOpacity = sliceElement.getAttribute('opacity') || 0.85;
 
-        sliceElement.addEventListener('mouseenter', (event) => {
+        this.addElementListener(sliceElement, 'mouseenter', (e) => {
           sliceElement.setAttribute('opacity', '1');
-          this.showTooltip(event, {
+          this.showTooltip(e, {
             [slice.label]: formatNumber(slice.value, 0),
             'Percentage': formatNumber(slice.percent, 1) + '%'
           });
         });
 
-        sliceElement.addEventListener('mouseleave', () => {
-          sliceElement.setAttribute('opacity', originalOpacity);
+        this.addElementListener(sliceElement, 'mouseleave', () => {
+          sliceElement.setAttribute('opacity', '0.85');
         });
       }
 
@@ -185,40 +182,44 @@ export class PieChart extends Chart {
               });
             }
 
+            const borderColor = this.config.style.pie?.borderColor || '#ffffff';
+            const borderWidth = this.config.style.pie?.borderWidth || 2;
+            const labelPosition = this.config.options.labels?.position || 'outside';
+            const labelFormat = this.config.options.labels?.format || 'percent';
+
             // Redraw slices up to current animation
             this.slices.forEach((s, i) => {
-              if (i < index) {
-                // Already animated
-                this.renderer.arc(
-                  s.centerX,
-                  s.centerY,
-                  s.radius,
-                  s.startAngle,
-                  s.endAngle,
-                  s.innerRadius,
-                  {
-                    fill: s.color,
-                    stroke: this.config.style.pie?.borderColor || '#ffffff',
-                    strokeWidth: this.config.style.pie?.borderWidth || 2,
-                    opacity: 0.85
-                  }
-                );
-              } else if (i === index) {
-                // Currently animating
-                this.renderer.arc(
-                  s.centerX,
-                  s.centerY,
-                  s.radius,
-                  s.startAngle,
-                  endAngle,
-                  s.innerRadius,
-                  {
-                    fill: s.color,
-                    stroke: this.config.style.pie?.borderColor || '#ffffff',
-                    strokeWidth: this.config.style.pie?.borderWidth || 2,
-                    opacity: 0.85
-                  }
-                );
+              const drawEnd = i < index ? s.endAngle : (i === index ? endAngle : null);
+              if (drawEnd === null) return;
+
+              this.renderer.arc(
+                s.centerX, s.centerY, s.radius,
+                s.startAngle, drawEnd, s.innerRadius,
+                { fill: s.color, stroke: borderColor, strokeWidth: borderWidth, opacity: 0.85 }
+              );
+
+              // Redraw label for completed slices
+              if (i < index && labelPosition !== 'none') {
+                const labelDistance = labelPosition === 'inside'
+                  ? (s.radius + s.innerRadius) / 2
+                  : s.radius + 20;
+                const labelX = s.centerX + labelDistance * Math.cos(s.midAngle);
+                const labelY = s.centerY + labelDistance * Math.sin(s.midAngle);
+
+                let labelText;
+                switch (labelFormat) {
+                  case 'value': labelText = formatNumber(s.value, 0); break;
+                  case 'label': labelText = s.label; break;
+                  default: labelText = formatNumber(s.percent, 1) + '%';
+                }
+
+                this.renderer.text(labelText, labelX, labelY, {
+                  fill: this.config.style.fontColor,
+                  fontSize: this.config.style.fontSize,
+                  fontFamily: this.config.style.fontFamily,
+                  textAnchor: 'middle',
+                  dominantBaseline: 'middle'
+                });
               }
             });
           }
