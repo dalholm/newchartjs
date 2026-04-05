@@ -9,6 +9,7 @@ import LineChart from './charts/LineChart.js';
 import AreaChart from './charts/AreaChart.js';
 import GaugeChart from './charts/GaugeChart.js';
 import SparklineChart from './charts/SparklineChart.js';
+import { KPICard, createKPICard } from './core/KPICard.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
 import { COMPARE_COLOR, COLOR_PALETTE } from './core/defaults.js';
 
@@ -81,6 +82,19 @@ const NewChart = {
   SparklineChart,
 
   /**
+   * KPI Card component
+   */
+  KPICard,
+
+  /**
+   * Create a KPI card (convenience factory)
+   * @param {Element|string} element - DOM element or selector
+   * @param {Object} config - Card configuration
+   * @returns {KPICard} Card instance
+   */
+  kpiCard: createKPICard,
+
+  /**
    * Get list of supported CSS custom property tokens
    * @returns {string[]} Token names
    */
@@ -104,5 +118,7 @@ NewChart.LineChart = LineChart;
 NewChart.AreaChart = AreaChart;
 NewChart.GaugeChart = GaugeChart;
 NewChart.SparklineChart = SparklineChart;
+NewChart.KPICard = KPICard;
+NewChart.kpiCard = createKPICard;
 
 export default NewChart;
