@@ -4,7 +4,7 @@
 
 import Chart from '../core/Chart.js';
 import { LINE_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath } from '../core/utils.js';
+import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
 
 export class LineChart extends Chart {
   constructor(element, config = {}) {
@@ -110,7 +110,8 @@ export class LineChart extends Chart {
 
       const color = dataset.color || this.getPaletteColor(datasetIndex);
       const lineWidth = dataset.strokeWidth || style.line?.width || 2;
-      const tension = options.smooth ? (style.line?.tension || 0.4) : 0;
+      const smooth = options.smooth;
+      const tension = (smooth === true || smooth === 'bezier') ? (style.line?.tension || 0.4) : 0;
       const pointRadius = options.showPoints ? (style.line?.pointRadius || 4) : 0;
       const isDashed = dataset.dash || false;
 
@@ -120,6 +121,13 @@ export class LineChart extends Chart {
         valueToY(value)
       ]);
 
+      // Build smooth path helper
+      const buildPath = (pts) => {
+        if (smooth === 'monotone') return getMonotonePath(pts);
+        if (tension > 0) return getBezierPath(pts, tension);
+        return `M ${pts.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;
+      };
+
       // Draw area fill with gradient if enabled
       if (options.fill && !isDashed) {
         const gradientId = `area-grad-${datasetIndex}`;
@@ -127,7 +135,7 @@ export class LineChart extends Chart {
 
         if (gradientFill) {
           // Build closed area path
-          const linePath = getBezierPath(points, tension);
+          const linePath = buildPath(points);
           const lastX = points[points.length - 1][0];
           const firstX = points[0][0];
           const baseline = chartY + chartHeight;
@@ -144,7 +152,7 @@ export class LineChart extends Chart {
             [indexToX(points.length - 1), chartY + chartHeight],
             [indexToX(0), chartY + chartHeight]
           ];
-          const areaPath = getBezierPath(areaPoints, tension);
+          const areaPath = buildPath(areaPoints);
           this.renderer.path(areaPath, {
             fill: color,
             opacity: 0.1
@@ -153,12 +161,7 @@ export class LineChart extends Chart {
       }
 
       // Draw line
-      let linePath;
-      if (tension > 0) {
-        linePath = getBezierPath(points, tension);
-      } else {
-        linePath = `M ${points.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;
-      }
+      const linePath = buildPath(points);
 
       const lineElement = this.renderer.path(linePath, {
         stroke: color,

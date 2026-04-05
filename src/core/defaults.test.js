@@ -92,7 +92,7 @@ describe('LINE_DEFAULTS', () => {
   });
 
   it('defaults to smooth lines', () => {
-    expect(LINE_DEFAULTS.options.smooth).toBe(true);
+    expect(LINE_DEFAULTS.options.smooth).toBe('monotone');
   });
 
   it('defaults to no fill', () => {

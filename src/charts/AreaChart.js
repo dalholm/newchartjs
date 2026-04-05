@@ -5,7 +5,7 @@
 
 import Chart from '../core/Chart.js';
 import { AREA_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath } from '../core/utils.js';
+import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
 
 export class AreaChart extends Chart {
   constructor(element, config = {}) {
@@ -96,8 +96,15 @@ export class AreaChart extends Chart {
     this._allPoints = [];
     this._crosshairLine = null;
 
-    const tension = options.smooth !== false ? (style.line?.tension || 0.4) : 0;
+    const smooth = options.smooth;
+    const tension = (smooth === true || smooth === 'bezier') ? (style.line?.tension || 0.4) : 0;
     const fillOpacity = style.area?.fillOpacity ?? 0.25;
+
+    const buildPath = (pts) => {
+      if (smooth === 'monotone') return getMonotonePath(pts);
+      if (tension > 0) return getBezierPath(pts, tension);
+      return `M ${pts.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;
+    };
 
     visibleDatasets.forEach((dataset, datasetIndex) => {
       if (!dataset.values) return;
@@ -142,9 +149,9 @@ export class AreaChart extends Chart {
       const gradientFill = this.renderer.createGradient?.(color, gradientId, fillOpacity, 0.02) || null;
 
       if (gradientFill) {
-        const linePath = getBezierPath(points, tension);
+        const linePath = buildPath(points);
         const bottomPath = stacked && datasetIndex > 0
-          ? ` L ${bottomPoints[0][0]},${bottomPoints[0][1]}` + getBezierPath(bottomPoints, tension).replace(/^M/, ' L')
+          ? ` L ${bottomPoints[0][0]},${bottomPoints[0][1]}` + buildPath(bottomPoints).replace(/^M/, ' L')
           : ` L ${bottomPoints[0][0]},${bottomPoints[0][1]} L ${bottomPoints[1][0]},${bottomPoints[1][1]}`;
         const areaD = `${linePath}${bottomPath} Z`;
         this.renderer.path(areaD, { fill: gradientFill, opacity: 1 });
@@ -156,12 +163,7 @@ export class AreaChart extends Chart {
       }
 
       // Draw line on top
-      let linePath;
-      if (tension > 0) {
-        linePath = getBezierPath(points, tension);
-      } else {
-        linePath = `M ${points.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;
-      }
+      const linePath = buildPath(points);
 
       const lineElement = this.renderer.path(linePath, {
         stroke: color,

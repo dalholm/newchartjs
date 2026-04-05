@@ -4,7 +4,7 @@
 
 import Chart from '../core/Chart.js';
 import { COMBO_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath } from '../core/utils.js';
+import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
 
 export class ComboChart extends Chart {
   constructor(element, config = {}) {
@@ -226,7 +226,8 @@ export class ComboChart extends Chart {
 
       const color = dataset.color || this.getPaletteColor(dataset._visibleIndex);
       const lineWidth = dataset.strokeWidth || style.combo?.lineWidth || style.line?.width || 2;
-      const tension = (options.smooth !== false) ? (style.combo?.tension ?? style.line?.tension ?? 0.4) : 0;
+      const smooth = options.smooth;
+      const tension = (smooth === true || smooth === 'bezier') ? (style.combo?.tension ?? style.line?.tension ?? 0.4) : 0;
       const pointRadius = (options.showPoints !== false) ? (style.combo?.pointRadius ?? style.line?.pointRadius ?? 4) : 0;
       const isDashed = dataset.dash || false;
 
@@ -238,7 +239,9 @@ export class ComboChart extends Chart {
 
       // Draw line
       let linePath;
-      if (tension > 0) {
+      if (smooth === 'monotone') {
+        linePath = getMonotonePath(points);
+      } else if (tension > 0) {
         linePath = getBezierPath(points, tension);
       } else {
         linePath = `M ${points.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;

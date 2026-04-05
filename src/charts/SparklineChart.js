@@ -6,7 +6,7 @@
 
 import Chart from '../core/Chart.js';
 import { SPARKLINE_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, deepMerge, getBezierPath } from '../core/utils.js';
+import { getMinMax, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
 
 export class SparklineChart extends Chart {
   constructor(element, config = {}) {
@@ -86,7 +86,14 @@ export class SparklineChart extends Chart {
    */
   _renderLine(values, color, w, h, padX, padY, min, range, isArea) {
     const { style, options } = this.config;
-    const tension = options.smooth !== false ? (style.sparkline?.tension ?? 0.3) : 0;
+    const smooth = options.smooth;
+    const tension = (smooth === true || smooth === 'bezier') ? (style.sparkline?.tension ?? 0.3) : 0;
+
+    const buildPath = (pts) => {
+      if (smooth === 'monotone') return getMonotonePath(pts);
+      if (tension > 0) return getBezierPath(pts, tension);
+      return `M ${pts.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;
+    };
 
     const points = values.map((v, i) => [
       padX + (i / (values.length - 1)) * w,
@@ -100,7 +107,7 @@ export class SparklineChart extends Chart {
       const baseline = padY + h;
 
       if (gradientFill) {
-        const linePath = getBezierPath(points, tension);
+        const linePath = buildPath(points);
         const areaD = `${linePath} L ${points[points.length - 1][0]},${baseline} L ${points[0][0]},${baseline} Z`;
         this.renderer.path(areaD, { fill: gradientFill });
       } else {
@@ -111,12 +118,7 @@ export class SparklineChart extends Chart {
     }
 
     // Line
-    let linePath;
-    if (tension > 0) {
-      linePath = getBezierPath(points, tension);
-    } else {
-      linePath = `M ${points.map(p => `${p[0]} ${p[1]}`).join(' L ')}`;
-    }
+    const linePath = buildPath(points);
 
     this.renderer.path(linePath, {
       stroke: color,

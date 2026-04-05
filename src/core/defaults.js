@@ -143,7 +143,7 @@ export const LINE_DEFAULTS = {
     ...DEFAULT_CONFIG.style,
     line: {
       width: 2,
-      tension: 0.4, // Bezier curve tension (0-1)
+      tension: 0.4, // Bezier curve tension (only used when smooth: 'bezier')
       pointRadius: 4,
       pointBorderWidth: 2,
       pointBorderColor: '#ffffff'
@@ -151,7 +151,7 @@ export const LINE_DEFAULTS = {
   },
   options: {
     ...DEFAULT_CONFIG.options,
-    smooth: true,
+    smooth: 'monotone', // 'monotone' (no overshoot), 'bezier', true (alias for bezier), or false
     fill: false, // Fill area under line
     showPoints: true,
     axis: {
@@ -182,7 +182,7 @@ export const AREA_DEFAULTS = {
   },
   options: {
     ...DEFAULT_CONFIG.options,
-    smooth: true,
+    smooth: 'monotone',
     showPoints: true,
     stacked: false,
     axis: {
@@ -264,7 +264,7 @@ export const SPARKLINE_DEFAULTS = {
     legend: { enabled: false },
     tooltip: { enabled: false },
     variant: 'line', // 'line', 'area', 'bar'
-    smooth: true,
+    smooth: 'monotone',
     highlightLast: true,
     referenceLine: null
   }
@@ -292,7 +292,7 @@ export const COMBO_DEFAULTS = {
   },
   options: {
     ...DEFAULT_CONFIG.options,
-    smooth: true,
+    smooth: 'monotone',
     showPoints: true,
     axis: {
       x: { enabled: true, label: '' },
