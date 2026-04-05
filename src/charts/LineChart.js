@@ -328,18 +328,25 @@ export class LineChart extends Chart {
               this._crosshairLine.setAttribute('opacity', '1');
             }
 
-            // Show points at this index
-            const tooltipData = {};
+            // Show points at this index and build rich tooltip
+            const rows = [];
             this._allPoints.forEach(pt => {
               if (pt.labelIndex === i) {
                 if (pt.element) {
                   pt.element.setAttribute('opacity', '1');
                 }
-                tooltipData[pt.datasetLabel || 'Value'] = formatNumber(pt.value, 0);
+                rows.push({
+                  color: pt.color,
+                  label: pt.datasetLabel || 'Value',
+                  value: formatNumber(pt.value, 0)
+                });
               }
             });
 
-            this.showTooltip(e, tooltipData);
+            this.showTooltip(e, {
+              header: data.labels?.[i] || '',
+              rows
+            });
           });
 
           this.addElementListener(hitbox, 'mouseleave', () => {

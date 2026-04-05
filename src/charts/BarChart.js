@@ -61,34 +61,54 @@ export class BarChart extends Chart {
     const barGap = barWidth * (this.config.style.bar?.gap || 0.2);
     const availableWidth = barWidth - barGap;
 
+    const isStacked = !!options.stacked;
+    const isPercent = options.stacked === 'percent';
+
     let datasetWidth;
-    if (options.stacked) {
+    if (isStacked) {
       datasetWidth = availableWidth;
     } else {
       datasetWidth = availableWidth / Math.max(numDatasets, 1);
     }
 
+    // Compute column totals for percent mode
+    let columnTotals = null;
+    if (isPercent) {
+      columnTotals = new Array(numBars).fill(0);
+      visibleDatasets.forEach(ds => {
+        if (ds.values) {
+          ds.values.forEach((v, i) => { columnTotals[i] += Math.abs(v); });
+        }
+      });
+    }
+
     // Find min/max values across visible datasets
     let allValues = [];
-    visibleDatasets.forEach(ds => {
-      if (ds.values) {
-        allValues = allValues.concat(ds.values);
-      }
-    });
+    if (isPercent) {
+      allValues = [0, 100];
+    } else {
+      visibleDatasets.forEach(ds => {
+        if (ds.values) {
+          allValues = allValues.concat(ds.values);
+        }
+      });
 
-    // Include reference line values in scale
-    const refLines = options.referenceLines || [];
-    refLines.forEach(ref => {
-      if (typeof ref.value === 'number') {
-        allValues.push(ref.value);
-      }
-    });
+      // Include reference line values in scale
+      const refLines = options.referenceLines || [];
+      refLines.forEach(ref => {
+        if (typeof ref.value === 'number') {
+          allValues.push(ref.value);
+        }
+      });
+    }
 
     if (allValues.length === 0) allValues = [0];
 
     const { min: minValue, max: maxValue } = getMinMax(allValues);
     const valueRange = maxValue - minValue || 1;
-    const scale = generateScale(minValue, maxValue, 5);
+    const scale = isPercent
+      ? [0, 25, 50, 75, 100]
+      : generateScale(minValue, maxValue, 5);
 
     return {
       barWidth,
@@ -101,7 +121,10 @@ export class BarChart extends Chart {
       maxValue,
       valueRange,
       scale,
-      layout
+      layout,
+      isStacked,
+      isPercent,
+      columnTotals
     };
   }
 
@@ -115,7 +138,7 @@ export class BarChart extends Chart {
     if (bars.length === 0) return;
 
     const { chartX, chartY, chartWidth, chartHeight, hasXAxis, hasYAxis } = bars.layout;
-    const { barWidth, availableWidth, datasetWidth, numBars, numDatasets, visibleDatasets, minValue, maxValue, valueRange, scale } = bars;
+    const { barWidth, availableWidth, datasetWidth, numBars, numDatasets, visibleDatasets, minValue, maxValue, valueRange, scale, isStacked, isPercent, columnTotals } = bars;
 
     // Draw grid
     if (style.grid?.color) {
@@ -128,7 +151,8 @@ export class BarChart extends Chart {
         });
 
         if (hasYAxis) {
-          this.renderer.text(formatNumber(value, 0), chartX - 10, y, {
+          const label = isPercent ? `${formatNumber(value, 0)}%` : formatNumber(value, 0);
+          this.renderer.text(label, chartX - 10, y, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
@@ -227,17 +251,32 @@ export class BarChart extends Chart {
       const groupBars = [];
 
       visibleDatasets.forEach((dataset, visibleIndex) => {
-        const value = dataset.values?.[labelIndex] || 0;
-        const normalizedValue = (value - minValue) / valueRange;
+        const rawValue = dataset.values?.[labelIndex] || 0;
+
+        // For percent mode, normalize to percentage of column total
+        let displayValue;
+        if (isPercent && columnTotals && columnTotals[labelIndex] > 0) {
+          displayValue = (Math.abs(rawValue) / columnTotals[labelIndex]) * 100;
+        } else {
+          displayValue = rawValue;
+        }
+
+        const normalizedValue = (displayValue - minValue) / valueRange;
         const barHeight = normalizedValue * chartHeight;
 
         let x, y;
 
-        if (options.stacked) {
+        if (isStacked) {
           let stackedHeight = 0;
           for (let i = 0; i < visibleIndex; i++) {
-            const prevValue = visibleDatasets[i].values?.[labelIndex] || 0;
-            const prevNormalized = (prevValue - minValue) / valueRange;
+            const prevRaw = visibleDatasets[i].values?.[labelIndex] || 0;
+            let prevDisplay;
+            if (isPercent && columnTotals && columnTotals[labelIndex] > 0) {
+              prevDisplay = (Math.abs(prevRaw) / columnTotals[labelIndex]) * 100;
+            } else {
+              prevDisplay = prevRaw;
+            }
+            const prevNormalized = (prevDisplay - minValue) / valueRange;
             stackedHeight += prevNormalized * chartHeight;
           }
           y = chartY + chartHeight - stackedHeight - barHeight;
@@ -251,7 +290,7 @@ export class BarChart extends Chart {
 
         const barElement = this.renderer.rect(
           x, y,
-          options.stacked ? availableWidth : datasetWidth,
+          isStacked ? availableWidth : datasetWidth,
           barHeight,
           {
             fill: color,
@@ -267,13 +306,14 @@ export class BarChart extends Chart {
 
         const barInfo = {
           element: barElement,
-          value,
+          value: rawValue,
+          displayValue,
           label: label,
           datasetLabel: dataset.label,
           color,
           x,
           y,
-          width: options.stacked ? availableWidth : datasetWidth,
+          width: isStacked ? availableWidth : datasetWidth,
           height: barHeight,
           labelIndex,
           datasetIndex: visibleIndex
@@ -339,13 +379,19 @@ export class BarChart extends Chart {
             }
           });
 
-          // Build tooltip content
-          const tooltipData = {};
-          group.bars.forEach(bar => {
-            tooltipData[bar.datasetLabel || 'Value'] = formatNumber(bar.value, 0);
-          });
+          // Build rich tooltip content
+          const rows = group.bars.map(bar => ({
+            color: bar.color,
+            label: bar.datasetLabel || 'Value',
+            value: isPercent
+              ? `${formatNumber(bar.value, 0)} (${formatNumber(bar.displayValue, 1)}%)`
+              : formatNumber(bar.value, 0)
+          }));
 
-          this.showTooltip(e, tooltipData);
+          this.showTooltip(e, {
+            header: group.label,
+            rows
+          });
         });
 
         this.addElementListener(hitbox, 'mouseleave', () => {
