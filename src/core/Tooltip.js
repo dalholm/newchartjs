@@ -161,14 +161,20 @@ export class Tooltip {
 
       if (row.color) {
         const swatch = document.createElement('span');
+        const isDashed = row.style === 'dashed';
         Object.assign(swatch.style, {
           width: '8px',
-          height: '3px',
-          background: row.color,
+          height: isDashed ? '0px' : '3px',
           borderRadius: '1px',
           display: 'inline-block',
           flexShrink: '0'
         });
+        if (isDashed) {
+          // Dashed swatch: top border as dashed line
+          swatch.style.borderTop = `2px dashed ${row.color}`;
+        } else {
+          swatch.style.background = row.color;
+        }
         left.appendChild(swatch);
       }
 

@@ -330,22 +330,43 @@ export class LineChart extends Chart {
 
             // Show points at this index and build rich tooltip
             const rows = [];
+            let currentValue = null;
+            let prevValue = null;
+
             this._allPoints.forEach(pt => {
               if (pt.labelIndex === i) {
                 if (pt.element) {
                   pt.element.setAttribute('opacity', '1');
                 }
+                const dataset = visibleDatasets[pt.datasetIndex];
+                const isDashed = dataset?.dash || dataset?.ref || false;
                 rows.push({
                   color: pt.color,
                   label: pt.datasetLabel || 'Value',
-                  value: formatNumber(pt.value, 0)
+                  value: formatNumber(pt.value, 0),
+                  style: isDashed ? 'dashed' : 'solid'
                 });
+
+                if (pt.datasetIndex === 0) currentValue = pt.value;
+                if (pt.datasetIndex === 1) prevValue = pt.value;
               }
             });
 
+            let footer = null;
+            if (currentValue != null && prevValue != null && prevValue !== 0) {
+              const change = ((currentValue - prevValue) / prevValue) * 100;
+              const isPositive = change >= 0;
+              footer = {
+                label: 'YoY:',
+                value: `${isPositive ? '+' : ''}${change.toFixed(1)}%`,
+                color: isPositive ? '#69db7c' : '#ff8787'
+              };
+            }
+
             this.showTooltip(e, {
               header: data.labels?.[i] || '',
-              rows
+              rows,
+              footer
             });
           });
 

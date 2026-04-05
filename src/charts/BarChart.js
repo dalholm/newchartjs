@@ -380,13 +380,28 @@ export class BarChart extends Chart {
           });
 
           // Build rich tooltip content — bars + markers + reference lines
-          const rows = group.bars.map(bar => ({
-            color: bar.color,
-            label: bar.datasetLabel || 'Value',
-            value: isPercent
-              ? `${formatNumber(bar.value, 0)} (${formatNumber(bar.displayValue, 1)}%)`
-              : formatNumber(bar.value, 0)
-          }));
+          const rows = [];
+          let currentValue = null;
+          let prevValue = null;
+
+          group.bars.forEach(bar => {
+            // Detect if this dataset is a dashed/ref series
+            const dataset = visibleDatasets[bar.datasetIndex];
+            const isDashed = dataset?.dash || dataset?.ref || false;
+
+            rows.push({
+              color: bar.color,
+              label: bar.datasetLabel || 'Value',
+              value: isPercent
+                ? `${formatNumber(bar.value, 0)} (${formatNumber(bar.displayValue, 1)}%)`
+                : formatNumber(bar.value, 0),
+              style: isDashed ? 'dashed' : 'solid'
+            });
+
+            // Track first two datasets for YoY calculation
+            if (bar.datasetIndex === 0) currentValue = bar.value;
+            if (bar.datasetIndex === 1) prevValue = bar.value;
+          });
 
           // Add per-bar marker values (e.g. budget per bar)
           const barMarkers = options.barMarkers || [];
@@ -396,7 +411,8 @@ export class BarChart extends Chart {
             rows.push({
               color: marker.color || '#f08c00',
               label: marker.label || 'Target',
-              value: formatNumber(markerValue, 0)
+              value: formatNumber(markerValue, 0),
+              style: 'dashed'
             });
           });
 
@@ -413,13 +429,27 @@ export class BarChart extends Chart {
             rows.push({
               color: ref.color || '#868e96',
               label: ref.label || 'Ref',
-              value: formatNumber(refValue, 0)
+              value: formatNumber(refValue, 0),
+              style: 'dashed'
             });
           });
 
+          // Compute YoY footer if we have current and previous values
+          let footer = null;
+          if (currentValue != null && prevValue != null && prevValue !== 0) {
+            const change = ((currentValue - prevValue) / prevValue) * 100;
+            const isPositive = change >= 0;
+            footer = {
+              label: 'YoY:',
+              value: `${isPositive ? '+' : ''}${change.toFixed(1)}%`,
+              color: isPositive ? '#69db7c' : '#ff8787'
+            };
+          }
+
           this.showTooltip(e, {
             header: group.label,
-            rows
+            rows,
+            footer
           });
         });
 
