@@ -1,0 +1,44 @@
+{
+  "type": "module",
+  "name": "newchartjs",
+  "version": "0.1.0",
+  "description": "A modern, lightweight charting library with SVG and Canvas rendering",
+  "main": "dist/newchartjs.cjs.js",
+  "module": "dist/newchartjs.esm.js",
+  "browser": "dist/newchartjs.umd.js",
+  "types": "dist/newchartjs.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "dev": "rollup -c -w & rollup-plugin-serve --host localhost --port 3000 --historyApiFallback",
+    "serve": "node scripts/serve.js"
+  },
+  "keywords": [
+    "chart",
+    "charting",
+    "visualization",
+    "svg",
+    "canvas",
+    "bar",
+    "pie",
+    "line",
+    "responsive"
+  ],
+  "author": "Nyehandel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nyehandel/newchartjs.git"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.0.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^2.0.2"
+  },
+  "dependencies": {}
+}

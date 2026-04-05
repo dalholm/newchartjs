@@ -1,0 +1,98 @@
+NewChart JS - Project Structure
+================================
+
+ENTRY POINT:
+  package.json          - npm package configuration with scripts and metadata
+  src/index.js          - Main entry point, exports NewChart namespace
+
+CORE MODULES (src/core/):
+  ├── Chart.js          - Base class for all chart types
+  │                      - Config merging, container setup, resize handling
+  │                      - Render lifecycle, animations, tooltips, legends
+  │
+  ├── Renderer.js       - SVG and Canvas rendering implementations
+  │   ├── Renderer      - Base class
+  │   ├── SVGRenderer   - Primary renderer with clean vector graphics
+  │   └── CanvasRenderer - Fallback for large datasets
+  │
+  ├── Animation.js      - Animation engine with easing functions
+  │   - animate()       - Value interpolation with easing
+  │   - springAnimate() - Physics-based spring animations
+  │   - delay()         - Promise-based delays
+  │
+  ├── Tooltip.js        - Interactive tooltip component
+  │   - Follows mouse, shows data on hover
+  │   - Auto-positions to stay in viewport
+  │
+  ├── Legend.js         - Configurable legend component
+  │   - Supports top/bottom/left/right positioning
+  │   - Click handlers for interactivity
+  │
+  ├── utils.js          - Utility functions
+  │   - Color manipulation (parseColor, lighten, darken)
+  │   - Math helpers (lerp, clamp, getMinMax, generateScale)
+  │   - DOM helpers (createElement, getCursorPosition)
+  │   - Deep merge, format numbers, debounce
+  │
+  └── defaults.js       - Default configs and color palettes
+      - DEFAULT_CONFIG  - Base config for all charts
+      - BAR_DEFAULTS    - Bar-specific defaults
+      - PIE_DEFAULTS    - Pie-specific defaults
+      - LINE_DEFAULTS   - Line-specific defaults
+      - COLOR_PALETTE   - 10-color professional palette
+
+CHART IMPLEMENTATIONS (src/charts/):
+  ├── BarChart.js       - Bar chart with grouping/stacking
+  │   - Vertical/horizontal orientation
+  │   - Animated bar drawing
+  │   - Grid lines, axis labels, hover effects
+  │
+  ├── PieChart.js       - Pie/donut chart
+  │   - Animated arc drawing
+  │   - Customizable labels (inside/outside/none)
+  │   - Legend support
+  │
+  └── LineChart.js      - Line chart with multi-series support
+      - Smooth curves (bezier), area fill, data points
+      - Animated line drawing with stroke-dasharray
+      - Grid lines, axis labels, hover tooltips
+
+BUILD OUTPUT (dist/):
+  ├── newchartjs.umd.js   - UMD bundle (26 KB minified)
+  ├── newchartjs.esm.js   - ES modules export
+  ├── newchartjs.cjs.js   - CommonJS export
+  └── *.map files         - Source maps for debugging
+
+DEMO & DOCUMENTATION:
+  ├── demo/index.html     - Interactive demo page
+  │   - 6 example charts (bar, pie, line, multi-line, stacked, donut)
+  │   - Interactive controls to update data
+  │   - Beautiful responsive design
+  │   - Code examples for each chart type
+  │
+  └── README.md           - Complete API documentation
+      - Installation, quick start, configuration
+      - Chart types, methods, easing functions
+      - Browser support, development instructions
+
+BUILD CONFIGURATION:
+  rollup.config.js       - Rollup bundler config
+    - Outputs UMD, ESM, and CJS formats
+    - Includes terser for production minification
+    - Dev server with live reload
+
+VERSION: 0.1.0
+LICENSE: MIT
+AUTHOR: Nyehandel
+DEPENDENCIES: None (vanilla JavaScript)
+
+KEY FEATURES:
+  ✓ SVG rendering with Canvas fallback
+  ✓ Responsive design with ResizeObserver
+  ✓ Smooth animations with multiple easing functions
+  ✓ Interactive tooltips and legends
+  ✓ Three chart types: Bar, Pie, Line
+  ✓ Declarative config-based API
+  ✓ Export to PNG/SVG (SVG renderer)
+  ✓ Zero external dependencies
+  ✓ Production-ready, well-documented code
