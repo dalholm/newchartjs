@@ -211,6 +211,26 @@
   <!-- KPI ROW -->
   <div class="kpi-row" id="kpi-row"></div>
 
+  <!-- GAUGE ROW -->
+  <div class="kpi-row" id="gauge-row">
+    <div class="chart-card animate-in" style="flex:1;min-width:200px;animation-delay:0.2s;">
+      <div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:var(--text-sec);">Budget Achievement</div>
+      <div id="gauge-budget" style="height:180px;padding:0 8px 8px;"></div>
+    </div>
+    <div class="chart-card animate-in" style="flex:1;min-width:200px;animation-delay:0.25s;">
+      <div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:var(--text-sec);">Gross Margin</div>
+      <div id="gauge-margin" style="height:180px;padding:0 8px 8px;"></div>
+    </div>
+    <div class="chart-card animate-in" style="flex:1;min-width:200px;animation-delay:0.3s;">
+      <div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:var(--text-sec);">Order Fulfillment</div>
+      <div id="gauge-fulfill" style="height:180px;padding:0 8px 8px;"></div>
+    </div>
+    <div class="chart-card animate-in" style="flex:1;min-width:200px;animation-delay:0.35s;">
+      <div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:var(--text-sec);">Return Rate</div>
+      <div id="gauge-returns" style="height:180px;padding:0 8px 8px;"></div>
+    </div>
+  </div>
+
   <!-- MAIN CHART CARD -->
   <div class="chart-card">
     <!-- Tab bar -->
@@ -458,6 +478,84 @@ function renderKPIs() {
 
     kpiInstances.push(card);
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GAUGE CHARTS
+   ═══════════════════════════════════════════════════════════════ */
+let gaugeInstances = [];
+
+function renderGauges() {
+  gaugeInstances.forEach(g => g.destroy());
+  gaugeInstances = [];
+
+  const totR26 = REV_26.reduce((s,v)=>s+v,0)*1000;
+  const budgetTarget = BUDGET.reduce((s,v)=>s+v,0)*1000;
+  const budgetPct = (totR26 / budgetTarget * 100);
+
+  const gaugeStyle = {
+    animation: { duration: 800, easing: 'easeOutCubic' },
+    fontFamily: "'Inter',sans-serif",
+    monoFamily: "'JetBrains Mono',monospace",
+    background: '#ffffff',
+    gauge: { needle: false, valueFontSize: 20 }
+  };
+
+  gaugeInstances.push(NewChart.create('#gauge-budget', {
+    type: 'gauge',
+    data: { datasets: [{ label: 'av budget', values: [Math.round(budgetPct)] }] },
+    options: {
+      min: 0, max: 100, ticks: 0, valueSuffix: '%', showMax: false,
+      zones: [
+        { from: 0, to: 0.5, color: '#e03131' },
+        { from: 0.5, to: 0.8, color: '#f08c00' },
+        { from: 0.8, to: 1.0, color: '#0ca678' }
+      ]
+    },
+    style: gaugeStyle
+  }));
+
+  gaugeInstances.push(NewChart.create('#gauge-margin', {
+    type: 'gauge',
+    data: { datasets: [{ label: 'Bruttomarginal', values: [47.2] }] },
+    options: {
+      min: 0, max: 60, target: 45, ticks: 0, valueSuffix: '%', valueDecimals: 1, showMax: false,
+      zones: [
+        { from: 0, to: 0.5, color: '#e03131' },
+        { from: 0.5, to: 0.75, color: '#f08c00' },
+        { from: 0.75, to: 1.0, color: '#0ca678' }
+      ]
+    },
+    style: gaugeStyle
+  }));
+
+  gaugeInstances.push(NewChart.create('#gauge-fulfill', {
+    type: 'gauge',
+    data: { datasets: [{ label: 'Orderfyllnad', values: [94] }] },
+    options: {
+      min: 0, max: 100, ticks: 0, valueSuffix: '%', showMax: false,
+      zones: [
+        { from: 0, to: 0.6, color: '#e03131' },
+        { from: 0.6, to: 0.85, color: '#f08c00' },
+        { from: 0.85, to: 1.0, color: '#0ca678' }
+      ]
+    },
+    style: gaugeStyle
+  }));
+
+  gaugeInstances.push(NewChart.create('#gauge-returns', {
+    type: 'gauge',
+    data: { datasets: [{ label: 'Returandel', values: [3.8] }] },
+    options: {
+      min: 0, max: 10, ticks: 0, valueSuffix: '%', valueDecimals: 1, showMax: false,
+      zones: [
+        { from: 0, to: 0.3, color: '#0ca678' },
+        { from: 0.3, to: 0.6, color: '#f08c00' },
+        { from: 0.6, to: 1.0, color: '#e03131' }
+      ]
+    },
+    style: gaugeStyle
+  }));
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -957,6 +1055,7 @@ function init() {
 
   setupEvents();
   renderKPIs();
+  renderGauges();
   renderBarLegend();
   renderBarChart();
   updateBreadcrumbs();

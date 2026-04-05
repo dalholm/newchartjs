@@ -14,15 +14,39 @@ export class GaugeChart extends Chart {
   }
 
   /**
-   * Calculate gauge geometry
+   * Calculate gauge geometry optimized for semicircular arc
    * @returns {Object} Gauge layout parameters
    */
   calculateLayout() {
     const padding = this.config.options.padding || 20;
+    const hasNeedle = this.config.style.gauge?.needle !== false;
+    const hasTicks = (this.config.options.ticks ?? 5) > 0;
+
+    // Space needed outside the arc for tick marks and labels
+    const tickMargin = hasTicks ? 35 : 8;
+    // Space below center for value text, label, and "av X" sub-label
+    const textBelow = hasNeedle ? 75 : 50;
+
+    // Width constraint: arc diameter + tick labels on each side
+    const maxRW = (this.width - 2 * padding) / 2 - tickMargin;
+
+    // Height constraints for a 270° arc:
+    // - Above center: radius extends to arc top, plus tick margin
+    // - Below center: arc endpoints at 0.707*r, plus text below center
+    // Constraint 1: padding + tickMargin + radius + 0.707*radius ≤ height - padding
+    const rFromArc = (this.height - 2 * padding - tickMargin) / 1.707;
+    // Constraint 2: padding + tickMargin + radius + textBelow ≤ height - padding
+    const rFromText = this.height - 2 * padding - tickMargin - textBelow;
+
+    const radius = Math.max(Math.min(maxRW, rFromArc, rFromText), 60);
+
+    // Position center so the gauge is vertically centered in available space
     const cx = this.width / 2;
-    const cy = this.height * 0.55;
-    const maxRadius = Math.min(this.width, this.height) / 2 - padding - 20;
-    const radius = Math.max(maxRadius, 60);
+    const contentTop = padding + tickMargin + radius;
+    const contentBottom = Math.max(0.707 * radius, textBelow);
+    const totalContent = radius + tickMargin + contentBottom;
+    const cy = padding + tickMargin + radius + (this.height - 2 * padding - totalContent) / 2;
+
     const arcWidth = this.config.style.gauge?.arcWidth || radius * 0.18;
 
     return { cx, cy, radius, arcWidth, padding };
