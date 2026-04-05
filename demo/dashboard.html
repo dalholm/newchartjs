@@ -487,8 +487,9 @@ function renderBarChart() {
   document.getElementById("chart-title").textContent =
     state.metric==="revenue"?"Omsattning":state.metric==="orders"?"Ordrar":"Snittorder";
 
-  // Show/hide chart
-  container.style.display = (show==="chart"||show==="split") ? "block" : "none";
+  // Always show container — Chart base class handles hiding SVG in table-only mode
+  container.style.display = "block";
+  container.style.minHeight = show==="table" ? "0" : "350px";
   // Hide old manual table container (replaced by built-in DataTable)
   tableContainer.style.display = "none";
 
@@ -496,9 +497,8 @@ function renderBarChart() {
   if(barChartInstance) { barChartInstance.destroy(); barChartInstance = null; }
   if(lineChartInstance) { lineChartInstance.destroy(); lineChartInstance = null; }
 
-  if(show==="chart"||show==="split") {
+  {
     container.innerHTML = "";
-    container.style.minHeight = "350px";
 
     // Build datasets based on legend visibility
     const datasets = [];
@@ -628,6 +628,7 @@ function renderBarChart() {
     container.addEventListener("dblclick", handleDrillDown);
   }
 }
+
 
 function handleDrillDown(e) {
   if(state.drillStack.length >= 2) return;

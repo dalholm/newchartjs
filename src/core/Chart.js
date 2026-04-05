@@ -55,7 +55,7 @@ export class Chart {
     this.initRenderer();
 
     // Tooltip, legend, and data table
-    this.tooltip = new Tooltip(this.element, this.config.style.tooltip);
+    this.tooltip = new Tooltip(this.container, this.config.style.tooltip);
     this.legend = null;
     this.dataTable = null;
 
@@ -299,12 +299,11 @@ export class Chart {
 
     const viewMode = tableOpts.viewMode || 'split';
 
-    // Hide chart renderer when table-only mode
-    if (this.renderer) {
-      const rendererEl = this.renderer.svg || this.renderer.canvas;
-      if (rendererEl) {
-        rendererEl.style.display = viewMode === 'table' ? 'none' : '';
-      }
+    // Hide chart renderer and container when table-only mode
+    if (viewMode === 'table') {
+      this.container.style.display = 'none';
+    } else {
+      this.container.style.display = '';
     }
 
     if (!this.dataTable) {
