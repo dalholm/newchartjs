@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — AI Network Ball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4;
+      --primary: #4c6ef5; --active: #4ade80;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); line-height: 1.6; }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; }
+
+    .chart-container { width: 100%; height: 450px; border-radius: 8px; overflow: hidden; }
+
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .btn {
+      padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; color: var(--text); font-family: var(--mono);
+      font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+    }
+    .btn:hover { background: #f0f0f4; border-color: #bbb; }
+    .btn.green { background: rgba(74, 222, 128, 0.08); color: #16a34a; border-color: rgba(74, 222, 128, 0.4); }
+    .btn.green:hover { background: rgba(74, 222, 128, 0.18); }
+    .btn.active { background: var(--active); color: #fff; border-color: var(--active); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+    .chart-sm { height: 300px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; Back to gallery</a>
+
+  <div class="page-header">
+    <h1>AI Network Ball</h1>
+    <p>A 3D rotating sphere of nodes. Push events to send cursors hopping between nodes —
+      they light up connections and show AI activity labels. Multiple cursors run in parallel.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. Interactive -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Interactive</h2>
+        <p>Push events to spawn cursors. Each one travels its own path through the network.</p>
+      </div>
+      <div class="example-body">
+        <div id="ball1" class="chart-container"></div>
+        <div class="controls">
+          <button class="btn green" onclick="ball1.pushEvent()">Push Event</button>
+          <button class="btn green" onclick="ball1.burst(3, 200)">Burst (3x)</button>
+          <button class="btn" id="autoBtn" onclick="toggleAuto()">Start Auto</button>
+          <button class="btn" onclick="ball1.pushEvent({ label: 'analyzing data...' })">Custom Label</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Variants -->
+    <div class="grid-2">
+      <!-- Dense -->
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Dense (80 nodes)</h2>
+          <p>More nodes, tighter connections.</p>
+        </div>
+        <div class="example-body">
+          <div id="ball2" class="chart-container chart-sm"></div>
+        </div>
+      </div>
+
+      <!-- Dark -->
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Dark Mode</h2>
+          <p>Dark background with bright green pulses.</p>
+        </div>
+        <div class="example-body">
+          <div id="ball3" class="chart-container chart-sm" style="background:#0a0e1a; border-radius:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Compact -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Compact — Loading Indicator</h2>
+        <p>Small inline sphere for status messages.</p>
+      </div>
+      <div class="example-body" style="display:flex; align-items:center; gap:24px;">
+        <div id="ball4" style="width:120px; height:120px;"></div>
+        <div>
+          <div style="font-size:13px; font-weight:600; margin-bottom:4px;">AI is analyzing your data...</div>
+          <div style="font-size:11px; color:var(--text-muted);">Processing 12,847 records across 3 data sources</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. API -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>API Reference</h2>
+      </div>
+      <div class="example-body">
+        <pre style="background:#f8f9fb; padding:16px; border-radius:6px; font-family:var(--mono); font-size:12px; line-height:1.7; color:var(--text-sec); overflow-x:auto;">
+<span style="color:#8993a4;">// Create a 3D network ball</span>
+<span style="color:#172b4d;">const ball = NewChart.create('#el', {</span>
+<span style="color:#172b4d;">  type: 'networkball',</span>
+<span style="color:#172b4d;">  data: { nodeCount: 40 }</span>
+<span style="color:#172b4d;">});</span>
+
+<span style="color:#8993a4;">// Push event — spawns a cursor</span>
+<span style="color:#172b4d;">ball.pushEvent();</span>
+<span style="color:#172b4d;">ball.pushEvent({ label: 'thinking...' });</span>
+
+<span style="color:#8993a4;">// Multiple events run in parallel</span>
+<span style="color:#172b4d;">ball.burst(3, 200);</span>
+
+<span style="color:#8993a4;">// Continuous auto-events</span>
+<span style="color:#172b4d;">ball.startAutoEvents(1500);</span>
+<span style="color:#172b4d;">ball.stopAutoEvents();</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+  // 1. Interactive
+  const ball1 = NewChart.create('#ball1', {
+    type: 'networkball',
+    data: { nodeCount: 40 }
+  });
+  window.ball1 = ball1;
+
+  let autoRunning = false;
+  window.toggleAuto = function() {
+    const btn = document.getElementById('autoBtn');
+    if (autoRunning) {
+      ball1.stopAutoEvents();
+      btn.textContent = 'Start Auto';
+      btn.classList.remove('active');
+    } else {
+      ball1.startAutoEvents(1500);
+      btn.textContent = 'Stop Auto';
+      btn.classList.add('active');
+    }
+    autoRunning = !autoRunning;
+  };
+
+  // 2. Dense
+  const ball2 = NewChart.create('#ball2', {
+    type: 'networkball',
+    data: { nodeCount: 80 },
+    style: {
+      networkball: {
+        connectionDistance: 0.6,
+        nodeRadius: 2.5,
+        rotationSpeed: 0.2,
+        travelerMaxHops: 7
+      }
+    }
+  });
+  ball2.startAutoEvents(1200);
+
+  // 3. Dark
+  const ball3 = NewChart.create('#ball3', {
+    type: 'networkball',
+    data: { nodeCount: 50 },
+    style: {
+      background: '#0a0e1a',
+      networkball: {
+        nodeColor: '#3a4a7a',
+        activeColor: '#4ade80',
+        connectionOpacity: 0.06,
+        glowRadius: 18,
+        rotationSpeed: 0.4
+      }
+    }
+  });
+  ball3.startAutoEvents(1400);
+
+  // 4. Compact
+  const ball4 = NewChart.create('#ball4', {
+    type: 'networkball',
+    data: { nodeCount: 20 },
+    style: {
+      networkball: {
+        nodeRadius: 2.5,
+        sphereScale: 0.7,
+        travelerSpeed: 1.8,
+        travelerMaxHops: 4,
+        labelFontSize: 0,
+        rotationSpeed: 0.5
+      }
+    }
+  });
+  ball4.startAutoEvents(800);
+</script>
+</body>
+</html>

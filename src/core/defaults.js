@@ -73,6 +73,7 @@ export const DEFAULT_CONFIG = {
       enabled: true
     },
     padding: 20,
+    theme: 'light', // 'light', 'dark', or 'auto' (follows prefers-color-scheme)
     renderer: 'auto', // 'svg', 'canvas', or 'auto'
     cssTokens: true // Enable CSS custom property theming (--nc-*)
   }
@@ -326,6 +327,171 @@ export const SCATTER_DEFAULTS = {
       y: { enabled: true, label: '' }
     },
     sizeLabel: 'Size'
+  }
+};
+
+/**
+ * Dark theme style overrides
+ * Applied when options.theme is 'dark' or 'auto' (with prefers-color-scheme: dark)
+ */
+export const DARK_STYLE = {
+  background: '#1a1d23',
+  fontColor: '#e0e2e7',
+  grid: {
+    color: '#2d3139'
+  },
+  axis: {
+    color: '#e0e2e7'
+  },
+  tooltip: {
+    background: '#2d3139',
+    color: '#e8eaed',
+    border: '1px solid #3d4350',
+    shadow: '0 10px 15px -3px rgba(0, 0, 0, 0.4)'
+  },
+  legend: {
+    color: '#e0e2e7'
+  },
+  line: {
+    pointBorderColor: '#1a1d23'
+  },
+  pie: {
+    borderColor: '#1a1d23'
+  },
+  scatter: {
+    pointBorderColor: '#1a1d23'
+  },
+  gauge: {
+    trackColor: '#2d3139'
+  }
+};
+
+/**
+ * Dark palette — slightly brighter/saturated for dark backgrounds
+ */
+const DARK_PALETTE = [
+  '#5c7cfa', // Primary blue (brighter)
+  '#20c997', // Success green (brighter)
+  '#fcc419', // Warning yellow (brighter)
+  '#ff6b6b', // Danger red (brighter)
+  '#9775fa', // Purple (brighter)
+  '#22b8cf', // Teal (brighter)
+  '#f06595', // Pink (brighter)
+  '#748ffc', // Light blue (brighter)
+  '#38d9a9', // Mint (brighter)
+  '#ffe066'  // Yellow (brighter)
+];
+
+/**
+ * Dark theme colors for KPI cards
+ */
+export const DARK_KPI_COLORS = {
+  up: '#20c997',
+  upBg: 'rgba(32, 201, 151, 0.15)',
+  down: '#ff6b6b',
+  downBg: 'rgba(255, 107, 107, 0.15)',
+  good: '#20c997',
+  warning: '#fcc419',
+  danger: '#ff6b6b',
+  label: '#8993a4',
+  value: '#e0e2e7',
+  previous: '#6b7280',
+  border: '#2d3139',
+  borderActive: '#5c7cfa',
+  surface: '#1a1d23',
+  progressTrack: '#2d3139'
+};
+
+/**
+ * Dark theme colors for Legend component
+ */
+export const DARK_LEGEND_COLORS = {
+  color: '#e0e2e7',
+  border: '#2d3139',
+  borderDisabled: '#252830',
+  background: '#1a1d23',
+  backgroundDisabled: '#1e2028',
+  textDisabled: '#6b7280'
+};
+
+/**
+ * Dark theme colors for DataTable component
+ */
+export const DARK_TABLE_COLORS = {
+  border: '#2d3139',
+  headerBg: '#1e2028',
+  headerColor: '#8993a4',
+  headerBorder: '#3d4350',
+  rowEven: '#1a1d23',
+  rowOdd: '#1e2028',
+  rowBorder: '#2d3139',
+  rowHover: 'rgba(92, 124, 250, 0.1)',
+  cellLabel: '#e0e2e7',
+  cellValue: '#a1a7b3'
+};
+
+/**
+ * Detect whether dark mode should be active
+ * @param {string} theme - 'light', 'dark', or 'auto'
+ * @returns {boolean} True if dark mode should be used
+ */
+export function isDarkMode(theme) {
+  if (theme === 'dark') return true;
+  if (theme === 'light' || !theme) return false;
+  // 'auto': check system preference
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  return false;
+}
+
+/**
+ * Get the dark palette
+ * @returns {string[]} Dark-mode optimized palette
+ */
+export function getDarkPalette() {
+  return DARK_PALETTE;
+}
+
+/**
+ * Default configuration for NetworkBall charts
+ */
+export const NETWORKBALL_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'networkball',
+  data: {
+    nodeCount: 40,
+    datasets: []
+  },
+  style: {
+    ...DEFAULT_CONFIG.style,
+    background: '#ffffff',
+    animation: { duration: 0 },
+    networkball: {
+      nodeCount: 40,
+      nodeRadius: 3.5,
+      nodeColor: '#8b97b5',
+      nodeOpacity: 0.5,
+      connectionOpacity: 0.1,
+      connectionWidth: 0.8,
+      connectionDistance: 0.8,
+      activeColor: '#4ade80',
+      glowRadius: 14,
+      sphereScale: 0.75,
+      rotationSpeed: 0.3,
+      energyDecay: 1.5,
+      labelFontSize: 10,
+      travelerSpeed: 1.2,
+      travelerMaxHops: 5
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    responsive: true,
+    legend: { enabled: false },
+    tooltip: { enabled: false },
+    renderer: 'canvas',
+    cssTokens: false
   }
 };
 

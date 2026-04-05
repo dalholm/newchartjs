@@ -11,9 +11,10 @@ import GaugeChart from './charts/GaugeChart.js';
 import SparklineChart from './charts/SparklineChart.js';
 import ComboChart from './charts/ComboChart.js';
 import ScatterChart from './charts/ScatterChart.js';
+import NetworkBallChart from './charts/NetworkBallChart.js';
 import { KPICard, createKPICard } from './core/KPICard.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
-import { COMPARE_COLOR, COLOR_PALETTE } from './core/defaults.js';
+import { COMPARE_COLOR, COLOR_PALETTE, DARK_STYLE, DARK_KPI_COLORS, isDarkMode, getDarkPalette } from './core/defaults.js';
 import DataTable from './core/DataTable.js';
 
 /**
@@ -69,6 +70,9 @@ const NewChart = {
       case 'bubble':
         ChartClass = ScatterChart;
         break;
+      case 'networkball':
+        ChartClass = NetworkBallChart;
+        break;
       default:
         throw new Error(`Unknown chart type: ${chartType}`);
     }
@@ -92,6 +96,7 @@ const NewChart = {
   SparklineChart,
   ComboChart,
   ScatterChart,
+  NetworkBallChart,
 
   /**
    * KPI Card component
@@ -120,7 +125,29 @@ const NewChart = {
   /**
    * Default color palette
    */
-  PALETTE: COLOR_PALETTE
+  PALETTE: COLOR_PALETTE,
+
+  /**
+   * Dark palette (brighter for dark backgrounds)
+   */
+  DARK_PALETTE: getDarkPalette(),
+
+  /**
+   * Dark theme style overrides
+   */
+  DARK_STYLE,
+
+  /**
+   * Dark theme KPI card colors
+   */
+  DARK_KPI_COLORS,
+
+  /**
+   * Check if dark mode is active for a given theme value
+   * @param {string} theme - 'light', 'dark', or 'auto'
+   * @returns {boolean}
+   */
+  isDarkMode
 };
 
 // DataTable not in the object literal above — attach here
