@@ -356,8 +356,10 @@ export class LineChart extends Chart {
             if (currentValue != null && prevValue != null && prevValue !== 0) {
               const change = ((currentValue - prevValue) / prevValue) * 100;
               const isPositive = change >= 0;
+              const ds0Label = rows[0]?.label || '';
+              const ds1Label = rows[1]?.label || '';
               footer = {
-                label: 'YoY:',
+                label: options.tooltipChangeLabel || `${ds0Label} vs ${ds1Label}:`,
                 value: `${isPositive ? '+' : ''}${change.toFixed(1)}%`,
                 color: isPositive ? '#69db7c' : '#ff8787'
               };

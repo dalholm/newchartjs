@@ -434,13 +434,16 @@ export class BarChart extends Chart {
             });
           });
 
-          // Compute YoY footer if we have current and previous values
+          // Compute change footer if we have two comparable datasets
           let footer = null;
           if (currentValue != null && prevValue != null && prevValue !== 0) {
             const change = ((currentValue - prevValue) / prevValue) * 100;
             const isPositive = change >= 0;
+            // Use configured label, or derive from dataset labels
+            const footerLabel = options.tooltipChangeLabel
+              || `${group.bars[0]?.datasetLabel || ''} vs ${group.bars[1]?.datasetLabel || ''}:`;
             footer = {
-              label: 'YoY:',
+              label: footerLabel,
               value: `${isPositive ? '+' : ''}${change.toFixed(1)}%`,
               color: isPositive ? '#69db7c' : '#ff8787'
             };
