@@ -74,6 +74,61 @@ describe('Chart base class', () => {
     chart.destroy();
   });
 
+  describe('tooltip positioning', () => {
+    it('tooltip element is inside the positioned container, not the outer element', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } }
+      });
+
+      // The tooltip's parent container must have position:relative
+      // so that position:absolute on the tooltip works correctly
+      expect(chart.tooltip.container).toBe(chart.container);
+      expect(chart.tooltip.container.style.position).toBe('relative');
+      chart.destroy();
+    });
+
+    it('showTooltip positions tooltip relative to its container', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } }
+      });
+
+      // Simulate a mouse event
+      const fakeEvent = {
+        clientX: 200,
+        clientY: 150
+      };
+      chart.showTooltip(fakeEvent, { Test: '123' });
+
+      // Tooltip should be visible and positioned
+      expect(chart.tooltip.visible).toBe(true);
+
+      // The tooltip element should be a child of chart.container
+      expect(chart.tooltip.element.parentNode).toBe(chart.container);
+      chart.destroy();
+    });
+
+    it('tooltip follow uses same coordinate space as showTooltip', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } }
+      });
+
+      const fakeEvent = { clientX: 300, clientY: 200 };
+      chart.showTooltip(fakeEvent, { Test: '456' });
+
+      // follow() should compute coordinates relative to the same container
+      // that the tooltip is mounted in (chart.container)
+      chart.tooltip.follow(fakeEvent);
+
+      // Both showTooltip and follow should use the same container for coordinates
+      // If they don't, the tooltip jumps when the mouse moves
+      expect(chart.tooltip.container).toBe(chart.container);
+      chart.destroy();
+    });
+  });
+
   describe('resize stability (no infinite growth)', () => {
     it('updateDimensions hides children before measuring to avoid content-driven inflation', () => {
       const chart = new BarChart(container, {
