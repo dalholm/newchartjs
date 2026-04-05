@@ -1,6 +1,7 @@
 /**
  * Gauge Chart implementation
  * Circular gauge with threshold zones, center value display, and optional target marker
+ * Supports variants: arc (default), ring, linear, compact
  */
 
 import Chart from '../core/Chart.js';
@@ -101,9 +102,31 @@ export class GaugeChart extends Chart {
   }
 
   /**
-   * Render gauge chart
+   * Dispatch render to variant-specific method
    */
   render() {
+    const variant = this.config.options.variant || 'arc';
+
+    switch (variant) {
+      case 'ring':
+        this.renderRing();
+        break;
+      case 'linear':
+        this.renderLinear();
+        break;
+      case 'compact':
+        this.renderCompact();
+        break;
+      default:
+        this.renderArc();
+        break;
+    }
+  }
+
+  /**
+   * Render classic semicircular arc gauge (default)
+   */
+  renderArc() {
     const { style, data, options } = this.config;
     const { cx, cy, radius, arcWidth } = this.calculateLayout();
 
@@ -293,6 +316,313 @@ export class GaugeChart extends Chart {
   }
 
   /**
+   * Render ring gauge — full 360° donut with center value
+   */
+  renderRing() {
+    const { style, data, options } = this.config;
+    const padding = this.config.options.padding || 20;
+
+    const dataset = data.datasets[0];
+    if (!dataset) return;
+
+    const value = dataset.values?.[0] ?? 0;
+    const min = options.min ?? 0;
+    const max = options.max ?? 100;
+    const ratio = Math.max(0, Math.min(1, (value - min) / (max - min)));
+
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+    const maxRadius = Math.min(this.width, this.height) / 2 - padding;
+    const ringWidth = style.gauge?.arcWidth || Math.max(maxRadius * 0.2, 8);
+    const outerR = maxRadius;
+    const innerR = outerR - ringWidth;
+
+    const zones = options.zones || style.gauge?.zones || [
+      { from: 0, to: 0.6, color: '#e03131' },
+      { from: 0.6, to: 0.85, color: '#f08c00' },
+      { from: 0.85, to: 1.0, color: '#0ca678' }
+    ];
+
+    const trackColor = style.gauge?.trackColor || '#f1f3f5';
+    const startAngle = -Math.PI / 2;
+    const sweep = Math.PI * 2;
+
+    // Background track — full circle
+    this.renderer.path(
+      this.arcPath(cx, cy, outerR, innerR, startAngle, startAngle + sweep - 0.001),
+      { fill: trackColor }
+    );
+
+    // Filled arc with zone colors
+    if (ratio > 0) {
+      zones.forEach(zone => {
+        const zoneStart = startAngle + zone.from * sweep;
+        const zoneEnd = startAngle + Math.min(zone.to, 1) * sweep;
+        const valueEnd = startAngle + ratio * sweep;
+        const drawEnd = Math.min(zoneEnd, valueEnd);
+
+        if (drawEnd > zoneStart) {
+          this.renderer.path(
+            this.arcPath(cx, cy, outerR, innerR, zoneStart, drawEnd),
+            { fill: zone.color }
+          );
+        }
+      });
+    }
+
+    // Center value
+    const valueColor = this.getValueColor(value, min, max, zones);
+    this.renderer.text(
+      this.formatValue(value),
+      cx, cy - 4,
+      {
+        fill: valueColor,
+        fontSize: style.gauge?.valueFontSize || 28,
+        fontFamily: style.monoFamily || style.fontFamily,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle'
+      }
+    );
+
+    // Label
+    const label = dataset.label || data.labels?.[0] || '';
+    if (label) {
+      this.renderer.text(label, cx, cy + 18, {
+        fill: '#8993a4',
+        fontSize: 11,
+        fontFamily: style.fontFamily,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle'
+      });
+    }
+
+    this._gaugeValue = value;
+  }
+
+  /**
+   * Render linear gauge — horizontal progress bar with zones
+   */
+  renderLinear() {
+    const { style, data, options } = this.config;
+    const padding = this.config.options.padding || 20;
+
+    const dataset = data.datasets[0];
+    if (!dataset) return;
+
+    const value = dataset.values?.[0] ?? 0;
+    const min = options.min ?? 0;
+    const max = options.max ?? 100;
+    const ratio = Math.max(0, Math.min(1, (value - min) / (max - min)));
+    const target = options.target;
+
+    const zones = options.zones || style.gauge?.zones || [
+      { from: 0, to: 0.6, color: '#e03131' },
+      { from: 0.6, to: 0.85, color: '#f08c00' },
+      { from: 0.85, to: 1.0, color: '#0ca678' }
+    ];
+
+    const trackColor = style.gauge?.trackColor || '#f1f3f5';
+    const barHeight = style.gauge?.arcWidth || 16;
+    const borderRadius = barHeight / 2;
+
+    // Layout: value text on top, bar in center, labels below
+    const barX = padding;
+    const barWidth = this.width - 2 * padding;
+    const barY = this.height / 2 - barHeight / 2 + 10;
+
+    // Background track
+    this.renderer.rect(barX, barY, barWidth, barHeight, {
+      fill: trackColor,
+      borderRadius
+    });
+
+    // Filled zones up to current value
+    if (ratio > 0) {
+      const fillWidth = barWidth * ratio;
+
+      // Clip zones to filled width using individual rects
+      zones.forEach(zone => {
+        const zoneStartX = barX + zone.from * barWidth;
+        const zoneEndX = barX + Math.min(zone.to, 1) * barWidth;
+        const drawEndX = Math.min(zoneEndX, barX + fillWidth);
+
+        if (drawEndX > zoneStartX) {
+          const zoneWidth = drawEndX - zoneStartX;
+          // Apply border radius only on edges
+          const isFirst = zone.from === 0;
+          const isLast = drawEndX >= barX + fillWidth - 0.5;
+
+          this.renderer.rect(zoneStartX, barY, zoneWidth, barHeight, {
+            fill: zone.color,
+            borderRadius: isFirst && isLast ? borderRadius
+              : isFirst ? `${borderRadius}px 0 0 ${borderRadius}px`
+              : isLast ? `0 ${borderRadius}px ${borderRadius}px 0`
+              : 0
+          });
+        }
+      });
+    }
+
+    // Target marker
+    if (target != null) {
+      const targetRatio = Math.max(0, Math.min(1, (target - min) / (max - min)));
+      const targetX = barX + targetRatio * barWidth;
+      this.renderer.line(
+        targetX, barY - 4,
+        targetX, barY + barHeight + 4,
+        {
+          stroke: options.targetColor || '#1a1d23',
+          strokeWidth: 2,
+          strokeLinecap: 'round'
+        }
+      );
+      // Target label below bar
+      this.renderer.text(
+        options.targetLabel || formatNumber(target, 0),
+        targetX, barY + barHeight + 18,
+        {
+          fill: '#5e6c84',
+          fontSize: 9,
+          fontFamily: style.fontFamily,
+          textAnchor: 'middle',
+          dominantBaseline: 'middle'
+        }
+      );
+    }
+
+    // Value text above bar
+    const valueColor = this.getValueColor(value, min, max, zones);
+    this.renderer.text(
+      this.formatValue(value),
+      this.width / 2, barY - 18,
+      {
+        fill: valueColor,
+        fontSize: style.gauge?.valueFontSize || 24,
+        fontFamily: style.monoFamily || style.fontFamily,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle'
+      }
+    );
+
+    // Label
+    const label = dataset.label || data.labels?.[0] || '';
+    if (label) {
+      this.renderer.text(label, this.width / 2, barY - 38, {
+        fill: '#8993a4',
+        fontSize: 11,
+        fontFamily: style.fontFamily,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle'
+      });
+    }
+
+    // Min/max labels
+    this.renderer.text(formatNumber(min, 0), barX, barY + barHeight + 14, {
+      fill: '#b3bac5',
+      fontSize: 9,
+      fontFamily: style.fontFamily,
+      textAnchor: 'start',
+      dominantBaseline: 'middle'
+    });
+    this.renderer.text(formatNumber(max, 0), barX + barWidth, barY + barHeight + 14, {
+      fill: '#b3bac5',
+      fontSize: 9,
+      fontFamily: style.fontFamily,
+      textAnchor: 'end',
+      dominantBaseline: 'middle'
+    });
+
+    this._gaugeValue = value;
+  }
+
+  /**
+   * Render compact gauge — minimal semicircular arc, no needle/ticks
+   */
+  renderCompact() {
+    const { style, data, options } = this.config;
+    const padding = this.config.options.padding || 16;
+
+    const dataset = data.datasets[0];
+    if (!dataset) return;
+
+    const value = dataset.values?.[0] ?? 0;
+    const min = options.min ?? 0;
+    const max = options.max ?? 100;
+
+    const zones = options.zones || style.gauge?.zones || [
+      { from: 0, to: 0.6, color: '#e03131' },
+      { from: 0.6, to: 0.85, color: '#f08c00' },
+      { from: 0.85, to: 1.0, color: '#0ca678' }
+    ];
+
+    const trackColor = style.gauge?.trackColor || '#f1f3f5';
+
+    // Arc geometry — 180 degree sweep (semicircle)
+    const startAngle = Math.PI;
+    const sweep = Math.PI;
+
+    const cx = this.width / 2;
+    // Fit semicircle: radius constrained by width and height
+    const maxRadiusW = (this.width - 2 * padding) / 2;
+    const maxRadiusH = this.height - 2 * padding - 40; // leave room for text below
+    const radius = Math.max(Math.min(maxRadiusW, maxRadiusH), 30);
+    const arcWidth = style.gauge?.arcWidth || Math.max(radius * 0.25, 10);
+    const cy = padding + radius + 4;
+
+    const outerR = radius;
+    const innerR = radius - arcWidth;
+
+    // Background track
+    this.renderer.path(
+      this.arcPath(cx, cy, outerR, innerR, startAngle, startAngle + sweep),
+      { fill: trackColor }
+    );
+
+    // Filled arc with zone colors
+    const valueAngle = this.valueToAngle(value, min, max, startAngle, sweep);
+    zones.forEach(zone => {
+      const zoneStart = startAngle + zone.from * sweep;
+      const zoneEnd = startAngle + Math.min(zone.to, 1) * sweep;
+      const drawEnd = Math.min(zoneEnd, valueAngle);
+
+      if (drawEnd > zoneStart) {
+        this.renderer.path(
+          this.arcPath(cx, cy, outerR, innerR, zoneStart, drawEnd),
+          { fill: zone.color }
+        );
+      }
+    });
+
+    // Value text centered below arc
+    const valueColor = this.getValueColor(value, min, max, zones);
+    this.renderer.text(
+      this.formatValue(value),
+      cx, cy + 8,
+      {
+        fill: valueColor,
+        fontSize: style.gauge?.valueFontSize || 24,
+        fontFamily: style.monoFamily || style.fontFamily,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle'
+      }
+    );
+
+    // Label
+    const label = dataset.label || data.labels?.[0] || '';
+    if (label) {
+      this.renderer.text(label, cx, cy + 28, {
+        fill: '#8993a4',
+        fontSize: 11,
+        fontFamily: style.fontFamily,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle'
+      });
+    }
+
+    this._gaugeValue = value;
+  }
+
+  /**
    * Get color based on value position within zones
    * @param {number} value - Current value
    * @param {number} min - Min value
@@ -323,7 +653,7 @@ export class GaugeChart extends Chart {
   }
 
   /**
-   * Animate gauge needle sweep
+   * Animate gauge value sweep
    */
   animate() {
     const duration = this.config.style.animation?.duration || 800;

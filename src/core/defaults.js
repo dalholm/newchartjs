@@ -220,6 +220,7 @@ export const GAUGE_DEFAULTS = {
   options: {
     ...DEFAULT_CONFIG.options,
     legend: { enabled: false },
+    variant: 'arc', // 'arc', 'ring', 'linear', 'compact'
     min: 0,
     max: 100,
     target: null,

@@ -114,6 +114,90 @@
         <div class="chart-container wide" id="chart-custom"></div>
       </div>
     </div>
+
+    <!-- 5. Ring variant -->
+    <div class="row">
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Ring — CPU Usage</h2>
+          <p><code>variant: 'ring'</code> — Full 360° donut, clean and minimal</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container compact" id="ring-cpu"></div>
+        </div>
+      </div>
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Ring — Disk Usage</h2>
+          <p>Inverted zones (high = red)</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container compact" id="ring-disk"></div>
+        </div>
+      </div>
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Ring — Score</h2>
+          <p>Thick ring with custom arc width</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container compact" id="ring-score"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Linear variant -->
+    <div class="row">
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Linear — Budget Utilization</h2>
+          <p><code>variant: 'linear'</code> — Horizontal bar gauge with target</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container wide" style="min-height: 120px;" id="linear-budget"></div>
+        </div>
+      </div>
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Linear — Storage</h2>
+          <p>Inverted zones, no target</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container wide" style="min-height: 120px;" id="linear-storage"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Compact variant -->
+    <div class="row">
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Compact — Battery Level</h2>
+          <p><code>variant: 'compact'</code> — Minimal semicircle, no needle or ticks</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container compact" style="min-height: 160px;" id="compact-battery"></div>
+        </div>
+      </div>
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Compact — Quality Score</h2>
+          <p>Simple half-circle with value</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container compact" style="min-height: 160px;" id="compact-quality"></div>
+        </div>
+      </div>
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Compact — Completion</h2>
+          <p>Single color zone</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container compact" style="min-height: 160px;" id="compact-completion"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -235,6 +319,7 @@ NewChart.create('#gauge-returns', {
 });
 
 // 6. Custom format
+// (numbering continues from original demo)
 NewChart.create('#chart-custom', {
   type: 'gauge',
   data: {
@@ -250,6 +335,84 @@ NewChart.create('#chart-custom', {
       { from: 0.85, to: 1.0, color: '#0ca678' }
     ]
   }
+});
+
+// ── Ring variants ──
+NewChart.create('#ring-cpu', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'CPU', values: [67] }] },
+  options: { variant: 'ring', min: 0, max: 100, valueSuffix: '%' },
+  style: { gauge: { valueFontSize: 24 } }
+});
+
+NewChart.create('#ring-disk', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Disk Usage', values: [84] }] },
+  options: {
+    variant: 'ring', min: 0, max: 100, valueSuffix: '%',
+    zones: [
+      { from: 0, to: 0.6, color: '#0ca678' },
+      { from: 0.6, to: 0.85, color: '#f08c00' },
+      { from: 0.85, to: 1.0, color: '#e03131' }
+    ]
+  },
+  style: { gauge: { valueFontSize: 24 } }
+});
+
+NewChart.create('#ring-score', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Score', values: [92] }] },
+  options: { variant: 'ring', min: 0, max: 100 },
+  style: { gauge: { arcWidth: 20, valueFontSize: 28 } }
+});
+
+// ── Linear variants ──
+NewChart.create('#linear-budget', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Budget Utilization', values: [72] }] },
+  options: {
+    variant: 'linear', min: 0, max: 100, target: 85,
+    valueSuffix: '%', targetLabel: 'Target: 85%'
+  }
+});
+
+NewChart.create('#linear-storage', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Storage Used', values: [7.2] }] },
+  options: {
+    variant: 'linear', min: 0, max: 10,
+    valueSuffix: ' GB', valueDecimals: 1,
+    zones: [
+      { from: 0, to: 0.6, color: '#0ca678' },
+      { from: 0.6, to: 0.85, color: '#f08c00' },
+      { from: 0.85, to: 1.0, color: '#e03131' }
+    ]
+  }
+});
+
+// ── Compact variants ──
+NewChart.create('#compact-battery', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Battery', values: [43] }] },
+  options: { variant: 'compact', min: 0, max: 100, valueSuffix: '%' },
+  style: { gauge: { valueFontSize: 22 } }
+});
+
+NewChart.create('#compact-quality', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Quality Score', values: [88] }] },
+  options: { variant: 'compact', min: 0, max: 100 },
+  style: { gauge: { valueFontSize: 22 } }
+});
+
+NewChart.create('#compact-completion', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Completion', values: [65] }] },
+  options: {
+    variant: 'compact', min: 0, max: 100, valueSuffix: '%',
+    zones: [{ from: 0, to: 1.0, color: '#4c6ef5' }]
+  },
+  style: { gauge: { valueFontSize: 22 } }
 });
 </script>
 </body>
