@@ -538,49 +538,84 @@ function renderBarChart() {
       datasets.push({
         label: state.drillStack.length===0 ? "2025" : "Foregaende",
         values: data.map(d => d.prev || 0),
-        color: COMPARE_COLOR
-      });
-    }
-    if(state.legendVis.budget && state.drillStack.length===0 && state.metric==="revenue") {
-      datasets.push({
-        label: "Budget",
-        values: BUDGET,
-        color: "#f08c00"
+        color: COMPARE_COLOR,
+        dash: true,
+        dashPattern: "5 3"
       });
     }
 
     const labels = data.map(d => d.label);
 
+    // Build reference lines
+    const referenceLines = [];
+    if(state.legendVis.average) {
+      referenceLines.push({
+        value: "average",
+        label: "Snitt",
+        color: "#868e96",
+        dash: "4 3",
+        strokeWidth: 1
+      });
+    }
+    if(state.legendVis.budget && state.drillStack.length===0 && state.metric==="revenue") {
+      const budgetAvg = Math.round(BUDGET.reduce((s,v)=>s+v,0)/BUDGET.length);
+      referenceLines.push({
+        value: budgetAvg,
+        label: "Budget",
+        color: "#f08c00",
+        dash: "6 4",
+        strokeWidth: 1.5,
+        labelPosition: "right",
+        labelBackground: "#ffec99"
+      });
+    }
+
+    // Build per-bar markers (budget line per bar)
+    const barMarkers = [];
+    if(state.legendVis.budget && state.drillStack.length===0 && state.metric==="revenue") {
+      barMarkers.push({
+        values: BUDGET,
+        color: "#f08c00",
+        strokeWidth: 2
+      });
+    }
+
+    const sharedStyle = {
+      animation: { duration:600, easing:"easeOutCubic" },
+      fontFamily: "'Inter',sans-serif",
+      monoFamily: "'JetBrains Mono',monospace",
+      grid: { color:"#ebecf0", width:1 },
+      axis: { color:"#8993a4", fontSize:11 },
+      background: "#ffffff",
+      tooltip: { background:"#1a1d23", color:"#e8eaed", borderRadius:6, fontSize:11, padding:10 }
+    };
+
     if(state.chartType === "bar") {
       barChartInstance = NewChart.create("#bar-chart-container", {
         type: "bar",
         data: { labels, datasets },
-        style: {
-          bar: { borderRadius:4, gap:0.15 },
-          animation: { duration:600, easing:"easeOutCubic" },
-          fontFamily: "'Inter',sans-serif",
-          grid: { color:"#ebecf0", width:1 },
-          axis: { color:"#8993a4", fontSize:11 },
-          background: "#ffffff",
-          tooltip: { background:"#1a1d23", color:"#e8eaed", borderRadius:6, fontSize:11, padding:10 }
-        },
-        options: { responsive:true, legend:{ enabled:false }, padding:20 }
+        style: { ...sharedStyle, bar: { borderRadius:4, gap:0.15 } },
+        options: {
+          responsive:true,
+          legend:{ enabled:false },
+          padding:20,
+          referenceLines: referenceLines,
+          barMarkers: barMarkers
+        }
       });
     } else {
       lineChartInstance = NewChart.create("#bar-chart-container", {
         type: "line",
         data: { labels, datasets },
-        style: {
-          line: { width:2.5, tension:0.3, pointRadius:5, pointBorderWidth:2, pointBorderColor:"#ffffff" },
-          animation: { duration:600, easing:"easeOutCubic" },
-          fontFamily: "'Inter',sans-serif",
-          grid: { color:"#ebecf0", width:1 },
-          axis: { color:"#8993a4", fontSize:11 },
-          background: "#ffffff",
-          tooltip: { background:"#1a1d23", color:"#e8eaed", borderRadius:6, fontSize:11, padding:10 }
-        },
-        options: { responsive:true, smooth:true, showPoints:true, fill: state.legendVis.current,
-          legend:{ enabled:false }, padding:20 }
+        style: { ...sharedStyle, line: { width:2.5, tension:0.3, pointRadius:5, pointBorderWidth:2.5, pointBorderColor:"#ffffff" } },
+        options: {
+          responsive:true,
+          smooth:true,
+          showPoints:true,
+          fill: state.legendVis.current,
+          legend:{ enabled:false },
+          padding:20
+        }
       });
     }
 
@@ -759,14 +794,19 @@ function renderDonutChart() {
         pie: { innerRadius:50, borderWidth:2, borderColor:"#ffffff" },
         animation: { duration:600, easing:"easeOutCubic" },
         fontFamily: "'Inter',sans-serif",
+        monoFamily: "'JetBrains Mono',monospace",
+        fontColor: "#172b4d",
         background: "#ffffff",
         tooltip: { background:"#1a1d23", color:"#e8eaed", borderRadius:6, fontSize:11, padding:10 }
       },
       options: {
         responsive:true,
         legend:{ enabled:false },
-        labels:{ enabled:true, position:"outside", format:"percent" },
-        padding:10
+        labels:{ enabled:false },
+        padding:10,
+        onClick: function(info) {
+          console.log("Donut slice clicked:", info.label, info.value, info.percent.toFixed(1)+"%");
+        }
       }
     });
   }
