@@ -48,14 +48,19 @@ export class LineChart extends Chart {
    */
   calculateScales() {
     const layout = this.calculateLayout();
-    const { data, options } = this.config;
+    const { data } = this.config;
+
+    // Filter datasets by legend visibility
+    const visibleDatasets = data.datasets.filter((ds, i) => this.isDatasetVisible(ds, i));
 
     let allValues = [];
-    data.datasets.forEach(ds => {
+    visibleDatasets.forEach(ds => {
       if (ds.values) {
         allValues = allValues.concat(ds.values);
       }
     });
+
+    if (allValues.length === 0) allValues = [0];
 
     const { min: minValue, max: maxValue } = getMinMax(allValues);
     const valueRange = maxValue - minValue || 1;
@@ -66,6 +71,7 @@ export class LineChart extends Chart {
 
     return {
       layout,
+      visibleDatasets,
       minValue,
       maxValue,
       valueRange,
@@ -102,19 +108,55 @@ export class LineChart extends Chart {
   }
 
   /**
+   * Create SVG gradient definition for area fill
+   * @param {string} color - Base color
+   * @param {string} id - Gradient ID
+   */
+  _createGradientDef(color, id) {
+    if (!this.renderer.svg) return null;
+
+    // Check if defs element exists, create if not
+    let defs = this.renderer.svg.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      this.renderer.svg.insertBefore(defs, this.renderer.svg.firstChild);
+    }
+
+    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    gradient.setAttribute('id', id);
+    gradient.setAttribute('x1', '0');
+    gradient.setAttribute('y1', '0');
+    gradient.setAttribute('x2', '0');
+    gradient.setAttribute('y2', '1');
+
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', color);
+    stop1.setAttribute('stop-opacity', '0.12');
+
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', color);
+    stop2.setAttribute('stop-opacity', '0.01');
+
+    gradient.appendChild(stop1);
+    gradient.appendChild(stop2);
+    defs.appendChild(gradient);
+
+    return `url(#${id})`;
+  }
+
+  /**
    * Render line chart
    */
   render() {
     const { style, data, options } = this.config;
     const scales = this.calculateScales();
-    const { layout, minValue, maxValue, valueRange, scale, numPoints, pointSpacing } = scales;
+    const { layout, visibleDatasets, minValue, maxValue, valueRange, scale, numPoints, pointSpacing } = scales;
 
     const { chartX, chartY, chartWidth, chartHeight, hasXAxis, hasYAxis } = layout;
 
-    // Helper to convert data value to Y coordinate
     const valueToY = (value) => chartY + chartHeight - ((value - minValue) / valueRange) * chartHeight;
-
-    // Helper to convert X index to X coordinate
     const indexToX = (index) => chartX + index * pointSpacing;
 
     // Draw grid
@@ -156,14 +198,17 @@ export class LineChart extends Chart {
 
     // Draw lines and points
     this.lines = [];
+    this._allPoints = [];
+    this._crosshairLine = null;
 
-    data.datasets.forEach((dataset, datasetIndex) => {
+    visibleDatasets.forEach((dataset, datasetIndex) => {
       if (!dataset.values) return;
 
       const color = dataset.color || this.getPaletteColor(datasetIndex);
-      const lineWidth = style.line?.width || 2;
+      const lineWidth = dataset.strokeWidth || style.line?.width || 2;
       const tension = options.smooth ? (style.line?.tension || 0.4) : 0;
       const pointRadius = options.showPoints ? (style.line?.pointRadius || 4) : 0;
+      const isDashed = dataset.dash || false;
 
       // Prepare points
       const points = dataset.values.map((value, index) => [
@@ -171,19 +216,36 @@ export class LineChart extends Chart {
         valueToY(value)
       ]);
 
-      // Draw area fill if enabled
-      if (options.fill) {
-        const areaPoints = [
-          ...points,
-          [indexToX(points.length - 1), chartY + chartHeight],
-          [indexToX(0), chartY + chartHeight]
-        ];
+      // Draw area fill with gradient if enabled
+      if (options.fill && !isDashed) {
+        const gradientId = `area-grad-${datasetIndex}`;
+        const gradientFill = this._createGradientDef(color, gradientId);
 
-        const areaPath = this.getBezierPath(areaPoints, tension);
-        this.renderer.path(areaPath, {
-          fill: color,
-          opacity: 0.1
-        });
+        if (gradientFill) {
+          // Build closed area path
+          const linePath = this.getBezierPath(points, tension);
+          const lastX = points[points.length - 1][0];
+          const firstX = points[0][0];
+          const baseline = chartY + chartHeight;
+          const areaD = `${linePath} L ${lastX},${baseline} L ${firstX},${baseline} Z`;
+
+          this.renderer.path(areaD, {
+            fill: gradientFill,
+            opacity: 1
+          });
+        } else {
+          // Canvas fallback — simple opacity fill
+          const areaPoints = [
+            ...points,
+            [indexToX(points.length - 1), chartY + chartHeight],
+            [indexToX(0), chartY + chartHeight]
+          ];
+          const areaPath = this.getBezierPath(areaPoints, tension);
+          this.renderer.path(areaPath, {
+            fill: color,
+            opacity: 0.1
+          });
+        }
       }
 
       // Draw line
@@ -197,35 +259,33 @@ export class LineChart extends Chart {
       const lineElement = this.renderer.path(linePath, {
         stroke: color,
         strokeWidth: lineWidth,
-        opacity: 0.85
+        strokeDasharray: isDashed ? (dataset.dashPattern || '5 3') : undefined,
+        opacity: 1
       });
 
-      // Draw points
+      // Draw points (hidden initially for crosshair interaction)
       const pointElements = [];
       points.forEach((point, pointIndex) => {
-        const pointEl = this.renderer.circle(point[0], point[1], pointRadius, {
-          fill: color,
-          stroke: style.line?.pointBorderColor || '#ffffff',
-          strokeWidth: style.line?.pointBorderWidth || 2,
-          opacity: 0.85
-        });
-
-        if (pointEl) {
-          pointEl.style.cursor = 'pointer';
-          this.addElementListener(pointEl, 'mouseenter', (e) => {
-            pointEl.setAttribute('opacity', '1');
-            this.showTooltip(e, {
-              [dataset.label || 'Value']: formatNumber(dataset.values[pointIndex], 2),
-              [data.labels?.[pointIndex] || `Point ${pointIndex}`]: ''
-            });
+        if (pointRadius > 0) {
+          const pointEl = this.renderer.circle(point[0], point[1], pointRadius, {
+            fill: color,
+            stroke: style.line?.pointBorderColor || '#ffffff',
+            strokeWidth: style.line?.pointBorderWidth || 2,
+            opacity: 0 // hidden by default, shown on crosshair hover
           });
 
-          this.addElementListener(pointEl, 'mouseleave', () => {
-            pointEl.setAttribute('opacity', '0.85');
+          pointElements.push(pointEl);
+          this._allPoints.push({
+            element: pointEl,
+            x: point[0],
+            y: point[1],
+            value: dataset.values[pointIndex],
+            labelIndex: pointIndex,
+            datasetIndex,
+            color,
+            datasetLabel: dataset.label
           });
         }
-
-        pointElements.push(pointEl);
       });
 
       this.lines.push({
@@ -236,6 +296,68 @@ export class LineChart extends Chart {
         datasetLabel: dataset.label
       });
     });
+
+    // Create crosshair line (hidden)
+    this._crosshairLine = this.renderer.line(0, chartY, 0, chartY + chartHeight, {
+      stroke: '#dfe1e6',
+      strokeWidth: 1,
+      strokeDasharray: '3 3',
+      opacity: 0
+    });
+
+    // Invisible hit areas for each x-position (crosshair columns)
+    if (numPoints > 0) {
+      const colWidth = pointSpacing > 0 ? pointSpacing : chartWidth;
+      for (let i = 0; i < numPoints; i++) {
+        const cx = indexToX(i);
+        const hitX = cx - colWidth / 2;
+
+        const hitbox = this.renderer.rect(hitX, chartY, colWidth, chartHeight, {
+          fill: 'transparent',
+          opacity: 0
+        });
+
+        if (hitbox) {
+          hitbox.style.cursor = 'crosshair';
+
+          this.addElementListener(hitbox, 'mouseenter', (e) => {
+            // Show crosshair
+            if (this._crosshairLine) {
+              this._crosshairLine.setAttribute('x1', cx);
+              this._crosshairLine.setAttribute('x2', cx);
+              this._crosshairLine.setAttribute('opacity', '1');
+            }
+
+            // Show points at this index
+            const tooltipData = {};
+            this._allPoints.forEach(pt => {
+              if (pt.labelIndex === i) {
+                if (pt.element) {
+                  pt.element.setAttribute('opacity', '1');
+                }
+                tooltipData[pt.datasetLabel || 'Value'] = formatNumber(pt.value, 0);
+              }
+            });
+
+            this.showTooltip(e, tooltipData);
+          });
+
+          this.addElementListener(hitbox, 'mouseleave', () => {
+            // Hide crosshair
+            if (this._crosshairLine) {
+              this._crosshairLine.setAttribute('opacity', '0');
+            }
+
+            // Hide all points
+            this._allPoints.forEach(pt => {
+              if (pt.element) {
+                pt.element.setAttribute('opacity', '0');
+              }
+            });
+          });
+        }
+      }
+    }
 
     // Draw X axis labels
     if (hasXAxis) {
