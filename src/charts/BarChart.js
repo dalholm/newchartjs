@@ -454,22 +454,75 @@ export class BarChart extends Chart {
             rows,
             footer
           });
+
+          // Fire onHover callback
+          if (typeof options.onHover === 'function') {
+            options.onHover(group.labelIndex, group.label);
+          }
         });
 
         this.addElementListener(hitbox, 'mouseleave', () => {
-          group.highlight.setAttribute('opacity', '0');
+          this._clearColumnHighlight();
 
-          // Restore all bars
-          bars_.forEach(bar => {
-            if (!bar.element) return;
-            bar.element.setAttribute('opacity', '1');
-            bar.element.style.filter = '';
-          });
+          // Fire onHoverEnd callback
+          if (typeof options.onHoverEnd === 'function') {
+            options.onHoverEnd();
+          }
         });
       }
     });
 
+    // Store group data for programmatic highlight
+    this._barGroups = barGroupData;
     this.bars = bars_;
+  }
+
+  /**
+   * Programmatically highlight a column by label index
+   * @param {number} index - Label index to highlight
+   */
+  highlightColumn(index) {
+    if (!this._barGroups || !this.bars) return;
+    const group = this._barGroups[index];
+    if (!group) return;
+
+    group.highlight.setAttribute('opacity', '0.03');
+
+    this.bars.forEach(bar => {
+      if (!bar.element) return;
+      if (bar.labelIndex === index) {
+        bar.element.setAttribute('opacity', '1');
+        bar.element.style.filter = 'brightness(1.08)';
+      } else {
+        bar.element.setAttribute('opacity', '0.3');
+        bar.element.style.filter = '';
+      }
+    });
+  }
+
+  /**
+   * Clear all column highlights
+   */
+  clearHighlight() {
+    this._clearColumnHighlight();
+  }
+
+  /**
+   * Internal: reset all bars and highlights to default state
+   */
+  _clearColumnHighlight() {
+    if (this._barGroups) {
+      this._barGroups.forEach(g => {
+        g.highlight.setAttribute('opacity', '0');
+      });
+    }
+    if (this.bars) {
+      this.bars.forEach(bar => {
+        if (!bar.element) return;
+        bar.element.setAttribute('opacity', '1');
+        bar.element.style.filter = '';
+      });
+    }
   }
 
   /**

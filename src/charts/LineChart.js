@@ -370,20 +370,18 @@ export class LineChart extends Chart {
               rows,
               footer
             });
+
+            if (typeof options.onHover === 'function') {
+              options.onHover(i, data.labels?.[i] || '');
+            }
           });
 
           this.addElementListener(hitbox, 'mouseleave', () => {
-            // Hide crosshair
-            if (this._crosshairLine) {
-              this._crosshairLine.setAttribute('opacity', '0');
-            }
+            this._clearPointHighlight();
 
-            // Hide all points
-            this._allPoints.forEach(pt => {
-              if (pt.element) {
-                pt.element.setAttribute('opacity', '0');
-              }
-            });
+            if (typeof options.onHoverEnd === 'function') {
+              options.onHoverEnd();
+            }
           });
         }
       }
@@ -399,6 +397,52 @@ export class LineChart extends Chart {
           textAnchor: 'middle',
           dominantBaseline: 'top'
         });
+      });
+    }
+  }
+
+  /**
+   * Programmatically highlight a data point column by index
+   * @param {number} index - Label index to highlight
+   */
+  highlightColumn(index) {
+    if (!this._allPoints || !this._crosshairLine) return;
+
+    const { data } = this.config;
+    const scales = this.calculateScales();
+    const { pointSpacing, layout } = scales;
+    const cx = layout.chartX + index * pointSpacing;
+
+    this._crosshairLine.setAttribute('x1', cx);
+    this._crosshairLine.setAttribute('x2', cx);
+    this._crosshairLine.setAttribute('opacity', '1');
+
+    this._allPoints.forEach(pt => {
+      if (pt.element) {
+        pt.element.setAttribute('opacity', pt.labelIndex === index ? '1' : '0');
+      }
+    });
+  }
+
+  /**
+   * Clear all highlights
+   */
+  clearHighlight() {
+    this._clearPointHighlight();
+  }
+
+  /**
+   * Internal: reset crosshair and points
+   */
+  _clearPointHighlight() {
+    if (this._crosshairLine) {
+      this._crosshairLine.setAttribute('opacity', '0');
+    }
+    if (this._allPoints) {
+      this._allPoints.forEach(pt => {
+        if (pt.element) {
+          pt.element.setAttribute('opacity', '0');
+        }
       });
     }
   }

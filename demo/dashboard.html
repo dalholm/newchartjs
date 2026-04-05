@@ -177,7 +177,10 @@
     @media (max-width: 768px) {
       .dashboard { padding:12px; }
       .kpi-row { flex-direction:column; }
-      .kpi { min-width:100%; }
+      .kpi { min-width:100%; flex-basis:auto; }
+      .kpi-value { font-size:18px; }
+      .kpi-value-row { flex-wrap:wrap; }
+      .kpi-footer { flex-wrap:wrap; gap:6px; }
       .donut-layout { flex-direction:column; }
       .donut-chart-wrap { width:100%; display:flex; justify-content:center; }
     }
@@ -590,6 +593,18 @@ function renderBarChart() {
       tooltip: { background:"#1a1d23", color:"#e8eaed", borderRadius:6, fontSize:11, padding:10 }
     };
 
+    // Shared hover callbacks for chart ↔ table sync
+    const onHover = (index) => {
+      const rows = tableContainer.querySelectorAll("tr[data-row]");
+      rows.forEach((r,i) => {
+        r.classList.toggle("hovered", i===index);
+      });
+    };
+    const onHoverEnd = () => {
+      const rows = tableContainer.querySelectorAll("tr[data-row]");
+      rows.forEach(r => r.classList.remove("hovered"));
+    };
+
     if(state.chartType === "bar") {
       barChartInstance = NewChart.create("#bar-chart-container", {
         type: "bar",
@@ -600,7 +615,9 @@ function renderBarChart() {
           legend:{ enabled:false },
           padding:20,
           referenceLines: referenceLines,
-          barMarkers: barMarkers
+          barMarkers: barMarkers,
+          onHover: onHover,
+          onHoverEnd: onHoverEnd
         }
       });
     } else {
@@ -614,7 +631,9 @@ function renderBarChart() {
           showPoints:true,
           fill: state.legendVis.current,
           legend:{ enabled:false },
-          padding:20
+          padding:20,
+          onHover: onHover,
+          onHoverEnd: onHoverEnd
         }
       });
     }
@@ -677,7 +696,7 @@ function renderBarTable(data, isSEK, mult, container) {
       ? '<span class="status-dot '+statusDotClass(d.value,d.budget)+'"></span>'
       : '<span style="color:'+(chg>=0?"var(--success)":"var(--danger)")+'">&#9679;</span>';
 
-    html += '<tr>' +
+    html += '<tr data-row="'+i+'">' +
       '<td class="label-cell">'+d.label+'</td>' +
       '<td class="right mono">'+valStr+'</td>' +
       '<td class="right mono">'+prevStr+'</td>' +
@@ -689,6 +708,24 @@ function renderBarTable(data, isSEK, mult, container) {
 
   html += '</tbody></table>';
   container.innerHTML = html;
+
+  // Table → chart hover sync
+  container.querySelectorAll("tr[data-row]").forEach(tr => {
+    tr.addEventListener("mouseenter", () => {
+      const idx = parseInt(tr.dataset.row);
+      const chart = barChartInstance || lineChartInstance;
+      if(chart && chart.highlightColumn) chart.highlightColumn(idx);
+      // Highlight this row, unhighlight others
+      container.querySelectorAll("tr[data-row]").forEach((r,i) => {
+        r.classList.toggle("hovered", i===idx);
+      });
+    });
+    tr.addEventListener("mouseleave", () => {
+      const chart = barChartInstance || lineChartInstance;
+      if(chart && chart.clearHighlight) chart.clearHighlight();
+      container.querySelectorAll("tr[data-row]").forEach(r => r.classList.remove("hovered"));
+    });
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════════
