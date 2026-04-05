@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6; --border-light: #ebecf0;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4; --text-faint: #b3bac5;
+      --primary: #4c6ef5; --primary-dk: #3b5bdb; --primary-lt: #edf2ff;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 20px 18px; }
+
+    /* Docs-specific */
+    .example-body h3 { font-size: 13px; font-weight: 600; margin: 20px 0 8px; color: var(--text); }
+    .example-body h3:first-child { margin-top: 0; }
+    .example-body p { font-size: 13px; line-height: 1.65; color: var(--text-sec); margin-bottom: 10px; }
+    .example-body ul { margin: 0 0 12px 18px; font-size: 13px; color: var(--text-sec); line-height: 1.65; }
+    .example-body li { margin-bottom: 4px; }
+    .example-body code { font-family: var(--mono); font-size: 11px; background: #f4f5f7; padding: 1px 5px; border-radius: 3px; color: var(--primary-dk); }
+    .example-body pre { background: #1a1d23; color: #e8eaed; padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 14px; font-family: var(--mono); font-size: 11px; line-height: 1.65; }
+    .example-body pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+    .example-body table { width: 100%; border-collapse: collapse; margin: 0 0 14px; font-size: 12px; }
+    .example-body th { text-align: left; padding: 7px 10px; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 2px solid var(--border); background: #f8f9fb; white-space: nowrap; }
+    .example-body td { padding: 6px 10px; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--text-sec); }
+    .example-body td:first-child { font-family: var(--mono); font-size: 11px; color: var(--text); white-space: nowrap; }
+    .example-body hr { border: none; border-top: 1px solid var(--border-light); margin: 20px 0; }
+
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .row > .example-card { flex: 1; min-width: 400px; }
+
+    .palette-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .palette-swatch { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px; }
+    .palette-swatch span { font-size: 8px; font-family: var(--mono); color: #fff; opacity: 0.85; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; All demos</a>
+  <div class="page-header">
+    <h1>Documentation</h1>
+    <p>Components, styling, theming, and API reference for NewChart JS.</p>
+  </div>
+
+  <div class="examples">
+
+    <!-- ============================================================ -->
+    <!-- GETTING STARTED -->
+    <!-- ============================================================ -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Getting Started</h2>
+        <p>Installation, basic usage, and config structure</p>
+      </div>
+      <div class="example-body">
+        <h3>Include the library</h3>
+<pre><code>&lt;script src="dist/newchart.min.js"&gt;&lt;/script&gt;</code></pre>
+
+        <h3>Create a chart</h3>
+<pre><code>const chart = NewChart.create('#my-chart', {
+  type: 'bar',
+  data: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+    datasets: [{
+      label: 'Revenue',
+      values: [12000, 19000, 15000, 22000]
+    }]
+  }
+});</code></pre>
+        <p>The container element must have a defined <code>width</code> and <code>height</code> (CSS or inline). Minimum rendered size is 300&times;300 px.</p>
+
+        <h3>Config structure</h3>
+        <table>
+          <thead><tr><th>Key</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>type</td><td>Chart type: <code>bar</code>, <code>line</code>, <code>area</code>, <code>pie</code>, <code>gauge</code>, <code>sparkline</code></td></tr>
+            <tr><td>data</td><td><code>{ labels: [...], datasets: [{ label, values, color }] }</code></td></tr>
+            <tr><td>style</td><td>Visual appearance &mdash; colors, fonts, sizes, animation</td></tr>
+            <tr><td>options</td><td>Behavioral settings &mdash; legend, tooltip, axes, stacking</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Update &amp; destroy</h3>
+<pre><code>// Reactive partial update
+chart.update({ data: { datasets: [{ values: [15000, 21000, 18000, 25000] }] } });
+
+// Clean up
+chart.destroy();</code></pre>
+
+        <h3>Renderer</h3>
+        <p>SVG by default. Switches to Canvas automatically when data exceeds 5 000 points. Force with <code>options.renderer: 'canvas'</code> or <code>'svg'</code>.</p>
+
+        <h3>Export</h3>
+<pre><code>const pngUrl = await chart.toPNG();   // Promise&lt;string&gt; data URL
+const svgStr  = chart.toSVG();        // SVG markup string</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CHART TYPES -->
+    <!-- ============================================================ -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Chart Types</h2>
+        <p>All six chart types and their specific options</p>
+      </div>
+      <div class="example-body">
+
+        <h3>BarChart</h3>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>options.stacked</td><td>false</td><td><code>true</code>, <code>'percent'</code>, or <code>false</code></td></tr>
+            <tr><td>options.orientation</td><td>'vertical'</td><td><code>'vertical'</code> or <code>'horizontal'</code></td></tr>
+            <tr><td>options.referenceLines</td><td>[]</td><td>Horizontal reference lines with label, color, dash</td></tr>
+            <tr><td>options.barMarkers</td><td>[]</td><td>Per-bar marker lines (e.g. budget per category)</td></tr>
+            <tr><td>style.bar.borderRadius</td><td>4</td><td>Corner radius of bars</td></tr>
+            <tr><td>style.bar.gap</td><td>0.2</td><td>Gap between bars (fraction of bar width)</td></tr>
+            <tr><td>style.bar.groupGap</td><td>0.5</td><td>Gap between groups</td></tr>
+          </tbody>
+        </table>
+        <p>Compare series: set <code>dash: true, ref: true</code> on a dataset for dashed bars and "(ref)" in the legend.</p>
+
+        <hr>
+
+        <h3>LineChart</h3>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>options.smooth</td><td>true</td><td>Bezier curve smoothing</td></tr>
+            <tr><td>options.fill</td><td>false</td><td>Gradient area fill under line</td></tr>
+            <tr><td>options.showPoints</td><td>true</td><td>Show data points on crosshair hover</td></tr>
+            <tr><td>style.line.width</td><td>2</td><td>Line stroke width</td></tr>
+            <tr><td>style.line.tension</td><td>0.4</td><td>Bezier tension (0 = straight)</td></tr>
+            <tr><td>style.line.pointRadius</td><td>4</td><td>Data point radius</td></tr>
+            <tr><td>style.line.pointBorderWidth</td><td>2</td><td>Point border width</td></tr>
+            <tr><td>style.line.pointBorderColor</td><td>'#ffffff'</td><td>Point border color</td></tr>
+          </tbody>
+        </table>
+        <p>Dashed lines: set <code>dash: true</code> (optional <code>dashPattern: '5 3'</code>) on a dataset.</p>
+
+        <hr>
+
+        <h3>AreaChart</h3>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>options.stacked</td><td>false</td><td>Stack areas on top of each other</td></tr>
+            <tr><td>options.smooth</td><td>true</td><td>Bezier curve smoothing</td></tr>
+            <tr><td>style.area.fillOpacity</td><td>0.25</td><td>Gradient top opacity (0&ndash;1)</td></tr>
+          </tbody>
+        </table>
+        <p>Also inherits all <code>style.line.*</code> properties for the area outline.</p>
+
+        <hr>
+
+        <h3>PieChart</h3>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>style.pie.innerRadius</td><td>0</td><td>0 = pie, &gt;0 = donut</td></tr>
+            <tr><td>style.pie.borderWidth</td><td>2</td><td>Border between slices</td></tr>
+            <tr><td>style.pie.borderColor</td><td>'#ffffff'</td><td>Slice border color</td></tr>
+            <tr><td>options.labels.position</td><td>'outside'</td><td><code>'inside'</code>, <code>'outside'</code>, <code>'none'</code></td></tr>
+            <tr><td>options.labels.format</td><td>'percent'</td><td><code>'percent'</code>, <code>'value'</code>, <code>'label'</code></td></tr>
+            <tr><td>options.onClick</td><td>null</td><td>Click handler: <code>({ index, label, value, percent, event })</code></td></tr>
+          </tbody>
+        </table>
+        <p>Per-slice colors: <code>datasets: [{ values: [...], colors: ['#f00', '#0f0', '#00f'] }]</code></p>
+        <p>Donut center text shows total by default, switches to hovered slice on hover.</p>
+
+        <hr>
+
+        <h3>GaugeChart</h3>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>options.min / max</td><td>0 / 100</td><td>Scale range</td></tr>
+            <tr><td>options.target</td><td>null</td><td>Target marker value</td></tr>
+            <tr><td>options.ticks</td><td>5</td><td>Number of tick marks</td></tr>
+            <tr><td>options.valueSuffix</td><td>''</td><td>e.g. <code>'%'</code>, <code>' kr'</code></td></tr>
+            <tr><td>options.valuePrefix</td><td>''</td><td>e.g. <code>'$'</code></td></tr>
+            <tr><td>options.formatValue</td><td>null</td><td>Custom formatter <code>(value) =&gt; string</code></td></tr>
+            <tr><td>style.gauge.arcWidth</td><td>auto</td><td>Arc width (auto-calculated from radius)</td></tr>
+            <tr><td>style.gauge.trackColor</td><td>'#f1f3f5'</td><td>Background track color</td></tr>
+            <tr><td>style.gauge.needle</td><td>true</td><td>Show/hide needle</td></tr>
+            <tr><td>style.gauge.zones</td><td>[red, orange, green]</td><td>Threshold zones (see below)</td></tr>
+          </tbody>
+        </table>
+<pre><code>style: { gauge: { zones: [
+  { from: 0,    to: 0.6,  color: '#e03131' },  // Red: 0-60%
+  { from: 0.6,  to: 0.85, color: '#f08c00' },  // Orange: 60-85%
+  { from: 0.85, to: 1.0,  color: '#0ca678' }   // Green: 85-100%
+] } }</code></pre>
+
+        <hr>
+
+        <h3>SparklineChart</h3>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>options.variant</td><td>'line'</td><td><code>'line'</code>, <code>'area'</code>, or <code>'bar'</code></td></tr>
+            <tr><td>options.highlightLast</td><td>true</td><td>Dot on last data point</td></tr>
+            <tr><td>options.referenceLine</td><td>null</td><td>Horizontal reference line value</td></tr>
+            <tr><td>style.sparkline.color</td><td>'#4c6ef5'</td><td>Line/bar color</td></tr>
+            <tr><td>style.sparkline.lineWidth</td><td>1.5</td><td>Line stroke width</td></tr>
+            <tr><td>style.sparkline.negativeColor</td><td>'#e03131'</td><td>Color for negative bars</td></tr>
+          </tbody>
+        </table>
+        <p>No axes, legend, or tooltip. Adapts to container size. Recommended: 64&times;22 (KPI card), 80&times;20 (table cell), 120&times;32 (widget).</p>
+
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- KPI CARD -->
+    <!-- ============================================================ -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>KPICard</h2>
+        <p>Standalone KPI card with value, change badge, sparkline, progress bar, and status indicator</p>
+      </div>
+      <div class="example-body">
+<pre><code>const card = NewChart.kpiCard('#card', {
+  label: 'Revenue',
+  value: 38920000,
+  previous: 32410000,
+  suffix: ' kr',
+  target: 42000000,
+  sparkline: {
+    values: [2850, 3120, 2960, 3400, 3100, 3800, 3550],
+    variant: 'area',
+    color: '#4c6ef5'
+  },
+  onClick: ({ config }) =&gt; console.log(config.label)
+});</code></pre>
+
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>label</td><td>''</td><td>Card title (rendered uppercase)</td></tr>
+            <tr><td>value</td><td>0</td><td>Main value</td></tr>
+            <tr><td>previous</td><td>null</td><td>Previous period value (shows change badge)</td></tr>
+            <tr><td>target</td><td>null</td><td>Target value (shows progress bar + status dot)</td></tr>
+            <tr><td>suffix / prefix</td><td>''</td><td>Value suffix/prefix, e.g. <code>' kr'</code>, <code>'$'</code></td></tr>
+            <tr><td>decimals</td><td>0</td><td>Decimal places</td></tr>
+            <tr><td>formatValue</td><td>auto</td><td>Custom formatter <code>(n) =&gt; string</code></td></tr>
+            <tr><td>active</td><td>false</td><td>Active state (blue border + glow)</td></tr>
+            <tr><td>onClick</td><td>null</td><td>Click handler</td></tr>
+            <tr><td>thresholds.good</td><td>1.0</td><td>Ratio &ge; this = green</td></tr>
+            <tr><td>thresholds.warning</td><td>0.9</td><td>Ratio &ge; this = orange, below = red</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Sparkline config (nested)</h3>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>sparkline.values</td><td>required</td><td>Data values array</td></tr>
+            <tr><td>sparkline.variant</td><td>'area'</td><td><code>'line'</code>, <code>'area'</code>, or <code>'bar'</code></td></tr>
+            <tr><td>sparkline.color</td><td>inherit</td><td>Sparkline color</td></tr>
+            <tr><td>sparkline.width / height</td><td>64 / 22</td><td>Container size in px</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Colors</h3>
+        <p>All 15 KPI card colors are configurable via <code>colors: { ... }</code>:</p>
+        <p><code>up</code>, <code>upBg</code>, <code>down</code>, <code>downBg</code>, <code>good</code>, <code>warning</code>, <code>danger</code>, <code>label</code>, <code>value</code>, <code>previous</code>, <code>border</code>, <code>borderActive</code>, <code>surface</code>, <code>progressTrack</code></p>
+
+        <h3>Methods</h3>
+<pre><code>card.update({ value: 41500000 });   // Partial update + re-render
+card.setActive(true);               // Toggle active state
+card.destroy();                     // Clean up</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- DATA TABLE -->
+    <!-- ============================================================ -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>DataTable</h2>
+        <p>Auto-generated data table with bidirectional hover sync</p>
+      </div>
+      <div class="example-body">
+<pre><code>NewChart.create('#chart', {
+  type: 'bar',
+  data: { ... },
+  options: {
+    table: {
+      enabled: true,
+      viewMode: 'split',   // 'chart' | 'table' | 'split'
+      maxHeight: 200
+    }
+  }
+});</code></pre>
+        <table>
+          <thead><tr><th>View mode</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>'chart'</td><td>Chart only, table hidden</td></tr>
+            <tr><td>'table'</td><td>Table only, chart hidden</td></tr>
+            <tr><td>'split'</td><td>Chart on top, scrollable table below</td></tr>
+          </tbody>
+        </table>
+        <p>Hover sync is automatic: hovering a table row highlights the chart, and vice versa.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- STYLING & THEMING -->
+    <!-- ============================================================ -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Styling &amp; Theming</h2>
+        <p>Three-layer system: Defaults &lt; JS config &lt; CSS custom properties</p>
+      </div>
+      <div class="example-body">
+
+        <h3>Priority</h3>
+        <table>
+          <thead><tr><th>Layer</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>CSS tokens (--nc-*)</td><td>Highest priority. Overrides everything.</td></tr>
+            <tr><td>JS config (style.*)</td><td>Passed to <code>create()</code> or <code>update()</code>.</td></tr>
+            <tr><td>Built-in defaults</td><td>Sensible out-of-the-box values.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Global style properties</h3>
+        <table>
+          <thead><tr><th>Property</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>style.background</td><td>'#ffffff'</td><td>Chart background</td></tr>
+            <tr><td>style.fontFamily</td><td>Inter, system</td><td>Primary font</td></tr>
+            <tr><td>style.monoFamily</td><td>JetBrains Mono, system</td><td>Monospace font (values, tooltips)</td></tr>
+            <tr><td>style.fontSize</td><td>12</td><td>Base font size (px)</td></tr>
+            <tr><td>style.fontColor</td><td>'#374151'</td><td>Base text color</td></tr>
+            <tr><td>style.grid.color</td><td>'#E5E7EB'</td><td>Grid line color</td></tr>
+            <tr><td>style.grid.width</td><td>1</td><td>Grid line width</td></tr>
+            <tr><td>style.axis.color</td><td>'#374151'</td><td>Axis line/label color</td></tr>
+            <tr><td>style.axis.fontSize</td><td>12</td><td>Axis label font size</td></tr>
+            <tr><td>style.animation.duration</td><td>600</td><td>Animation duration (ms). 0 = disabled.</td></tr>
+            <tr><td>style.animation.easing</td><td>'easeOutCubic'</td><td>Easing function (13 available)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Animation easings</h3>
+        <p><code>linear</code>, <code>easeInQuad</code>, <code>easeOutQuad</code>, <code>easeInOutQuad</code>, <code>easeInCubic</code>, <code>easeOutCubic</code>, <code>easeInOutCubic</code>, <code>easeInQuart</code>, <code>easeOutQuart</code>, <code>easeInOutQuart</code>, <code>easeInQuint</code>, <code>easeOutQuint</code>, <code>easeInOutQuint</code></p>
+
+        <hr>
+
+        <h3>Color palette</h3>
+        <div class="palette-grid">
+          <div class="palette-swatch" style="background:#4c6ef5"><span>0</span></div>
+          <div class="palette-swatch" style="background:#0ca678"><span>1</span></div>
+          <div class="palette-swatch" style="background:#f08c00"><span>2</span></div>
+          <div class="palette-swatch" style="background:#e03131"><span>3</span></div>
+          <div class="palette-swatch" style="background:#7048e8"><span>4</span></div>
+          <div class="palette-swatch" style="background:#1098ad"><span>5</span></div>
+          <div class="palette-swatch" style="background:#d6336c"><span>6</span></div>
+          <div class="palette-swatch" style="background:#5c7cfa"><span>7</span></div>
+          <div class="palette-swatch" style="background:#20c997"><span>8</span></div>
+          <div class="palette-swatch" style="background:#fcc419; color:#333"><span>9</span></div>
+        </div>
+        <p>Compare/previous-period color: <code>#b3bac5</code> (available as <code>NewChart.COMPARE_COLOR</code>)</p>
+
+        <h3>Override colors</h3>
+<pre><code>// Per dataset
+datasets: [{ label: 'A', values: [...], color: '#ff6b6b' }]
+
+// Per slice (PieChart)
+datasets: [{ values: [...], colors: ['#ff6b6b', '#51cf66', '#339af0'] }]
+
+// Entire palette via JS
+{ palette: ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'] }
+
+// Entire palette via CSS
+.my-chart {
+  --nc-palette-1: #264653;
+  --nc-palette-2: #2a9d8f;
+  --nc-palette-3: #e9c46a;
+}</code></pre>
+
+        <hr>
+
+        <h3>CSS Custom Properties (--nc-*)</h3>
+        <p>Theme charts from CSS without touching JavaScript. Works with classes, media queries, and <code>:root</code>.</p>
+        <table>
+          <thead><tr><th>Token</th><th>Maps to</th></tr></thead>
+          <tbody>
+            <tr><td>--nc-background</td><td>style.background</td></tr>
+            <tr><td>--nc-font-family</td><td>style.fontFamily</td></tr>
+            <tr><td>--nc-font-size</td><td>style.fontSize</td></tr>
+            <tr><td>--nc-font-color</td><td>style.fontColor</td></tr>
+            <tr><td>--nc-grid-color</td><td>style.grid.color</td></tr>
+            <tr><td>--nc-grid-width</td><td>style.grid.width</td></tr>
+            <tr><td>--nc-axis-color</td><td>style.axis.color</td></tr>
+            <tr><td>--nc-axis-width</td><td>style.axis.width</td></tr>
+            <tr><td>--nc-axis-font-size</td><td>style.axis.fontSize</td></tr>
+            <tr><td>--nc-animation-duration</td><td>style.animation.duration</td></tr>
+            <tr><td>--nc-tooltip-background</td><td>style.tooltip.background</td></tr>
+            <tr><td>--nc-tooltip-color</td><td>style.tooltip.color</td></tr>
+            <tr><td>--nc-tooltip-font-size</td><td>style.tooltip.fontSize</td></tr>
+            <tr><td>--nc-tooltip-padding</td><td>style.tooltip.padding</td></tr>
+            <tr><td>--nc-tooltip-border-radius</td><td>style.tooltip.borderRadius</td></tr>
+            <tr><td>--nc-tooltip-shadow</td><td>style.tooltip.shadow</td></tr>
+            <tr><td>--nc-legend-font-size</td><td>style.legend.fontSize</td></tr>
+            <tr><td>--nc-legend-color</td><td>style.legend.color</td></tr>
+            <tr><td>--nc-legend-marker-size</td><td>style.legend.marker.size</td></tr>
+            <tr><td>--nc-bar-border-radius</td><td>style.bar.borderRadius</td></tr>
+            <tr><td>--nc-bar-gap</td><td>style.bar.gap</td></tr>
+            <tr><td>--nc-bar-group-gap</td><td>style.bar.groupGap</td></tr>
+            <tr><td>--nc-line-width</td><td>style.line.width</td></tr>
+            <tr><td>--nc-line-tension</td><td>style.line.tension</td></tr>
+            <tr><td>--nc-line-point-radius</td><td>style.line.pointRadius</td></tr>
+            <tr><td>--nc-line-point-border-width</td><td>style.line.pointBorderWidth</td></tr>
+            <tr><td>--nc-line-point-border-color</td><td>style.line.pointBorderColor</td></tr>
+            <tr><td>--nc-pie-border-width</td><td>style.pie.borderWidth</td></tr>
+            <tr><td>--nc-pie-border-color</td><td>style.pie.borderColor</td></tr>
+            <tr><td>--nc-pie-inner-radius</td><td>style.pie.innerRadius</td></tr>
+            <tr><td>--nc-palette-1 &hellip; 10</td><td>Color palette slots</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Dark theme example</h3>
+<pre><code>.dark-theme {
+  --nc-background: #1a1a2e;
+  --nc-font-color: #e0e0e0;
+  --nc-grid-color: #2a2a4a;
+  --nc-axis-color: #8888aa;
+  --nc-tooltip-background: #16162a;
+  --nc-tooltip-color: #e0e0e0;
+  --nc-palette-1: #7c3aed;
+  --nc-palette-2: #06b6d4;
+}
+
+/* Auto dark mode */
+@media (prefers-color-scheme: dark) {
+  .chart-container { --nc-background: #0d1117; ... }
+}</code></pre>
+
+        <h3>Disable CSS tokens</h3>
+<pre><code>{ options: { cssTokens: false } }</code></pre>
+
+        <h3>Disable animations</h3>
+<pre><code>// JS
+{ style: { animation: { duration: 0 } } }
+
+// CSS
+.no-anim { --nc-animation-duration: 0; }
+
+// Respect user preference
+@media (prefers-reduced-motion: reduce) {
+  .chart-container { --nc-animation-duration: 0; }
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- COMMON OPTIONS -->
+    <!-- ============================================================ -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Common Options</h2>
+        <p>Options shared across all chart types</p>
+      </div>
+      <div class="example-body">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>options.responsive</td><td>true</td><td>Auto-resize via ResizeObserver</td></tr>
+            <tr><td>options.maintainAspectRatio</td><td>true</td><td>Preserve proportions on resize</td></tr>
+            <tr><td>options.renderer</td><td>'auto'</td><td><code>'svg'</code>, <code>'canvas'</code>, or <code>'auto'</code></td></tr>
+            <tr><td>options.cssTokens</td><td>true</td><td>Enable CSS custom property theming</td></tr>
+            <tr><td>options.padding</td><td>20</td><td>Internal padding (px)</td></tr>
+            <tr><td>options.legend.enabled</td><td>true</td><td>Show/hide legend</td></tr>
+            <tr><td>options.legend.position</td><td>'top'</td><td><code>'top'</code>, <code>'bottom'</code>, <code>'left'</code>, <code>'right'</code></td></tr>
+            <tr><td>options.tooltip.enabled</td><td>true</td><td>Show/hide tooltip</td></tr>
+            <tr><td>options.ariaLabel</td><td>auto</td><td>ARIA label for accessibility</td></tr>
+            <tr><td>options.onHover</td><td>null</td><td>Callback: <code>(index, label) =&gt; void</code></td></tr>
+            <tr><td>options.onHoverEnd</td><td>null</td><td>Callback: <code>() =&gt; void</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Legend</h3>
+        <p>Click a legend item to toggle series visibility. Datasets with <code>dash: true</code> or <code>ref: true</code> show a "(ref)" tag. The legend is interactive by default.</p>
+
+        <h3>Tooltip</h3>
+        <p>Rich tooltips with header, color swatches, and YoY change footer are built automatically for BarChart and LineChart when multiple datasets are present.</p>
+
+        <h3>Table</h3>
+        <p>Any chart can display an auto-generated data table with <code>options.table.enabled: true</code>. Hover sync between chart and table is bidirectional.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- API REFERENCE -->
+    <!-- ============================================================ -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>API Reference</h2>
+        <p>Methods and properties on chart instances</p>
+      </div>
+      <div class="example-body">
+
+        <h3>Chart instance</h3>
+        <table>
+          <thead><tr><th>Method</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>chart.update(config)</td><td>Merge partial config and re-render</td></tr>
+            <tr><td>chart.destroy()</td><td>Remove DOM, listeners, observers, animations</td></tr>
+            <tr><td>chart.toPNG()</td><td>Export as PNG data URL (SVG renderer only). Returns <code>Promise&lt;string&gt;</code></td></tr>
+            <tr><td>chart.toSVG()</td><td>Export as SVG markup string (SVG renderer only)</td></tr>
+            <tr><td>chart.highlightColumn(index)</td><td>Programmatic highlight (Bar, Line)</td></tr>
+            <tr><td>chart.highlightSlice(index)</td><td>Programmatic highlight (Pie)</td></tr>
+            <tr><td>chart.clearHighlight()</td><td>Clear all highlights</td></tr>
+            <tr><td>chart.cancelAnimations()</td><td>Cancel all running animations</td></tr>
+          </tbody>
+        </table>
+
+        <h3>KPICard instance</h3>
+        <table>
+          <thead><tr><th>Method</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>card.update(config)</td><td>Merge partial config and re-render</td></tr>
+            <tr><td>card.setActive(boolean)</td><td>Toggle active/selected state</td></tr>
+            <tr><td>card.destroy()</td><td>Clean up DOM and sparkline</td></tr>
+          </tbody>
+        </table>
+
+        <h3>NewChart namespace</h3>
+        <table>
+          <thead><tr><th>Property</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>NewChart.create(el, config)</td><td>Chart factory</td></tr>
+            <tr><td>NewChart.kpiCard(el, config)</td><td>KPI card factory</td></tr>
+            <tr><td>NewChart.getSupportedTokens()</td><td>List of CSS token names</td></tr>
+            <tr><td>NewChart.PALETTE</td><td>Default 10-color array</td></tr>
+            <tr><td>NewChart.COMPARE_COLOR</td><td>Compare color: <code>'#b3bac5'</code></td></tr>
+            <tr><td>NewChart.version</td><td><code>'0.1.0'</code></td></tr>
+            <tr><td>NewChart.BarChart</td><td>Direct class access</td></tr>
+            <tr><td>NewChart.LineChart</td><td>Direct class access</td></tr>
+            <tr><td>NewChart.PieChart</td><td>Direct class access</td></tr>
+            <tr><td>NewChart.AreaChart</td><td>Direct class access</td></tr>
+            <tr><td>NewChart.GaugeChart</td><td>Direct class access</td></tr>
+            <tr><td>NewChart.SparklineChart</td><td>Direct class access</td></tr>
+            <tr><td>NewChart.KPICard</td><td>Direct class access</td></tr>
+            <tr><td>NewChart.DataTable</td><td>Direct class access</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
