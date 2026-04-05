@@ -140,21 +140,17 @@ export class PieChart extends Chart {
             [slice.label]: formatNumber(slice.value, 0),
             'Andel': formatNumber(slice.percent, 1) + '%'
           });
+
+          if (typeof options.onHover === 'function') {
+            options.onHover(slice.index, slice.label);
+          }
         });
 
         this.addElementListener(sliceElement, 'mouseleave', () => {
-          sliceElement.style.transform = '';
-          sliceElement.style.filter = '';
+          this._clearSliceHighlight();
 
-          // Restore all slices
-          this._sliceElements.forEach(({ element: el }) => {
-            el.setAttribute('opacity', '1');
-          });
-
-          // Restore center text
-          if (isDonut && this._centerTextValue && this._centerTextLabel) {
-            this._centerTextValue.textContent = formatNumber(total, 0);
-            this._centerTextLabel.textContent = 'total';
+          if (typeof options.onHoverEnd === 'function') {
+            options.onHoverEnd();
           }
         });
 
@@ -231,6 +227,71 @@ export class PieChart extends Chart {
     }
 
     this.slices = slices;
+  }
+
+  /**
+   * Programmatically highlight a slice by index
+   * @param {number} index - Slice index to highlight
+   */
+  highlightSlice(index) {
+    if (!this._sliceElements || !this.slices) return;
+    const target = this._sliceElements[index];
+    if (!target) return;
+
+    const { style, options } = this.config;
+    const innerRadius = this.slices[0]?.innerRadius || 0;
+    const isDonut = innerRadius > 0;
+    const total = this.slices.reduce((sum, s) => sum + s.value, 0);
+    const slice = target.slice;
+
+    // Explode target
+    const tx = Math.cos(slice.midAngle) * 5;
+    const ty = Math.sin(slice.midAngle) * 5;
+    target.element.style.transform = `translate(${tx}px, ${ty}px)`;
+    target.element.style.filter = 'brightness(1.08)';
+    target.element.setAttribute('opacity', '1');
+
+    // Dim others
+    this._sliceElements.forEach(({ element: el }, i) => {
+      if (i !== index) {
+        el.setAttribute('opacity', '0.35');
+      }
+    });
+
+    // Update center text
+    if (isDonut && this._centerTextValue && this._centerTextLabel) {
+      this._centerTextValue.textContent = formatNumber(slice.percent, 1) + '%';
+      this._centerTextLabel.textContent = slice.label;
+    }
+  }
+
+  /**
+   * Clear all slice highlights
+   */
+  clearHighlight() {
+    this._clearSliceHighlight();
+  }
+
+  /**
+   * Internal: reset all slices to default state
+   */
+  _clearSliceHighlight() {
+    const innerRadius = this.slices?.[0]?.innerRadius || 0;
+    const isDonut = innerRadius > 0;
+    const total = this.slices ? this.slices.reduce((sum, s) => sum + s.value, 0) : 0;
+
+    if (this._sliceElements) {
+      this._sliceElements.forEach(({ element: el }) => {
+        el.style.transform = '';
+        el.style.filter = '';
+        el.setAttribute('opacity', '1');
+      });
+    }
+
+    if (isDonut && this._centerTextValue && this._centerTextLabel) {
+      this._centerTextValue.textContent = formatNumber(total, 0);
+      this._centerTextLabel.textContent = 'total';
+    }
   }
 
   /**

@@ -843,6 +843,18 @@ function renderDonutChart() {
         padding:10,
         onClick: function(info) {
           console.log("Donut slice clicked:", info.label, info.value, info.percent.toFixed(1)+"%");
+        },
+        onHover: function(sliceIndex) {
+          // Map slice index back to raw data index
+          const rawIdx = raw.indexOf(data[sliceIndex]);
+          const rows = tableWrap.querySelectorAll("tr[data-row]");
+          rows.forEach(r => {
+            r.classList.toggle("hovered", parseInt(r.dataset.row)===rawIdx);
+          });
+        },
+        onHoverEnd: function() {
+          const rows = tableWrap.querySelectorAll("tr[data-row]");
+          rows.forEach(r => r.classList.remove("hovered"));
         }
       }
     });
@@ -850,15 +862,16 @@ function renderDonutChart() {
 
   // Table
   if(show==="table"||show==="split") {
-    renderDonutTable(raw, total, tableWrap);
+    renderDonutTable(raw, data, tableWrap);
   }
 
   // Legend
   renderDonutLegend(raw);
 }
 
-function renderDonutTable(raw, total, container) {
+function renderDonutTable(raw, filteredData, container) {
   const isChannel = state.donutSource==="channel";
+  const rawTotal = raw.reduce((s,x)=>s+x.value,0);
   let html = '<table class="data-table"><thead><tr>' +
     '<th>'+(isChannel?"Kanal":"Kategori")+'</th>' +
     '<th class="right">Omsattning</th>' +
@@ -867,12 +880,12 @@ function renderDonutTable(raw, total, container) {
     '</tr></thead><tbody>';
 
   raw.forEach((d,i) => {
-    const pct = ((d.value/raw.reduce((s,x)=>s+x.value,0))*100).toFixed(1);
+    const pct = ((d.value/rawTotal)*100).toFixed(1);
     const lastCol = isChannel
       ? makeBadge(pctChange(d.value, d.prev))
       : d.margin+"%";
 
-    html += '<tr>' +
+    html += '<tr data-row="'+i+'">' +
       '<td class="label-cell"><span style="display:inline-flex;align-items:center;gap:8px">' +
       '<span style="width:10px;height:10px;border-radius:3px;background:'+SERIES_COLORS[i%SERIES_COLORS.length]+';flex-shrink:0"></span>' +
       d.label+'</span></td>' +
@@ -884,6 +897,27 @@ function renderDonutTable(raw, total, container) {
 
   html += '</tbody></table>';
   container.innerHTML = html;
+
+  // Table → chart hover sync
+  container.querySelectorAll("tr[data-row]").forEach(tr => {
+    tr.addEventListener("mouseenter", () => {
+      const rawIdx = parseInt(tr.dataset.row);
+      // Map raw index to filtered slice index
+      const sliceIdx = filteredData.indexOf(raw[rawIdx]);
+      if(donutChartInstance && donutChartInstance.highlightSlice && sliceIdx >= 0) {
+        donutChartInstance.highlightSlice(sliceIdx);
+      }
+      container.querySelectorAll("tr[data-row]").forEach(r => {
+        r.classList.toggle("hovered", parseInt(r.dataset.row)===rawIdx);
+      });
+    });
+    tr.addEventListener("mouseleave", () => {
+      if(donutChartInstance && donutChartInstance.clearHighlight) {
+        donutChartInstance.clearHighlight();
+      }
+      container.querySelectorAll("tr[data-row]").forEach(r => r.classList.remove("hovered"));
+    });
+  });
 }
 
 function renderDonutLegend(raw) {
