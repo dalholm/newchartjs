@@ -81,6 +81,12 @@ export class PieChart extends Chart {
     const borderWidth = style.pie?.borderWidth || 2;
     const borderColor = style.pie?.borderColor || '#ffffff';
     const labelPosition = options.labels?.position || 'outside';
+    const innerRadius = slices[0]?.innerRadius || 0;
+    const isDonut = innerRadius > 0;
+    const total = slices.reduce((sum, s) => sum + s.value, 0);
+
+    // Store slice elements for hover interaction
+    this._sliceElements = [];
 
     // Draw slices
     slices.forEach((slice) => {
@@ -95,24 +101,72 @@ export class PieChart extends Chart {
           fill: slice.color,
           stroke: borderColor,
           strokeWidth: borderWidth,
-          opacity: 0.85
+          opacity: 1
         }
       );
 
-      // Hover effect
+      this._sliceElements.push({ element: sliceElement, slice });
+
+      // Hover effects: explode + dim others
       if (sliceElement) {
         sliceElement.style.cursor = 'pointer';
+        sliceElement.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out, filter 0.15s ease-out';
+        sliceElement.style.transformOrigin = `${slice.centerX}px ${slice.centerY}px`;
 
         this.addElementListener(sliceElement, 'mouseenter', (e) => {
+          // Explode hovered slice outward
+          const tx = Math.cos(slice.midAngle) * 5;
+          const ty = Math.sin(slice.midAngle) * 5;
+          sliceElement.style.transform = `translate(${tx}px, ${ty}px)`;
+          sliceElement.style.filter = 'brightness(1.08)';
           sliceElement.setAttribute('opacity', '1');
+
+          // Dim other slices
+          this._sliceElements.forEach(({ element: el }) => {
+            if (el !== sliceElement) {
+              el.setAttribute('opacity', '0.35');
+            }
+          });
+
+          // Update center text if donut
+          if (isDonut && this._centerTextValue && this._centerTextLabel) {
+            this._centerTextValue.textContent = formatNumber(slice.percent, 1) + '%';
+            this._centerTextLabel.textContent = slice.label;
+          }
+
           this.showTooltip(e, {
             [slice.label]: formatNumber(slice.value, 0),
-            'Percentage': formatNumber(slice.percent, 1) + '%'
+            'Andel': formatNumber(slice.percent, 1) + '%'
           });
         });
 
         this.addElementListener(sliceElement, 'mouseleave', () => {
-          sliceElement.setAttribute('opacity', '0.85');
+          sliceElement.style.transform = '';
+          sliceElement.style.filter = '';
+
+          // Restore all slices
+          this._sliceElements.forEach(({ element: el }) => {
+            el.setAttribute('opacity', '1');
+          });
+
+          // Restore center text
+          if (isDonut && this._centerTextValue && this._centerTextLabel) {
+            this._centerTextValue.textContent = formatNumber(total, 0);
+            this._centerTextLabel.textContent = 'total';
+          }
+        });
+
+        // Click callback
+        this.addElementListener(sliceElement, 'click', (e) => {
+          if (typeof options.onClick === 'function') {
+            options.onClick({
+              index: slice.index,
+              label: slice.label,
+              value: slice.value,
+              percent: slice.percent,
+              event: e
+            });
+          }
         });
       }
 
@@ -150,6 +204,29 @@ export class PieChart extends Chart {
       }
     });
 
+    // Draw center text for donut charts
+    if (isDonut) {
+      const cx = slices[0].centerX;
+      const cy = slices[0].centerY;
+
+      this._centerTextValue = this.renderer.text(formatNumber(total, 0), cx, cy - 3, {
+        fill: style.fontColor || '#172b4d',
+        fontSize: 16,
+        fontFamily: style.monoFamily || style.fontFamily,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle',
+        fontWeight: 700
+      });
+
+      this._centerTextLabel = this.renderer.text('total', cx, cy + 14, {
+        fill: '#8993a4',
+        fontSize: 9,
+        fontFamily: style.fontFamily,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle'
+      });
+    }
+
     this.slices = slices;
   }
 
@@ -186,17 +263,30 @@ export class PieChart extends Chart {
             const borderWidth = this.config.style.pie?.borderWidth || 2;
             const labelPosition = this.config.options.labels?.position || 'outside';
             const labelFormat = this.config.options.labels?.format || 'percent';
+            const innerRadius = this.slices[0]?.innerRadius || 0;
+            const isDonut = innerRadius > 0;
+            const total = this.slices.reduce((sum, s) => sum + s.value, 0);
+
+            // Clear stored elements for hover
+            this._sliceElements = [];
 
             // Redraw slices up to current animation
             this.slices.forEach((s, i) => {
               const drawEnd = i < index ? s.endAngle : (i === index ? endAngle : null);
               if (drawEnd === null) return;
 
-              this.renderer.arc(
+              const el = this.renderer.arc(
                 s.centerX, s.centerY, s.radius,
                 s.startAngle, drawEnd, s.innerRadius,
-                { fill: s.color, stroke: borderColor, strokeWidth: borderWidth, opacity: 0.85 }
+                { fill: s.color, stroke: borderColor, strokeWidth: borderWidth, opacity: 1 }
               );
+
+              if (el) {
+                el.style.cursor = 'pointer';
+                el.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out, filter 0.15s ease-out';
+                el.style.transformOrigin = `${s.centerX}px ${s.centerY}px`;
+                this._sliceElements.push({ element: el, slice: s });
+              }
 
               // Redraw label for completed slices
               if (i < index && labelPosition !== 'none') {
@@ -222,6 +312,33 @@ export class PieChart extends Chart {
                 });
               }
             });
+
+            // Redraw center text for donut
+            if (isDonut) {
+              const cx = this.slices[0].centerX;
+              const cy = this.slices[0].centerY;
+
+              // White center circle
+              this.renderer.circle(cx, cy, innerRadius - 2, {
+                fill: '#ffffff'
+              });
+
+              this._centerTextValue = this.renderer.text(formatNumber(total, 0), cx, cy - 3, {
+                fill: this.config.style.fontColor || '#172b4d',
+                fontSize: 16,
+                fontFamily: this.config.style.monoFamily || this.config.style.fontFamily,
+                textAnchor: 'middle',
+                dominantBaseline: 'middle'
+              });
+
+              this._centerTextLabel = this.renderer.text('total', cx, cy + 14, {
+                fill: '#8993a4',
+                fontSize: 9,
+                fontFamily: this.config.style.fontFamily,
+                textAnchor: 'middle',
+                dominantBaseline: 'middle'
+              });
+            }
           }
         });
       }, delay);
