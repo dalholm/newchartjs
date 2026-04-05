@@ -178,14 +178,21 @@ export class BarChart extends Chart {
         strokeLinecap: 'round'
       });
 
-      // Label
+      // Label — always position inside chart area to avoid clipping
       if (ref.label) {
-        const labelX = ref.labelPosition === 'right' ? chartX + chartWidth + 4 : chartX + 4;
+        const labelX = ref.labelPosition === 'right'
+          ? chartX + chartWidth - 6
+          : chartX + 4;
+        const labelAnchor = ref.labelPosition === 'right' ? 'end' : 'start';
         const labelY = ry - 6;
 
         // Background pill for label
         if (ref.labelBackground) {
-          this.renderer.rect(labelX - 2, labelY - 8, ref.label.length * 6 + 12, 16, {
+          const pillWidth = ref.label.length * 6 + 12;
+          const pillX = ref.labelPosition === 'right'
+            ? chartX + chartWidth - pillWidth - 2
+            : labelX - 2;
+          this.renderer.rect(pillX, labelY - 8, pillWidth, 16, {
             fill: ref.labelBackground,
             borderRadius: 3
           });
@@ -195,25 +202,20 @@ export class BarChart extends Chart {
           fill: ref.color || '#868e96',
           fontSize: 9,
           fontFamily: style.monoFamily || style.fontFamily,
-          textAnchor: 'start',
-          dominantBaseline: 'auto'
+          textAnchor: labelAnchor,
+          dominantBaseline: 'auto',
+          fontWeight: ref.labelBackground ? 600 : 400
         });
       }
     });
 
-    // Draw bars with hover interaction
+    // Draw bars
     const bars_ = [];
-    const barGroups = []; // group hitboxes for column hover
+    const barGroupData = []; // data for hitboxes (created later)
 
     data.labels.forEach((label, labelIndex) => {
       const baseX = chartX + labelIndex * barWidth + barWidth / 2;
       const groupX = chartX + labelIndex * barWidth;
-
-      // Invisible hitbox for column hover
-      const hitbox = this.renderer.rect(groupX, chartY, barWidth, chartHeight, {
-        fill: 'transparent',
-        opacity: 0
-      });
 
       // Column highlight background (hidden by default)
       const highlight = this.renderer.rect(groupX + 1, chartY, barWidth - 2, chartHeight, {
@@ -281,48 +283,47 @@ export class BarChart extends Chart {
         groupBars.push(barInfo);
       });
 
-      // Per-bar reference markers (e.g. budget line per bar)
+      // Per-bar reference markers — span only the actual bars, not the whole column
       const barMarkers = options.barMarkers || [];
       barMarkers.forEach(marker => {
         const markerValue = marker.values?.[labelIndex];
         if (markerValue == null) return;
 
         const markerY = chartY + chartHeight - ((markerValue - minValue) / valueRange) * chartHeight;
-        this.renderer.line(
-          groupX + barWidth * 0.08, markerY,
-          groupX + barWidth * 0.92, markerY,
-          {
-            stroke: marker.color || '#f08c00',
-            strokeWidth: marker.strokeWidth || 2,
-            strokeLinecap: 'round'
-          }
-        );
+        const markerX1 = baseX - availableWidth / 2;
+        const markerX2 = baseX + availableWidth / 2;
+        this.renderer.line(markerX1, markerY, markerX2, markerY, {
+          stroke: marker.color || '#f08c00',
+          strokeWidth: marker.strokeWidth || 2,
+          strokeLinecap: 'round'
+        });
       });
 
-      barGroups.push({ hitbox, highlight, bars: groupBars, label, labelIndex });
+      barGroupData.push({ groupX, highlight, bars: groupBars, label, labelIndex });
 
       // X axis labels
       if (hasXAxis) {
-        const labelEl = this.renderer.text(label, baseX, chartY + chartHeight + 15, {
+        this.renderer.text(label, baseX, chartY + chartHeight + 15, {
           fill: style.axis.color,
           fontSize: style.axis.fontSize,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',
           dominantBaseline: 'top'
         });
-        if (labelEl) {
-          labelEl.style.transition = 'fill 0.12s, font-weight 0.12s';
-          labelEl._labelIndex = labelIndex;
-        }
       }
     });
 
-    // Setup column hover interactions
-    barGroups.forEach(group => {
-      if (group.hitbox) {
-        group.hitbox.style.cursor = 'pointer';
+    // Create invisible hitboxes AFTER all visible elements so they sit on top in SVG
+    barGroupData.forEach(group => {
+      const hitbox = this.renderer.rect(group.groupX, chartY, barWidth, chartHeight, {
+        fill: 'transparent',
+        opacity: 0
+      });
 
-        this.addElementListener(group.hitbox, 'mouseenter', (e) => {
+      if (hitbox) {
+        hitbox.style.cursor = 'pointer';
+
+        this.addElementListener(hitbox, 'mouseenter', (e) => {
           // Show column highlight
           group.highlight.setAttribute('opacity', '0.03');
 
@@ -347,7 +348,7 @@ export class BarChart extends Chart {
           this.showTooltip(e, tooltipData);
         });
 
-        this.addElementListener(group.hitbox, 'mouseleave', () => {
+        this.addElementListener(hitbox, 'mouseleave', () => {
           group.highlight.setAttribute('opacity', '0');
 
           // Restore all bars

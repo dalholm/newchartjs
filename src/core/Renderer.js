@@ -206,7 +206,7 @@ export class SVGRenderer extends Renderer {
    * @returns {Element} Text element
    */
   text(text, x, y, style = {}) {
-    const textEl = this.createElement('text', {
+    const attrs = {
       x: x,
       y: y,
       fill: style.fill || '#000',
@@ -215,8 +215,13 @@ export class SVGRenderer extends Renderer {
       'text-anchor': style.textAnchor || 'start',
       'dominant-baseline': style.dominantBaseline || 'hanging',
       opacity: style.opacity !== undefined ? style.opacity : 1
-    });
+    };
 
+    if (style.fontWeight) {
+      attrs['font-weight'] = style.fontWeight;
+    }
+
+    const textEl = this.createElement('text', attrs);
     textEl.textContent = text;
     this.svg.appendChild(textEl);
     return textEl;

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PieChart } from './PieChart.js';
 
 describe('PieChart', () => {
@@ -103,8 +103,114 @@ describe('PieChart', () => {
     const chart = createChart({
       options: { labels: { position: 'none' } }
     });
+    // Only center text should be absent (no labels, no donut center text)
     const texts = container.querySelectorAll('text');
     expect(texts.length).toBe(0);
     chart.destroy();
+  });
+
+  // ═══ NEW FEATURE TESTS ═══
+
+  describe('hover explode', () => {
+    it('slice elements have CSS transition for transform', () => {
+      const chart = createChart();
+      const paths = container.querySelectorAll('path');
+      paths.forEach(p => {
+        expect(p.style.transition).toContain('transform');
+      });
+      chart.destroy();
+    });
+
+    it('slice elements have transformOrigin set to center', () => {
+      const chart = createChart();
+      const slices = chart.calculateSlices();
+      const paths = container.querySelectorAll('path');
+      paths.forEach(p => {
+        expect(p.style.transformOrigin).not.toBe('');
+      });
+      chart.destroy();
+    });
+
+    it('stores _sliceElements for hover interaction', () => {
+      const chart = createChart();
+      expect(chart._sliceElements).toBeDefined();
+      expect(chart._sliceElements.length).toBe(3);
+      chart.destroy();
+    });
+  });
+
+  describe('donut center text', () => {
+    it('renders center text for donut charts', () => {
+      const chart = createChart({
+        style: { pie: { innerRadius: 50 } },
+        options: { labels: { position: 'none' } }
+      });
+      const texts = container.querySelectorAll('text');
+      const textContents = Array.from(texts).map(t => t.textContent);
+      // Should have total value and "total" label
+      expect(textContents).toContain('total');
+      chart.destroy();
+    });
+
+    it('does not render center text for regular pie', () => {
+      const chart = createChart({
+        style: { pie: { innerRadius: 0 } },
+        options: { labels: { position: 'none' } }
+      });
+      const texts = container.querySelectorAll('text');
+      const textContents = Array.from(texts).map(t => t.textContent);
+      expect(textContents).not.toContain('total');
+      chart.destroy();
+    });
+
+    it('stores _centerTextValue and _centerTextLabel refs for donut', () => {
+      const chart = createChart({
+        style: { pie: { innerRadius: 50 } }
+      });
+      expect(chart._centerTextValue).toBeDefined();
+      expect(chart._centerTextLabel).toBeDefined();
+      chart.destroy();
+    });
+  });
+
+  describe('onClick callback', () => {
+    it('calls onClick when a slice is clicked', () => {
+      const onClick = vi.fn();
+      const chart = createChart({
+        options: { onClick }
+      });
+
+      const paths = container.querySelectorAll('path');
+      paths[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledWith(expect.objectContaining({
+        index: 0,
+        label: 'Red',
+        value: 40,
+        percent: 40
+      }));
+      chart.destroy();
+    });
+
+    it('does not throw when no onClick is provided', () => {
+      const chart = createChart();
+      const paths = container.querySelectorAll('path');
+      expect(() => {
+        paths[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      }).not.toThrow();
+      chart.destroy();
+    });
+  });
+
+  describe('opacity dimming', () => {
+    it('slices start with opacity 1', () => {
+      const chart = createChart();
+      const paths = container.querySelectorAll('path');
+      paths.forEach(p => {
+        expect(p.getAttribute('opacity')).toBe('1');
+      });
+      chart.destroy();
+    });
   });
 });
