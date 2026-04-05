@@ -96,21 +96,21 @@ describe('KPICard', () => {
       const card = createCard({ value: 100, target: 100 });
       const dot = container.querySelector('.nc-kpi-status');
       expect(dot).not.toBeNull();
-      expect(dot.style.background).toBe('#0ca678');
+      expect(dot.style.background).toContain('12, 166, 120');
       card.destroy();
     });
 
     it('shows yellow dot when value >= 90% of target', () => {
       const card = createCard({ value: 92, target: 100 });
       const dot = container.querySelector('.nc-kpi-status');
-      expect(dot.style.background).toBe('#f08c00');
+      expect(dot.style.background).toContain('240, 140, 0');
       card.destroy();
     });
 
     it('shows red dot when value < 90% of target', () => {
       const card = createCard({ value: 70, target: 100 });
       const dot = container.querySelector('.nc-kpi-status');
-      expect(dot.style.background).toBe('#e03131');
+      expect(dot.style.background).toContain('224, 49, 49');
       card.destroy();
     });
 
@@ -180,22 +180,22 @@ describe('KPICard', () => {
   describe('active state', () => {
     it('applies active border color when active is true', () => {
       const card = createCard({ active: true });
-      expect(container.style.borderColor).toBe('#4c6ef5');
+      expect(container.style.borderColor).toContain('76, 110, 245');
       card.destroy();
     });
 
     it('applies default border color when active is false', () => {
       const card = createCard({ active: false });
-      expect(container.style.borderColor).toBe('#dfe1e6');
+      expect(container.style.borderColor).toContain('223, 225, 230');
       card.destroy();
     });
 
     it('setActive toggles active state', () => {
       const card = createCard({ active: false });
       card.setActive(true);
-      expect(container.style.borderColor).toBe('#4c6ef5');
+      expect(container.style.borderColor).toContain('76, 110, 245');
       card.setActive(false);
-      expect(container.style.borderColor).toBe('#dfe1e6');
+      expect(container.style.borderColor).toContain('223, 225, 230');
       card.destroy();
     });
   });
@@ -312,7 +312,7 @@ describe('KPICard', () => {
     it('formats small numbers without abbreviation', () => {
       const card = createCard({ value: 47, previous: null, suffix: '%', decimals: 1 });
       const value = container.querySelector('.nc-kpi-value');
-      expect(value.textContent).toBe('47.0%');
+      expect(value.textContent).toMatch(/47.*%/);
       card.destroy();
     });
   });

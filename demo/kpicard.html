@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — KPI Card Examples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4;
+      --primary: #4c6ef5;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 24px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; }
+
+    /* KPI grid layouts */
+    .kpi-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+    .kpi-grid > div { flex: 1; min-width: 200px; }
+    .kpi-grid-3 > div { min-width: 250px; }
+    .kpi-grid-2 > div { min-width: 300px; }
+    .kpi-single > div { max-width: 320px; }
+
+    .code-hint { margin-top: 12px; padding: 10px 14px; background: #f8f9fb; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 11px; font-family: var(--mono); color: var(--text-sec);
+      white-space: pre-wrap; line-height: 1.6; overflow-x: auto; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <div class="page-header">
+    <h1>KPI Card</h1>
+    <p>Config-driven KPI-kort med varde, forandringsbadge, sparkline, progress bar och statusindikator.
+      Byggt som en forstaklassig komponent i NewChart — perfekt for ERP-dashboards.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. Full featured row (like dashboard) -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Forsaljningsoversikt — komplett KPI-rad</h2>
+        <p>Fyra kort med sparkline, forandring, och progress bar — som i ett riktigt ERP-dashboard</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid" id="kpi-full"></div>
+      </div>
+    </div>
+
+    <!-- 2. With target and progress -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Budget-uppfoljning med progress</h2>
+        <p>Statusindikator (gron/gul/rod) och progress bar baserat pa mal</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid kpi-grid-3" id="kpi-progress"></div>
+      </div>
+    </div>
+
+    <!-- 3. Different sparkline variants -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Sparkline-varianter</h2>
+        <p>Line, area och bar — olika visuella stilar for trenddata</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid kpi-grid-3" id="kpi-variants"></div>
+      </div>
+    </div>
+
+    <!-- 4. Active/selectable cards -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Valbara kort (klicka for att aktivera)</h2>
+        <p>onClick-handler med aktiv-tillstand — typiskt for metric-val i dashboard</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid" id="kpi-selectable"></div>
+      </div>
+    </div>
+
+    <!-- 5. Custom formatting -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Anpassad formatering</h2>
+        <p>Custom formatValue, prefix/suffix, och decimaler</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid kpi-grid-3" id="kpi-format"></div>
+      </div>
+    </div>
+
+    <!-- 6. Minimal cards (no sparkline) -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Minimala kort</h2>
+        <p>Utan sparkline — snabb oversikt med varde och forandring</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid" id="kpi-minimal"></div>
+      </div>
+    </div>
+
+    <!-- 7. Update example -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Reaktiv uppdatering</h2>
+        <p>Klicka "Simulera uppdatering" for att se kortet uppdateras med nya varden</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid kpi-single" id="kpi-update"></div>
+        <button id="btn-update" style="margin-top:12px; padding:8px 16px; font-size:12px; font-family:var(--font);
+          border:1px solid var(--border); border-radius:6px; cursor:pointer; background:var(--primary);
+          color:#fff; font-weight:600;">Simulera uppdatering</button>
+      </div>
+    </div>
+
+    <!-- Code example -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Anvandning</h2>
+        <p>Sa har skapar du ett KPI-kort</p>
+      </div>
+      <div class="example-body">
+        <div class="code-hint">const card = NewChart.kpiCard('#my-element', {
+  label: 'Omsattning',
+  value: 38920000,
+  previous: 32410000,
+  suffix: ' kr',
+  target: 42000000,
+  sparkline: {
+    values: [2850, 3120, 2960, 3480, 3210, 3650],
+    color: '#4c6ef5',
+    variant: 'area'      // 'line', 'area', or 'bar'
+  },
+  onClick: ({ config }) => console.log(config.label)
+});
+
+// Uppdatera reaktivt
+card.update({ value: 41500000 });</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+const MONTHS_DATA = [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210];
+const ORDERS_DATA = [412,468,431,502,478,528,419,487,519,453,564,611];
+const AOV_DATA = MONTHS_DATA.map((r,i) => Math.round(r*1000/ORDERS_DATA[i]));
+
+// 1. Full featured row
+const fullKpis = [
+  { label:'Omsattning', value:38920000, previous:32410000, suffix:' kr',
+    sparkline:{ values:MONTHS_DATA, color:'#4c6ef5' }, target:42000000 },
+  { label:'Ordrar', value:5872, previous:5453, suffix:'',
+    sparkline:{ values:ORDERS_DATA, color:'#0ca678' } },
+  { label:'Snittorder', value:6624, previous:5943, suffix:' kr',
+    sparkline:{ values:AOV_DATA, color:'#7048e8' } },
+  { label:'Bruttomarginal', value:47.2, previous:44.8, suffix:'%', decimals:1,
+    sparkline:{ values:[42,43,44,45,44,46,45,47,48,46,48,47], color:'#e03131' } }
+];
+createRow('kpi-full', fullKpis);
+
+// 2. Progress/target
+const progressKpis = [
+  { label:'Arsbudget', value:38920000, previous:null, suffix:' kr', target:42000000 },
+  { label:'Ordrar Q4', value:1628, previous:null, suffix:'', target:1500,
+    thresholds:{ good:1.0, warning:0.85 } },
+  { label:'NPS Score', value:72, previous:68, suffix:'', target:80,
+    sparkline:{ values:[65,68,66,70,71,69,72,71,73,72,74,72], color:'#0ca678' } }
+];
+createRow('kpi-progress', progressKpis);
+
+// 3. Sparkline variants
+const sparkValues = [28,32,25,38,34,42,30,36,40,35,44,48];
+const variantKpis = [
+  { label:'Trend (line)', value:48, previous:28, suffix:'',
+    sparkline:{ values:sparkValues, color:'#4c6ef5', variant:'line' } },
+  { label:'Trend (area)', value:48, previous:28, suffix:'',
+    sparkline:{ values:sparkValues, color:'#0ca678', variant:'area' } },
+  { label:'Trend (bar)', value:48, previous:28, suffix:'',
+    sparkline:{ values:sparkValues, color:'#7048e8', variant:'bar' } }
+];
+createRow('kpi-variants', variantKpis);
+
+// 4. Selectable
+const selectableCards = [];
+const selectableKpis = [
+  { label:'Omsattning', value:38920000, suffix:' kr', previous:32410000 },
+  { label:'Ordrar', value:5872, suffix:'', previous:5453 },
+  { label:'Snittorder', value:6624, suffix:' kr', previous:5943 },
+  { label:'Marginal', value:47.2, suffix:'%', previous:44.8, decimals:1 }
+];
+const selGrid = document.getElementById('kpi-selectable');
+selectableKpis.forEach((k, i) => {
+  const el = document.createElement('div');
+  selGrid.appendChild(el);
+  const card = NewChart.kpiCard(el, {
+    ...k,
+    active: i === 0,
+    onClick: () => {
+      selectableCards.forEach((c, ci) => c.setActive(ci === i));
+    }
+  });
+  selectableCards.push(card);
+});
+
+// 5. Custom formatting
+const formatKpis = [
+  { label:'Lagervarde', value:12450000,
+    formatValue: (v) => (v/1e6).toFixed(1) + ' MSEK',
+    previous:11200000,
+    formatPrevious: (v) => 'fg. ' + (v/1e6).toFixed(1) + ' MSEK' },
+  { label:'Leveranstid', value:3.2, suffix:' dagar', decimals:1, previous:4.1,
+    sparkline:{ values:[4.5,4.2,4.0,3.8,3.6,3.5,3.4,3.3,3.2,3.1,3.2,3.2], color:'#0ca678' } },
+  { label:'Returandel', value:3.8, prefix:'', suffix:'%', decimals:1, previous:4.2,
+    sparkline:{ values:[4.2,4.0,4.5,3.9,4.1,3.7,3.8,3.5,3.6,3.9,3.4,3.8], color:'#e03131', variant:'bar' } }
+];
+createRow('kpi-format', formatKpis);
+
+// 6. Minimal (no sparkline)
+const minimalKpis = [
+  { label:'Aktiva kunder', value:2847, previous:2612, suffix:'' },
+  { label:'Pipeline', value:4200000, previous:3800000, suffix:' kr' },
+  { label:'Konvertering', value:12.4, previous:10.8, suffix:'%', decimals:1 },
+  { label:'Artiklar', value:1423, previous:1380, suffix:' st' }
+];
+createRow('kpi-minimal', minimalKpis);
+
+// 7. Update example
+const updateEl = document.createElement('div');
+document.getElementById('kpi-update').appendChild(updateEl);
+const updateCard = NewChart.kpiCard(updateEl, {
+  label: 'Realtidsomsattning',
+  value: 38920000,
+  previous: 32410000,
+  suffix: ' kr',
+  target: 42000000,
+  sparkline: { values: MONTHS_DATA.slice(), color: '#4c6ef5' }
+});
+
+document.getElementById('btn-update').addEventListener('click', () => {
+  const newVal = updateCard.config.value + Math.round((Math.random() - 0.3) * 500000);
+  const spark = updateCard.config.sparkline.values.slice();
+  spark.push(spark[spark.length-1] + Math.round((Math.random() - 0.3) * 200));
+  if (spark.length > 12) spark.shift();
+  updateCard.update({
+    value: newVal,
+    sparkline: { ...updateCard.config.sparkline, values: spark }
+  });
+});
+
+// Helper to create a row of cards
+function createRow(containerId, kpis) {
+  const grid = document.getElementById(containerId);
+  kpis.forEach(k => {
+    const el = document.createElement('div');
+    grid.appendChild(el);
+    NewChart.kpiCard(el, k);
+  });
+}
+</script>
+</body>
+</html>

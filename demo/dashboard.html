@@ -46,21 +46,9 @@
     .date-badge { padding:5px 10px; font-size:11px; border-radius:var(--radius); border:1px solid var(--border);
       background:var(--surface); color:var(--text-sec); font-family:var(--mono); }
 
-    /* ═══ KPI CARDS ═══ */
+    /* ═══ KPI CARDS (layout only — styling handled by NewChart.KPICard) ═══ */
     .kpi-row { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
-    .kpi { flex:1 1 0; min-width:170px; padding:14px 16px; background:var(--surface);
-      border-radius:var(--radius-lg); border:1.5px solid var(--border); cursor:pointer;
-      transition:all 0.12s; box-shadow:var(--shadow); position:relative; overflow:hidden; }
-    .kpi:hover { box-shadow:var(--shadow-md); }
-    .kpi.active { border-color:var(--primary); box-shadow: 0 0 0 3px rgba(76,110,245,0.09), var(--shadow-md); }
-    .kpi-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
-    .kpi-label { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.7px; }
-    .kpi-value-row { display:flex; align-items:baseline; gap:6px; margin-bottom:2px; }
-    .kpi-value { font-size:22px; font-weight:700; color:var(--text); font-family:var(--mono); letter-spacing:-0.5px; }
-    .kpi-footer { display:flex; justify-content:space-between; align-items:flex-end; }
-    .kpi-prev { font-size:10px; color:var(--text-faint); font-family:var(--mono); }
-    .kpi-progress { margin-top:6px; height:3px; background:var(--border-light); border-radius:2px; overflow:hidden; }
-    .kpi-progress-fill { height:100%; border-radius:2px; transition:width 0.4s; }
+    .kpi { flex:1 1 0; min-width:170px; }
 
     /* ═══ BADGE ═══ */
     .badge { font-size:10px; font-weight:600; font-family:var(--mono); border-radius:3px;
@@ -178,9 +166,6 @@
       .dashboard { padding:12px; }
       .kpi-row { flex-direction:column; }
       .kpi { min-width:100%; flex:0 0 auto; }
-      .kpi-value { font-size:18px; }
-      .kpi-value-row { flex-wrap:wrap; }
-      .kpi-footer { flex-wrap:wrap; gap:6px; }
       .donut-layout { flex-direction:column; }
       .donut-chart-wrap { width:100%; display:flex; justify-content:center; }
     }
@@ -417,8 +402,10 @@ let lineChartInstance = null;
 let donutChartInstance = null;
 
 /* ═══════════════════════════════════════════════════════════════
-   KPI CARDS
+   KPI CARDS (powered by NewChart.KPICard)
    ═══════════════════════════════════════════════════════════════ */
+let kpiInstances = [];
+
 function renderKPIs() {
   const totR26=REV_26.reduce((s,v)=>s+v,0)*1000, totR25=REV_25.reduce((s,v)=>s+v,0)*1000;
   const totO26=ORD_26.reduce((s,v)=>s+v,0), totO25=ORD_25.reduce((s,v)=>s+v,0);
@@ -426,48 +413,50 @@ function renderKPIs() {
   const budgetTarget = BUDGET.reduce((s,v)=>s+v,0)*1000;
 
   const kpis = [
-    { id:"revenue", label:"Omsattning", value:totR26, prev:totR25, suffix:" kr",
-      spark:REV_26, color:SERIES_COLORS[0], target:budgetTarget },
-    { id:"orders", label:"Ordrar", value:totO26, prev:totO25, suffix:"",
-      spark:ORD_26, color:SERIES_COLORS[1], target:null },
-    { id:"aov", label:"AOV", value:aov26, prev:aov25, suffix:" kr",
-      spark:AOV_26, color:SERIES_COLORS[2], target:null },
-    { id:"margin", label:"Bruttomarginal", value:47.2, prev:44.8, suffix:"%",
-      spark:[42,43,44,45,44,46,45,47,48,46,48,47], color:SERIES_COLORS[3], target:null },
+    { id:"revenue", label:"Omsattning", value:totR26, previous:totR25, suffix:" kr",
+      sparkline:{ values:REV_26, color:SERIES_COLORS[0] }, target:budgetTarget },
+    { id:"orders", label:"Ordrar", value:totO26, previous:totO25, suffix:"",
+      sparkline:{ values:ORD_26, color:SERIES_COLORS[1] }, target:null },
+    { id:"aov", label:"AOV", value:aov26, previous:aov25, suffix:" kr",
+      sparkline:{ values:AOV_26, color:SERIES_COLORS[2] }, target:null },
+    { id:"margin", label:"Bruttomarginal", value:47.2, previous:44.8, suffix:"%", decimals:1,
+      sparkline:{ values:[42,43,44,45,44,46,45,47,48,46,48,47], color:SERIES_COLORS[3] }, target:null },
   ];
 
+  // Clean up previous instances
+  kpiInstances.forEach(inst => inst.destroy());
+  kpiInstances = [];
+
   const row = document.getElementById("kpi-row");
-  row.innerHTML = kpis.map(k => {
-    const chg = pctChange(k.value, k.prev);
+  row.innerHTML = '';
+
+  kpis.forEach(k => {
+    const el = document.createElement('div');
+    el.className = 'kpi animate-in';
+    row.appendChild(el);
+
     const isActive = k.id === state.metric;
     const sparkColor = isActive ? "#4c6ef5" : "#b3bac5";
-    let progressHTML = "";
-    if(k.target) {
-      const pct = Math.min(100, (k.value/k.target)*100);
-      const cls = k.value>=k.target?"var(--success)":k.value>=k.target*0.9?"var(--warning)":"var(--danger)";
-      progressHTML = '<div class="kpi-progress"><div class="kpi-progress-fill" style="width:'+pct+'%;background:'+cls+'"></div></div>';
-    }
-    return '<div class="kpi animate-in'+(isActive?" active":"")+'" data-metric="'+k.id+'">' +
-      '<div class="kpi-header"><div class="kpi-label">'+k.label+'</div>' +
-      (k.target ? '<span class="status-dot '+statusDotClass(k.value,k.target)+'"></span>' : '') +
-      '</div>' +
-      '<div class="kpi-value-row"><span class="kpi-value">'+fmt(k.value)+k.suffix+'</span>'+makeBadge(chg)+'</div>' +
-      '<div class="kpi-footer"><span class="kpi-prev">fg. '+fmt(k.prev)+k.suffix+'</span>' +
-      sparklineSVG(k.spark, 64, 22, sparkColor) + '</div>' +
-      progressHTML +
-      '</div>';
-  }).join("");
 
-  row.querySelectorAll(".kpi").forEach(el => {
-    el.addEventListener("click", () => {
-      const m = el.dataset.metric;
-      if(m === "margin") return;
-      state.metric = m;
-      state.drillStack = [];
-      renderKPIs();
-      renderBarChart();
-      updateBreadcrumbs();
+    const card = NewChart.kpiCard(el, {
+      label: k.label,
+      value: k.value,
+      previous: k.previous,
+      suffix: k.suffix,
+      decimals: k.decimals || 0,
+      target: k.target,
+      active: isActive,
+      sparkline: k.sparkline ? { ...k.sparkline, color: sparkColor } : null,
+      onClick: k.id !== "margin" ? () => {
+        state.metric = k.id;
+        state.drillStack = [];
+        renderKPIs();
+        renderBarChart();
+        updateBreadcrumbs();
+      } : null
     });
+
+    kpiInstances.push(card);
   });
 }
 
@@ -498,11 +487,10 @@ function renderBarChart() {
   document.getElementById("chart-title").textContent =
     state.metric==="revenue"?"Omsattning":state.metric==="orders"?"Ordrar":"Snittorder";
 
-  // Show/hide chart and table
+  // Show/hide chart
   container.style.display = (show==="chart"||show==="split") ? "block" : "none";
-  tableContainer.style.display = (show==="table"||show==="split") ? "block" : "none";
-  if(show==="split") tableContainer.className = "data-table-wrap split";
-  else tableContainer.className = "data-table-wrap";
+  // Hide old manual table container (replaced by built-in DataTable)
+  tableContainer.style.display = "none";
 
   // Destroy existing charts
   if(barChartInstance) { barChartInstance.destroy(); barChartInstance = null; }
@@ -577,16 +565,32 @@ function renderBarChart() {
       tooltip: { background:"#1a1d23", color:"#e8eaed", borderRadius:6, fontSize:11, padding:10 }
     };
 
-    // Shared hover callbacks for chart ↔ table sync
-    const onHover = (index) => {
-      const rows = tableContainer.querySelectorAll("tr[data-row]");
-      rows.forEach((r,i) => {
-        r.classList.toggle("hovered", i===index);
-      });
-    };
-    const onHoverEnd = () => {
-      const rows = tableContainer.querySelectorAll("tr[data-row]");
-      rows.forEach(r => r.classList.remove("hovered"));
+    // Built-in table config with custom columns
+    const hasBudget = state.drillStack.length===0 && state.metric==="revenue";
+    const tableConfig = {
+      enabled: show==="table" || show==="split",
+      viewMode: show,
+      maxHeight: 200,
+      columns: [
+        { key:"_label", label:"Period", align:"left" },
+        { key: datasets[0]?.label || "Value", label: isSEK?"Omsattning":"Antal", align:"right", mono:true,
+          render: (row, ri) => isSEK ? fmtSEK(data[ri].value*mult) : fmt(data[ri].value) },
+        ...(datasets.length > 1 ? [{ key: datasets[1]?.label || "Prev", label:"Fg. period", align:"right", mono:true,
+          render: (row, ri) => data[ri].prev ? (isSEK ? fmtSEK(data[ri].prev*mult) : fmt(data[ri].prev)) : "–" }] : []),
+        { key:"_change", label:"Forandring", align:"right",
+          render: (row, ri) => data[ri].prev ? makeBadge(pctChange(data[ri].value, data[ri].prev)) : "–" },
+        ...(hasBudget ? [{ key:"_budget", label:"Budget", align:"right", mono:true,
+          render: (row, ri) => data[ri].budget ? fmtSEK(data[ri].budget*mult) : "" }] : []),
+        { key:"_status", label:"Status", align:"center",
+          render: (row, ri) => {
+            const d = data[ri];
+            const chg = d.prev ? pctChange(d.value, d.prev) : 0;
+            return d.budget
+              ? '<span class="status-dot '+statusDotClass(d.value,d.budget)+'"></span>'
+              : '<span style="color:'+(chg>=0?"var(--success)":"var(--danger)")+'">&#9679;</span>';
+          }
+        }
+      ]
     };
 
     if(state.chartType === "bar") {
@@ -600,8 +604,7 @@ function renderBarChart() {
           padding:20,
           referenceLines: referenceLines,
           barMarkers: barMarkers,
-          onHover: onHover,
-          onHoverEnd: onHoverEnd
+          table: tableConfig
         }
       });
     } else {
@@ -616,19 +619,13 @@ function renderBarChart() {
           fill: state.legendVis.current,
           legend:{ enabled:false },
           padding:20,
-          onHover: onHover,
-          onHoverEnd: onHoverEnd
+          table: tableConfig
         }
       });
     }
 
     // Add double-click drill-down
     container.addEventListener("dblclick", handleDrillDown);
-  }
-
-  // Render table
-  if(show==="table"||show==="split") {
-    renderBarTable(data, isSEK, mult, tableContainer);
   }
 }
 
@@ -660,57 +657,7 @@ function handleDrillDown(e) {
   renderBarChart();
 }
 
-function renderBarTable(data, isSEK, mult, container) {
-  const hasBudget = state.drillStack.length===0 && state.metric==="revenue";
-  let html = '<table class="data-table"><thead><tr>' +
-    '<th>Period</th>' +
-    '<th class="right">'+(isSEK?"Omsattning":"Antal")+'</th>' +
-    '<th class="right">Fg. period</th>' +
-    '<th class="right">Forandring</th>' +
-    (hasBudget?'<th class="right">Budget</th>':'') +
-    '<th class="center">Status</th>' +
-    '</tr></thead><tbody>';
-
-  data.forEach((d,i) => {
-    const chg = d.prev ? pctChange(d.value, d.prev) : 0;
-    const valStr = isSEK ? fmtSEK(d.value*mult) : fmt(d.value);
-    const prevStr = d.prev ? (isSEK ? fmtSEK(d.prev*mult) : fmt(d.prev)) : "–";
-    const budStr = d.budget ? fmtSEK(d.budget*mult) : "";
-    const statusHTML = d.budget
-      ? '<span class="status-dot '+statusDotClass(d.value,d.budget)+'"></span>'
-      : '<span style="color:'+(chg>=0?"var(--success)":"var(--danger)")+'">&#9679;</span>';
-
-    html += '<tr data-row="'+i+'">' +
-      '<td class="label-cell">'+d.label+'</td>' +
-      '<td class="right mono">'+valStr+'</td>' +
-      '<td class="right mono">'+prevStr+'</td>' +
-      '<td class="right">'+makeBadge(chg)+'</td>' +
-      (hasBudget?'<td class="right mono">'+budStr+'</td>':'') +
-      '<td class="center">'+statusHTML+'</td>' +
-      '</tr>';
-  });
-
-  html += '</tbody></table>';
-  container.innerHTML = html;
-
-  // Table → chart hover sync
-  container.querySelectorAll("tr[data-row]").forEach(tr => {
-    tr.addEventListener("mouseenter", () => {
-      const idx = parseInt(tr.dataset.row);
-      const chart = barChartInstance || lineChartInstance;
-      if(chart && chart.highlightColumn) chart.highlightColumn(idx);
-      // Highlight this row, unhighlight others
-      container.querySelectorAll("tr[data-row]").forEach((r,i) => {
-        r.classList.toggle("hovered", i===idx);
-      });
-    });
-    tr.addEventListener("mouseleave", () => {
-      const chart = barChartInstance || lineChartInstance;
-      if(chart && chart.clearHighlight) chart.clearHighlight();
-      container.querySelectorAll("tr[data-row]").forEach(r => r.classList.remove("hovered"));
-    });
-  });
-}
+/* renderBarTable removed — replaced by built-in DataTable component */
 
 /* ═══════════════════════════════════════════════════════════════
    BREADCRUMBS
@@ -795,12 +742,15 @@ function renderDonutChart() {
 
   // Destroy existing
   if(donutChartInstance) { donutChartInstance.destroy(); donutChartInstance = null; }
+  if(window._donutTable) { window._donutTable.destroy(); window._donutTable = null; }
+
+  const colors = data.map(d => SERIES_COLORS[raw.indexOf(d) % SERIES_COLORS.length]);
+  const isChannel = state.donutSource==="channel";
+  const rawTotal = raw.reduce((s,x)=>s+x.value,0);
 
   if(show==="chart"||show==="split") {
     const container = document.getElementById("donut-chart-container");
     container.innerHTML = "";
-
-    const colors = data.map(d => SERIES_COLORS[raw.indexOf(d) % SERIES_COLORS.length]);
 
     donutChartInstance = NewChart.create("#donut-chart-container", {
       type: "pie",
@@ -829,80 +779,67 @@ function renderDonutChart() {
           console.log("Donut slice clicked:", info.label, info.value, info.percent.toFixed(1)+"%");
         },
         onHover: function(sliceIndex) {
-          // Map slice index back to raw data index
-          const rawIdx = raw.indexOf(data[sliceIndex]);
-          const rows = tableWrap.querySelectorAll("tr[data-row]");
-          rows.forEach(r => {
-            r.classList.toggle("hovered", parseInt(r.dataset.row)===rawIdx);
-          });
+          if(window._donutTable) window._donutTable.highlightRow(sliceIndex);
         },
         onHoverEnd: function() {
-          const rows = tableWrap.querySelectorAll("tr[data-row]");
-          rows.forEach(r => r.classList.remove("hovered"));
+          if(window._donutTable) window._donutTable.clearHighlight();
         }
       }
     });
   }
 
-  // Table
+  // Standalone DataTable in the side panel (donut layout is side-by-side)
   if(show==="table"||show==="split") {
-    renderDonutTable(raw, data, tableWrap);
+    tableWrap.innerHTML = "";
+    window._donutTable = new NewChart.DataTable(tableWrap, {
+      enabled: true,
+      viewMode: "table",
+      fontFamily: "'Inter',sans-serif",
+      monoFamily: "'JetBrains Mono',monospace"
+    });
+
+    window._donutTable.onHover(
+      (index) => {
+        if(donutChartInstance && donutChartInstance.highlightSlice) donutChartInstance.highlightSlice(index);
+      },
+      () => {
+        if(donutChartInstance && donutChartInstance.clearHighlight) donutChartInstance.clearHighlight();
+      }
+    );
+
+    // Build data in the format DataTable expects
+    window._donutTable.setData(
+      { labels: data.map(d=>d.label), datasets: [{ label:"Value", values: data.map(d=>d.value) }] },
+      {
+        columns: [
+          { key:"_label", label: isChannel?"Kanal":"Kategori", align:"left",
+            render: (row, ri) => {
+              const color = colors[ri] || SERIES_COLORS[ri % SERIES_COLORS.length];
+              return '<span style="display:inline-flex;align-items:center;gap:8px">' +
+                '<span style="width:10px;height:10px;border-radius:3px;background:'+color+';flex-shrink:0"></span>' +
+                data[ri].label+'</span>';
+            }
+          },
+          { key:"_revenue", label:"Omsattning", align:"right", mono:true,
+            render: (row, ri) => fmtSEK(data[ri].value*1000) },
+          { key:"_share", label:"Andel", align:"right", mono:true,
+            render: (row, ri) => ((data[ri].value/rawTotal)*100).toFixed(1)+"%" },
+          { key:"_extra", label: isChannel?"YoY":"Marginal", align:"right",
+            render: (row, ri) => {
+              const d = data[ri];
+              return isChannel ? makeBadge(pctChange(d.value, d.prev)) : '<span style="font-family:var(--mono)">'+d.margin+'%</span>';
+            }
+          }
+        ]
+      }
+    );
   }
 
   // Legend
   renderDonutLegend(raw);
 }
 
-function renderDonutTable(raw, filteredData, container) {
-  const isChannel = state.donutSource==="channel";
-  const rawTotal = raw.reduce((s,x)=>s+x.value,0);
-  let html = '<table class="data-table"><thead><tr>' +
-    '<th>'+(isChannel?"Kanal":"Kategori")+'</th>' +
-    '<th class="right">Omsattning</th>' +
-    '<th class="right">Andel</th>' +
-    '<th class="right">'+(isChannel?"YoY":"Marginal")+'</th>' +
-    '</tr></thead><tbody>';
-
-  raw.forEach((d,i) => {
-    const pct = ((d.value/rawTotal)*100).toFixed(1);
-    const lastCol = isChannel
-      ? makeBadge(pctChange(d.value, d.prev))
-      : d.margin+"%";
-
-    html += '<tr data-row="'+i+'">' +
-      '<td class="label-cell"><span style="display:inline-flex;align-items:center;gap:8px">' +
-      '<span style="width:10px;height:10px;border-radius:3px;background:'+SERIES_COLORS[i%SERIES_COLORS.length]+';flex-shrink:0"></span>' +
-      d.label+'</span></td>' +
-      '<td class="right mono">'+fmtSEK(d.value*1000)+'</td>' +
-      '<td class="right mono">'+pct+'%</td>' +
-      '<td class="right">'+(isChannel?lastCol:'<span class="mono">'+lastCol+'</span>')+'</td>' +
-      '</tr>';
-  });
-
-  html += '</tbody></table>';
-  container.innerHTML = html;
-
-  // Table → chart hover sync
-  container.querySelectorAll("tr[data-row]").forEach(tr => {
-    tr.addEventListener("mouseenter", () => {
-      const rawIdx = parseInt(tr.dataset.row);
-      // Map raw index to filtered slice index
-      const sliceIdx = filteredData.indexOf(raw[rawIdx]);
-      if(donutChartInstance && donutChartInstance.highlightSlice && sliceIdx >= 0) {
-        donutChartInstance.highlightSlice(sliceIdx);
-      }
-      container.querySelectorAll("tr[data-row]").forEach(r => {
-        r.classList.toggle("hovered", parseInt(r.dataset.row)===rawIdx);
-      });
-    });
-    tr.addEventListener("mouseleave", () => {
-      if(donutChartInstance && donutChartInstance.clearHighlight) {
-        donutChartInstance.clearHighlight();
-      }
-      container.querySelectorAll("tr[data-row]").forEach(r => r.classList.remove("hovered"));
-    });
-  });
-}
+/* renderDonutTable removed — replaced by standalone DataTable component */
 
 function renderDonutLegend(raw) {
   const el = document.getElementById("donut-legend");
