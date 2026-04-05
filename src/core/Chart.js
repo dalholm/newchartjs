@@ -8,6 +8,7 @@ import { DEFAULT_CONFIG } from './defaults.js';
 import { resolveCSSTokens } from './CSSTokens.js';
 import Tooltip from './Tooltip.js';
 import Legend from './Legend.js';
+import DataTable from './DataTable.js';
 import { animate } from './Animation.js';
 
 export class Chart {
@@ -53,9 +54,10 @@ export class Chart {
     this.renderer = null;
     this.initRenderer();
 
-    // Tooltip and legend
+    // Tooltip, legend, and data table
     this.tooltip = new Tooltip(this.element, this.config.style.tooltip);
     this.legend = null;
+    this.dataTable = null;
 
     // Resize observer for responsiveness
     this.resizeObserver = null;
@@ -208,6 +210,9 @@ export class Chart {
     // Call subclass render method
     this.render();
 
+    // Setup data table if configured
+    this.setupDataTable();
+
     // Animate if configured
     if (this.config.style.animation?.duration > 0) {
       this.animate();
@@ -283,6 +288,68 @@ export class Chart {
     if (!this._legendVisibility) return true;
     const key = dataset.key || dataset.label || `Series ${index + 1}`;
     return this._legendVisibility[key] !== false;
+  }
+
+  /**
+   * Setup data table component
+   */
+  setupDataTable() {
+    const tableOpts = this.config.options.table;
+    if (!tableOpts?.enabled) return;
+
+    const viewMode = tableOpts.viewMode || 'split';
+
+    // Hide chart renderer when table-only mode
+    if (this.renderer) {
+      const rendererEl = this.renderer.svg || this.renderer.canvas;
+      if (rendererEl) {
+        rendererEl.style.display = viewMode === 'table' ? 'none' : '';
+      }
+    }
+
+    if (!this.dataTable) {
+      this.dataTable = new DataTable(this.element, {
+        ...tableOpts,
+        fontFamily: this.config.style.fontFamily,
+        monoFamily: this.config.style.monoFamily
+      });
+
+      // Wire table→chart hover sync
+      this.dataTable.onHover(
+        (index) => {
+          if (typeof this.highlightColumn === 'function') {
+            this.highlightColumn(index);
+          } else if (typeof this.highlightSlice === 'function') {
+            this.highlightSlice(index);
+          }
+        },
+        () => {
+          if (typeof this.clearHighlight === 'function') {
+            this.clearHighlight();
+          }
+        }
+      );
+    }
+
+    // Wire chart→table hover via onHover option
+    const origOnHover = this.config.options.onHover;
+    const origOnHoverEnd = this.config.options.onHoverEnd;
+    this.config.options.onHover = (index, label) => {
+      if (this.dataTable) this.dataTable.highlightRow(index);
+      if (origOnHover) origOnHover(index, label);
+    };
+    this.config.options.onHoverEnd = () => {
+      if (this.dataTable) this.dataTable.clearHighlight();
+      if (origOnHoverEnd) origOnHoverEnd();
+    };
+
+    // Pass data to table
+    this.dataTable.setData(this.config.data, {
+      columns: tableOpts.columns,
+      colors: this.config.data.datasets.map((ds, i) => ds.color || this.getPaletteColor(i))
+    });
+
+    this.dataTable.setViewMode(viewMode);
   }
 
   /**
@@ -403,6 +470,10 @@ export class Chart {
 
     if (this.legend) {
       this.legend.destroy();
+    }
+
+    if (this.dataTable) {
+      this.dataTable.destroy();
     }
 
     if (this.renderer) {

@@ -12,6 +12,7 @@ import SparklineChart from './charts/SparklineChart.js';
 import { KPICard, createKPICard } from './core/KPICard.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
 import { COMPARE_COLOR, COLOR_PALETTE } from './core/defaults.js';
+import DataTable from './core/DataTable.js';
 
 /**
  * Chart factory and namespace
@@ -120,5 +121,6 @@ NewChart.GaugeChart = GaugeChart;
 NewChart.SparklineChart = SparklineChart;
 NewChart.KPICard = KPICard;
 NewChart.kpiCard = createKPICard;
+NewChart.DataTable = DataTable;
 
 export default NewChart;
