@@ -247,8 +247,8 @@ export class Chart {
     }
 
     const colors = [
-      '#4F46E5', '#DC2626', '#059669', '#2563EB', '#F59E0B',
-      '#8B5CF6', '#06B6D4', '#EC4899', '#10B981', '#6366F1'
+      '#4c6ef5', '#0ca678', '#f08c00', '#e03131', '#7048e8',
+      '#1098ad', '#d6336c', '#5c7cfa', '#20c997', '#fcc419'
     ];
     return colors[index % colors.length];
   }

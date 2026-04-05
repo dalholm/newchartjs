@@ -7,6 +7,7 @@ import BarChart from './charts/BarChart.js';
 import PieChart from './charts/PieChart.js';
 import LineChart from './charts/LineChart.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
+import { COMPARE_COLOR, COLOR_PALETTE } from './core/defaults.js';
 
 /**
  * Chart factory and namespace
@@ -68,7 +69,17 @@ const NewChart = {
    * Get list of supported CSS custom property tokens
    * @returns {string[]} Token names
    */
-  getSupportedTokens
+  getSupportedTokens,
+
+  /**
+   * Default compare/previous-period color
+   */
+  COMPARE_COLOR,
+
+  /**
+   * Default color palette
+   */
+  PALETTE: COLOR_PALETTE
 };
 
 // Export chart classes as properties of NewChart for better bundling

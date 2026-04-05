@@ -129,16 +129,22 @@ export class SVGRenderer extends Renderer {
    * @returns {Element} Line element
    */
   line(x1, y1, x2, y2, style = {}) {
-    const line = this.createElement('line', {
+    const attrs = {
       x1: x1,
       y1: y1,
       x2: x2,
       y2: y2,
       stroke: style.stroke || '#000',
       'stroke-width': style.strokeWidth || 1,
+      'stroke-linecap': style.strokeLinecap || 'butt',
       opacity: style.opacity !== undefined ? style.opacity : 1
-    });
+    };
 
+    if (style.strokeDasharray) {
+      attrs['stroke-dasharray'] = style.strokeDasharray;
+    }
+
+    const line = this.createElement('line', attrs);
     this.svg.appendChild(line);
     return line;
   }
@@ -172,7 +178,7 @@ export class SVGRenderer extends Renderer {
    * @returns {Element} Path element
    */
   path(d, style = {}) {
-    const path = this.createElement('path', {
+    const attrs = {
       d: d,
       fill: style.fill || 'none',
       stroke: style.stroke || 'none',
@@ -180,8 +186,13 @@ export class SVGRenderer extends Renderer {
       'stroke-linecap': 'round',
       'stroke-linejoin': 'round',
       opacity: style.opacity !== undefined ? style.opacity : 1
-    });
+    };
 
+    if (style.strokeDasharray) {
+      attrs['stroke-dasharray'] = style.strokeDasharray;
+    }
+
+    const path = this.createElement('path', attrs);
     this.svg.appendChild(path);
     return path;
   }
@@ -383,11 +394,17 @@ export class CanvasRenderer extends Renderer {
    */
   line(x1, y1, x2, y2, style = {}) {
     this.ctx.beginPath();
+    if (style.strokeDasharray) {
+      this.ctx.setLineDash(style.strokeDasharray.split(/[\s,]+/).map(Number));
+    } else {
+      this.ctx.setLineDash([]);
+    }
     this.ctx.moveTo(x1, y1);
     this.ctx.lineTo(x2, y2);
     this.ctx.strokeStyle = style.stroke || '#000';
     this.ctx.lineWidth = style.strokeWidth || 1;
     this.ctx.stroke();
+    this.ctx.setLineDash([]);
   }
 
   /**
@@ -427,6 +444,12 @@ export class CanvasRenderer extends Renderer {
 
     this.ctx.globalAlpha = style.opacity !== undefined ? style.opacity : 1;
 
+    if (style.strokeDasharray) {
+      this.ctx.setLineDash(style.strokeDasharray.split(/[\s,]+/).map(Number));
+    } else {
+      this.ctx.setLineDash([]);
+    }
+
     if (style.fill && style.fill !== 'none') {
       this.ctx.fillStyle = style.fill;
       this.ctx.fill(path2d);
@@ -439,6 +462,7 @@ export class CanvasRenderer extends Renderer {
     }
 
     this.ctx.globalAlpha = 1;
+    this.ctx.setLineDash([]);
   }
 
   /**

@@ -3,17 +3,22 @@
  */
 
 const PALETTE = [
-  '#4F46E5', // Indigo
-  '#DC2626', // Red
-  '#059669', // Emerald
-  '#2563EB', // Blue
-  '#F59E0B', // Amber
-  '#8B5CF6', // Purple
-  '#06B6D4', // Cyan
-  '#EC4899', // Pink
-  '#10B981', // Green
-  '#6366F1'  // Indigo-light
+  '#4c6ef5', // Primary blue
+  '#0ca678', // Success green
+  '#f08c00', // Warning orange
+  '#e03131', // Danger red
+  '#7048e8', // Purple
+  '#1098ad', // Teal
+  '#d6336c', // Pink
+  '#5c7cfa', // Light blue
+  '#20c997', // Mint
+  '#fcc419'  // Yellow
 ];
+
+/**
+ * Compare/previous-period color
+ */
+export const COMPARE_COLOR = '#b3bac5';
 
 /**
  * Default configuration for all charts
@@ -26,7 +31,8 @@ export const DEFAULT_CONFIG = {
   },
   style: {
     background: '#ffffff',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    monoFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
     fontSize: 12,
     fontColor: '#374151',
     grid: {
