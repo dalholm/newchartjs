@@ -6,6 +6,7 @@
 import BarChart from './charts/BarChart.js';
 import PieChart from './charts/PieChart.js';
 import LineChart from './charts/LineChart.js';
+import { getSupportedTokens } from './core/CSSTokens.js';
 
 /**
  * Chart factory and namespace
@@ -61,7 +62,13 @@ const NewChart = {
    */
   BarChart,
   PieChart,
-  LineChart
+  LineChart,
+
+  /**
+   * Get list of supported CSS custom property tokens
+   * @returns {string[]} Token names
+   */
+  getSupportedTokens
 };
 
 // Export chart classes as properties of NewChart for better bundling

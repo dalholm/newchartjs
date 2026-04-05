@@ -169,9 +169,8 @@ export class BarChart extends Chart {
           y = chartY + chartHeight - stackedHeight - barHeight;
           x = baseX - availableWidth / 2;
         } else {
-          // Grouped bars
-          const offset = (datasetIndex - (numDatasets - 1) / 2) * datasetWidth;
-          x = baseX - availableWidth / 2 + offset;
+          // Grouped bars — position from left edge of available width
+          x = baseX - availableWidth / 2 + datasetIndex * datasetWidth;
           y = chartY + chartHeight - barHeight;
         }
 

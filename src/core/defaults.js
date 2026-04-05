@@ -67,7 +67,8 @@ export const DEFAULT_CONFIG = {
       enabled: true
     },
     padding: 20,
-    renderer: 'auto' // 'svg', 'canvas', or 'auto'
+    renderer: 'auto', // 'svg', 'canvas', or 'auto'
+    cssTokens: true // Enable CSS custom property theming (--nc-*)
   }
 };
 

@@ -5,6 +5,7 @@
 import { SVGRenderer, CanvasRenderer } from './Renderer.js';
 import { deepMerge, debounce, formatNumber } from './utils.js';
 import { DEFAULT_CONFIG } from './defaults.js';
+import { resolveCSSTokens } from './CSSTokens.js';
 import Tooltip from './Tooltip.js';
 import Legend from './Legend.js';
 import { animate } from './Animation.js';
@@ -22,8 +23,14 @@ export class Chart {
       throw new Error('Chart element not found');
     }
 
-    // Merge configs
+    // Merge configs: defaults < JS config < CSS tokens
     this.config = deepMerge(DEFAULT_CONFIG, config);
+
+    if (this.config.options?.cssTokens !== false) {
+      const cssOverrides = resolveCSSTokens(this.element);
+      this.config = deepMerge(this.config, cssOverrides);
+    }
+
     this.initialConfig = JSON.parse(JSON.stringify(this.config));
 
     // Container setup
@@ -220,11 +227,15 @@ export class Chart {
   }
 
   /**
-   * Get color from palette
+   * Get color from palette (CSS token palette overrides default)
    * @param {number} index - Index
    * @returns {string} Color
    */
   getPaletteColor(index) {
+    if (this.config.palette && this.config.palette.length > 0) {
+      return this.config.palette[index % this.config.palette.length];
+    }
+
     const colors = [
       '#4F46E5', '#DC2626', '#059669', '#2563EB', '#F59E0B',
       '#8B5CF6', '#06B6D4', '#EC4899', '#10B981', '#6366F1'

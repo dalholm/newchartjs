@@ -15,7 +15,10 @@
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "dev": "rollup -c -w & rollup-plugin-serve --host localhost --port 3000 --historyApiFallback",
-    "serve": "node scripts/serve.js"
+    "serve": "node scripts/serve.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [
     "chart",
@@ -36,9 +39,11 @@
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
+    "@vitest/coverage-v8": "^4.1.2",
+    "jsdom": "^29.0.1",
     "rollup": "^4.0.0",
     "rollup-plugin-livereload": "^2.0.5",
-    "rollup-plugin-serve": "^2.0.2"
-  },
-  "dependencies": {}
+    "rollup-plugin-serve": "^2.0.2",
+    "vitest": "^4.1.2"
+  }
 }
