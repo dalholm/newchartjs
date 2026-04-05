@@ -73,4 +73,137 @@ describe('Chart base class', () => {
     expect(chart.shouldUseCanvas()).toBe(false);
     chart.destroy();
   });
+
+  describe('resize stability (no infinite growth)', () => {
+    it('updateDimensions hides children before measuring to avoid content-driven inflation', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } }
+      });
+
+      // Spy: when measuring, children should be hidden
+      const origGetBCR = container.getBoundingClientRect.bind(container);
+      let childrenHiddenDuringMeasure = false;
+      container.getBoundingClientRect = function () {
+        const children = Array.from(container.children);
+        childrenHiddenDuringMeasure = children.every(c => c.style.display === 'none');
+        return origGetBCR();
+      };
+
+      chart.updateDimensions();
+      expect(childrenHiddenDuringMeasure).toBe(true);
+
+      // Children should be restored after measurement
+      const children = Array.from(container.children);
+      const allVisible = children.every(c => c.style.display !== 'none');
+      expect(allVisible).toBe(true);
+
+      container.getBoundingClientRect = origGetBCR;
+      chart.destroy();
+    });
+
+    it('dimensions stay stable after multiple updateDimensions calls', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A', 'B', 'C'], datasets: [{ values: [10, 20, 30] }] },
+        style: { animation: { duration: 0 } }
+      });
+
+      const initialWidth = chart.width;
+      const initialHeight = chart.height;
+
+      for (let i = 0; i < 10; i++) {
+        chart.updateDimensions();
+      }
+
+      expect(chart.width).toBe(initialWidth);
+      expect(chart.height).toBe(initialHeight);
+      chart.destroy();
+    });
+
+    it('dimensions stay stable after multiple draw cycles', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A', 'B', 'C'], datasets: [{ values: [10, 20, 30] }] },
+        style: { animation: { duration: 0 } }
+      });
+
+      const initialWidth = chart.width;
+      const initialHeight = chart.height;
+
+      // Simulate what ResizeObserver would trigger repeatedly
+      for (let i = 0; i < 5; i++) {
+        chart.updateDimensions();
+        chart.draw();
+      }
+
+      expect(chart.width).toBe(initialWidth);
+      expect(chart.height).toBe(initialHeight);
+      chart.destroy();
+    });
+
+    it('element bounding rect does not grow after multiple re-renders', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A', 'B'], datasets: [{ values: [10, 20] }] },
+        style: { animation: { duration: 0 } }
+      });
+
+      const rectBefore = container.getBoundingClientRect();
+
+      chart.draw();
+      chart.draw();
+      chart.draw();
+
+      const rectAfter = container.getBoundingClientRect();
+      expect(rectAfter.height).toBe(rectBefore.height);
+      expect(rectAfter.width).toBe(rectBefore.width);
+      chart.destroy();
+    });
+
+    it('chart with legend does not grow on repeated resize + draw cycles', () => {
+      const chart = new BarChart(container, {
+        data: {
+          labels: ['A', 'B'],
+          datasets: [
+            { label: 'Series 1', values: [10, 20], color: '#f00' },
+            { label: 'Series 2', values: [15, 25], color: '#0f0' }
+          ]
+        },
+        options: { legend: { enabled: true } },
+        style: { animation: { duration: 0 } }
+      });
+
+      const heightAfterInit = chart.height;
+
+      for (let i = 0; i < 5; i++) {
+        chart.updateDimensions();
+        chart.draw();
+      }
+
+      expect(chart.height).toBe(heightAfterInit);
+      chart.destroy();
+    });
+
+    it('children display styles are restored after updateDimensions', () => {
+      const chart = new BarChart(container, {
+        data: {
+          labels: ['A', 'B'],
+          datasets: [{ label: 'Test', values: [10, 20], color: '#f00' }]
+        },
+        options: { legend: { enabled: true } },
+        style: { animation: { duration: 0 } }
+      });
+
+      // Record display before
+      const children = Array.from(container.children);
+      const displayBefore = children.map(c => c.style.display);
+
+      chart.updateDimensions();
+
+      // Display should be identical after measurement
+      children.forEach((c, i) => {
+        expect(c.style.display).toBe(displayBefore[i]);
+      });
+
+      chart.destroy();
+    });
+  });
 });

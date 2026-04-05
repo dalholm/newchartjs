@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Gauge Chart Examples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4;
+      --primary: #4c6ef5;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .row > .example-card { flex: 1; min-width: 300px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; display: flex; justify-content: center; }
+    .chart-container { min-height: 280px; }
+    .chart-container.wide { width: 100%; max-width: 400px; }
+    .chart-container.compact { width: 260px; min-height: 240px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <div class="page-header">
+    <h1>Gauge Chart</h1>
+    <p>KPI-matare med troskelzoner, nal och malmarkorer — perfekt for ERP-dashboards och styrkort.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. Revenue target gauge -->
+    <div class="row">
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Omsattningsmal</h2>
+          <p>Procent av arsbudget uppnadd — gron/gul/rod zoner</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container wide" id="chart-revenue"></div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Bruttomarginal</h2>
+          <p>Aktuell marginal vs mal pa 45%</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container wide" id="chart-margin"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. SLA / Uptime -->
+    <div class="row">
+      <div class="example-card">
+        <div class="example-header">
+          <h2>SLA Uppfyllnad</h2>
+          <p>Systemupptid med strikt troskel (99% = gult, 99.9% = gront)</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container wide" id="chart-sla"></div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Lagerkapacitet</h2>
+          <p>Andel utnyttjad — inverterade zoner (hogt = rod)</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container wide" id="chart-capacity"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Row of compact gauges -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Operativa KPI:er</h2>
+        <p>Kompakta gauges for overblick — typisk KPI-panel i ERP</p>
+      </div>
+      <div class="example-body" style="flex-wrap: wrap; gap: 12px;">
+        <div class="chart-container compact" id="gauge-orders"></div>
+        <div class="chart-container compact" id="gauge-nps"></div>
+        <div class="chart-container compact" id="gauge-delivery"></div>
+        <div class="chart-container compact" id="gauge-returns"></div>
+      </div>
+    </div>
+
+    <!-- 4. Custom format -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Omsattning med anpassat format</h2>
+        <p>Visar varde i MSEK med prefix och suffix — custom formatValue</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container wide" id="chart-custom"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+// 1. Revenue target
+NewChart.create('#chart-revenue', {
+  type: 'gauge',
+  data: {
+    datasets: [{ label: 'Arsbudget', values: [78] }]
+  },
+  options: {
+    min: 0, max: 100, target: 100,
+    valueSuffix: '%',
+    zones: [
+      { from: 0, to: 0.5, color: '#e03131' },
+      { from: 0.5, to: 0.8, color: '#f08c00' },
+      { from: 0.8, to: 1.0, color: '#0ca678' }
+    ]
+  }
+});
+
+// 2. Margin
+NewChart.create('#chart-margin', {
+  type: 'gauge',
+  data: {
+    datasets: [{ label: 'Bruttomarginal', values: [42.3] }]
+  },
+  options: {
+    min: 0, max: 60, target: 45,
+    valueSuffix: '%',
+    valueDecimals: 1,
+    zones: [
+      { from: 0, to: 0.5, color: '#e03131' },
+      { from: 0.5, to: 0.75, color: '#f08c00' },
+      { from: 0.75, to: 1.0, color: '#0ca678' }
+    ]
+  }
+});
+
+// 3. SLA
+NewChart.create('#chart-sla', {
+  type: 'gauge',
+  data: {
+    datasets: [{ label: 'SLA Uppfyllnad', values: [99.7] }]
+  },
+  options: {
+    min: 95, max: 100, target: 99.9,
+    valueSuffix: '%',
+    valueDecimals: 1,
+    ticks: 5,
+    zones: [
+      { from: 0, to: 0.6, color: '#e03131' },
+      { from: 0.6, to: 0.9, color: '#f08c00' },
+      { from: 0.9, to: 1.0, color: '#0ca678' }
+    ]
+  }
+});
+
+// 4. Capacity (inverted — high = bad)
+NewChart.create('#chart-capacity', {
+  type: 'gauge',
+  data: {
+    datasets: [{ label: 'Lagerkapacitet', values: [87] }]
+  },
+  options: {
+    min: 0, max: 100, target: 75,
+    valueSuffix: '%',
+    targetLabel: 'Optimal: 75%',
+    zones: [
+      { from: 0, to: 0.6, color: '#0ca678' },
+      { from: 0.6, to: 0.85, color: '#f08c00' },
+      { from: 0.85, to: 1.0, color: '#e03131' }
+    ]
+  }
+});
+
+// 5. Compact gauges
+NewChart.create('#gauge-orders', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Orderfyllnad', values: [94] }] },
+  options: { min: 0, max: 100, valueSuffix: '%', ticks: 4, showMax: false },
+  style: { gauge: { valueFontSize: 22 } }
+});
+
+NewChart.create('#gauge-nps', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'NPS', values: [72] }] },
+  options: {
+    min: -100, max: 100, ticks: 4, showMax: false,
+    zones: [
+      { from: 0, to: 0.5, color: '#e03131' },
+      { from: 0.5, to: 0.75, color: '#f08c00' },
+      { from: 0.75, to: 1.0, color: '#0ca678' }
+    ]
+  },
+  style: { gauge: { valueFontSize: 22 } }
+});
+
+NewChart.create('#gauge-delivery', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Leveransprecision', values: [96.2] }] },
+  options: { min: 80, max: 100, valueSuffix: '%', valueDecimals: 1, ticks: 4, showMax: false },
+  style: { gauge: { valueFontSize: 22 } }
+});
+
+NewChart.create('#gauge-returns', {
+  type: 'gauge',
+  data: { datasets: [{ label: 'Returandel', values: [3.8] }] },
+  options: {
+    min: 0, max: 10, valueSuffix: '%', valueDecimals: 1, ticks: 5, showMax: false,
+    zones: [
+      { from: 0, to: 0.3, color: '#0ca678' },
+      { from: 0.3, to: 0.6, color: '#f08c00' },
+      { from: 0.6, to: 1.0, color: '#e03131' }
+    ]
+  },
+  style: { gauge: { valueFontSize: 22 } }
+});
+
+// 6. Custom format
+NewChart.create('#chart-custom', {
+  type: 'gauge',
+  data: {
+    datasets: [{ label: 'Total omsattning', values: [38.9] }]
+  },
+  options: {
+    min: 0, max: 50, target: 42,
+    targetLabel: 'Mal: 42 MSEK',
+    formatValue: (v) => v.toFixed(1) + ' MSEK',
+    zones: [
+      { from: 0, to: 0.6, color: '#e03131' },
+      { from: 0.6, to: 0.85, color: '#f08c00' },
+      { from: 0.85, to: 1.0, color: '#0ca678' }
+    ]
+  }
+});
+</script>
+</body>
+</html>

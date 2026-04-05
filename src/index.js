@@ -6,6 +6,9 @@
 import BarChart from './charts/BarChart.js';
 import PieChart from './charts/PieChart.js';
 import LineChart from './charts/LineChart.js';
+import AreaChart from './charts/AreaChart.js';
+import GaugeChart from './charts/GaugeChart.js';
+import SparklineChart from './charts/SparklineChart.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
 import { COMPARE_COLOR, COLOR_PALETTE } from './core/defaults.js';
 
@@ -46,6 +49,15 @@ const NewChart = {
       case 'line':
         ChartClass = LineChart;
         break;
+      case 'area':
+        ChartClass = AreaChart;
+        break;
+      case 'gauge':
+        ChartClass = GaugeChart;
+        break;
+      case 'sparkline':
+        ChartClass = SparklineChart;
+        break;
       default:
         throw new Error(`Unknown chart type: ${chartType}`);
     }
@@ -64,6 +76,9 @@ const NewChart = {
   BarChart,
   PieChart,
   LineChart,
+  AreaChart,
+  GaugeChart,
+  SparklineChart,
 
   /**
    * Get list of supported CSS custom property tokens
@@ -86,5 +101,8 @@ const NewChart = {
 NewChart.BarChart = BarChart;
 NewChart.PieChart = PieChart;
 NewChart.LineChart = LineChart;
+NewChart.AreaChart = AreaChart;
+NewChart.GaugeChart = GaugeChart;
+NewChart.SparklineChart = SparklineChart;
 
 export default NewChart;

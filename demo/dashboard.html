@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Sovfabriken Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══ RESET & TOKENS ═══ */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --surface-alt: #f8f9fb;
+      --border: #dfe1e6; --border-light: #ebecf0; --border-focus: #4c6ef5;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4; --text-faint: #b3bac5;
+      --primary: #4c6ef5; --primary-dk: #3b5bdb; --primary-lt: #edf2ff; --primary-faint: #dbe4ff;
+      --success: #0ca678; --success-dk: #099268; --success-lt: #e6fcf5; --success-bg: #c3fae8;
+      --danger: #e03131; --danger-dk: #c92a2a; --danger-lt: #fff5f5; --danger-bg: #ffc9c9;
+      --warning: #f08c00; --warning-lt: #fff9db; --warning-bg: #ffec99;
+      --neutral: #868e96;
+      --radius: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+
+    body { font-family: var(--font); background: var(--bg); min-height:100vh; color: var(--text); }
+
+    /* ═══ LAYOUT ═══ */
+    .dashboard { padding: 16px 20px; max-width: 1400px; margin: 0 auto; }
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+    .header-left { display:flex; align-items:center; gap:10px; }
+    .logo { width:28px; height:28px; border-radius:6px; background:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .header h1 { font-size:16px; font-weight:700; color:var(--text); }
+    .header .subtitle { font-size:11px; color:var(--text-muted); }
+    .header-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+    /* ═══ SEGMENTED CONTROL ═══ */
+    .seg { display:inline-flex; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    .seg button { padding:5px 12px; font-size:11px; font-weight:400; font-family:var(--font);
+      border:none; cursor:pointer; background:var(--surface); color:var(--text-muted); transition:all 0.12s; }
+    .seg button + button { border-left:1px solid var(--border); }
+    .seg button.active { font-weight:600; color:var(--primary-dk); background:var(--primary-lt); }
+
+    .date-badge { padding:5px 10px; font-size:11px; border-radius:var(--radius); border:1px solid var(--border);
+      background:var(--surface); color:var(--text-sec); font-family:var(--mono); }
+
+    /* ═══ KPI CARDS ═══ */
+    .kpi-row { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+    .kpi { flex:1 1 0; min-width:170px; padding:14px 16px; background:var(--surface);
+      border-radius:var(--radius-lg); border:1.5px solid var(--border); cursor:pointer;
+      transition:all 0.12s; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+    .kpi:hover { box-shadow:var(--shadow-md); }
+    .kpi.active { border-color:var(--primary); box-shadow: 0 0 0 3px rgba(76,110,245,0.09), var(--shadow-md); }
+    .kpi-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
+    .kpi-label { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.7px; }
+    .kpi-value-row { display:flex; align-items:baseline; gap:6px; margin-bottom:2px; }
+    .kpi-value { font-size:22px; font-weight:700; color:var(--text); font-family:var(--mono); letter-spacing:-0.5px; }
+    .kpi-footer { display:flex; justify-content:space-between; align-items:flex-end; }
+    .kpi-prev { font-size:10px; color:var(--text-faint); font-family:var(--mono); }
+    .kpi-progress { margin-top:6px; height:3px; background:var(--border-light); border-radius:2px; overflow:hidden; }
+    .kpi-progress-fill { height:100%; border-radius:2px; transition:width 0.4s; }
+
+    /* ═══ BADGE ═══ */
+    .badge { font-size:10px; font-weight:600; font-family:var(--mono); border-radius:3px;
+      padding:1px 5px; white-space:nowrap; display:inline-block; }
+    .badge.up { color:var(--success-dk); background:var(--success-bg); }
+    .badge.down { color:var(--danger-dk); background:var(--danger-bg); }
+
+    /* ═══ STATUS DOT ═══ */
+    .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+    .status-dot.green { background:var(--success); }
+    .status-dot.yellow { background:var(--warning); }
+    .status-dot.red { background:var(--danger); }
+
+    /* ═══ CHART CARD ═══ */
+    .chart-card { background:var(--surface); border-radius:var(--radius-lg); border:1px solid var(--border);
+      box-shadow:var(--shadow); overflow:hidden; margin-bottom:16px; }
+
+    /* TAB BAR */
+    .tab-bar { display:flex; border-bottom:1px solid var(--border); background:var(--surface); }
+    .tab-bar button { padding:12px 20px; font-size:12px; font-weight:400; font-family:var(--font);
+      border:none; cursor:pointer; color:var(--text-muted); background:transparent;
+      border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.12s; }
+    .tab-bar button.active { font-weight:600; color:var(--primary); border-bottom-color:var(--primary); }
+    .tab-bar .spacer { flex:1; }
+    .tab-bar .live { display:flex; align-items:center; padding:0 12px; gap:6px; font-size:10px;
+      color:var(--text-faint); font-family:var(--mono); }
+    .tab-bar .live-dot { width:6px; height:6px; border-radius:50%; background:var(--success); }
+
+    /* CHART TOOLBAR */
+    .chart-toolbar { display:flex; align-items:center; justify-content:space-between;
+      padding:10px 16px; border-bottom:1px solid var(--border-light); background:var(--surface-alt);
+      flex-wrap:wrap; gap:8px; }
+    .toolbar-left { display:flex; align-items:center; gap:8px; }
+    .toolbar-right { display:flex; align-items:center; gap:6px; }
+    .toolbar-title { font-size:12px; font-weight:600; color:var(--text); }
+
+    .tool-btn { display:flex; align-items:center; gap:4px; padding:5px 8px; font-size:11px;
+      font-family:var(--font); border:1px solid var(--border); border-radius:var(--radius);
+      cursor:pointer; color:var(--text-sec); background:var(--surface); font-weight:400; transition:all 0.12s; }
+    .tool-btn:hover { border-color:var(--primary); color:var(--primary-dk); }
+    .tool-btn.active { border-color:var(--primary-dk); color:var(--primary-dk); background:var(--primary-lt); font-weight:600; }
+
+    /* CHART TYPE SWITCHER */
+    .chart-type-switch { display:flex; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    .chart-type-switch button { padding:4px 8px; border:none; cursor:pointer; background:var(--surface);
+      display:flex; align-items:center; transition:all 0.12s; }
+    .chart-type-switch button + button { border-left:1px solid var(--border); }
+    .chart-type-switch button.active { background:var(--primary-lt); }
+    .chart-type-switch button svg { width:14px; height:14px; }
+
+    /* BREADCRUMBS */
+    .breadcrumbs { display:flex; align-items:center; gap:2px; margin-right:8px; }
+    .breadcrumbs button { border:none; background:none; cursor:pointer; padding:2px 4px;
+      font-size:11px; font-family:var(--font); color:var(--primary); }
+    .breadcrumbs button.current { color:var(--text); font-weight:600; text-decoration:none; cursor:default; }
+    .breadcrumbs button:not(.current):hover { text-decoration:underline; }
+    .breadcrumbs .sep { color:var(--text-faint); font-size:10px; }
+
+    /* LEGEND */
+    .legend { display:flex; gap:4px; flex-wrap:wrap; padding:12px 16px 4px; }
+    .legend-item { display:flex; align-items:center; gap:5px; padding:3px 8px; font-size:11px;
+      font-family:var(--font); border:1px solid var(--border); border-radius:3px;
+      cursor:pointer; background:var(--surface); color:var(--text); transition:all 0.15s; }
+    .legend-item.hidden { border-color:var(--border-light); background:var(--surface-alt);
+      color:var(--text-faint); opacity:0.5; }
+    .legend-swatch { width:10px; height:3px; border-radius:2px; transition:background 0.15s; }
+    .legend-ref { font-size:9px; color:var(--text-muted); }
+
+    /* CHART AREA */
+    .chart-area { padding:0 16px 16px; }
+    .chart-container { position:relative; width:100%; min-height:350px; }
+
+    /* DATA TABLE */
+    .data-table-wrap { border:1px solid var(--border-light); border-radius:var(--radius); overflow:hidden; }
+    .data-table-wrap.split { margin-top:12px; max-height:200px; overflow-y:auto; }
+    .data-table { width:100%; border-collapse:collapse; font-size:12px; font-family:var(--font); }
+    .data-table th { text-align:left; padding:8px 10px; color:var(--text-muted); font-weight:500;
+      font-size:10px; text-transform:uppercase; letter-spacing:0.5px;
+      border-bottom:2px solid var(--border); background:var(--surface-alt); position:sticky; top:0;
+      white-space:nowrap; z-index:1; }
+    .data-table th.right { text-align:right; }
+    .data-table th.center { text-align:center; }
+    .data-table td { padding:7px 10px; border-bottom:1px solid var(--border-light); }
+    .data-table td.right { text-align:right; }
+    .data-table td.center { text-align:center; }
+    .data-table td.mono { font-family:var(--mono); }
+    .data-table td.label-cell { font-weight:500; color:var(--text); }
+    .data-table tr { transition:background 0.08s; cursor:pointer; }
+    .data-table tr:nth-child(even) { background:var(--surface-alt); }
+    .data-table tr:hover, .data-table tr.hovered { background:var(--primary-lt); }
+
+    /* DONUT LAYOUT */
+    .donut-layout { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; padding:8px 16px 16px; }
+    .donut-chart-wrap { flex-shrink:0; }
+    .donut-table-wrap { flex:1; min-width:300px; border:1px solid var(--border-light); border-radius:var(--radius); overflow:hidden; }
+
+    /* TOOLTIP */
+    .chart-tooltip { position:fixed; background:#1a1d23; color:#e8eaed; padding:10px 14px;
+      border-radius:6px; font-size:11px; font-family:var(--font); line-height:1.6;
+      pointer-events:none; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.35);
+      max-width:280px; border:1px solid #2d3139; opacity:0; transition:opacity 0.1s; }
+    .chart-tooltip.visible { opacity:1; }
+    .chart-tooltip .tt-header { font-weight:600; margin-bottom:4px; border-bottom:1px solid #333; padding-bottom:4px; }
+    .chart-tooltip .tt-row { display:flex; justify-content:space-between; gap:16px; }
+    .chart-tooltip .tt-swatch { width:8px; height:3px; border-radius:1px; display:inline-block; margin-right:4px; vertical-align:middle; }
+    .chart-tooltip .tt-value { font-family:var(--mono); }
+    .chart-tooltip .tt-divider { border-top:1px solid #333; margin-top:4px; padding-top:4px; }
+
+    /* FOOTER */
+    .dashboard-footer { margin-top:12px; display:flex; justify-content:space-between; font-size:10px;
+      color:var(--text-faint); padding:0 4px; flex-wrap:wrap; gap:8px; }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 768px) {
+      .dashboard { padding:12px; }
+      .kpi-row { flex-direction:column; }
+      .kpi { min-width:100%; }
+      .donut-layout { flex-direction:column; }
+      .donut-chart-wrap { width:100%; display:flex; justify-content:center; }
+    }
+
+    /* ═══ ANIMATIONS ═══ */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .animate-in { animation: fadeUp 0.3s ease-out both; }
+    .kpi:nth-child(1) { animation-delay:0s; }
+    .kpi:nth-child(2) { animation-delay:0.05s; }
+    .kpi:nth-child(3) { animation-delay:0.1s; }
+    .kpi:nth-child(4) { animation-delay:0.15s; }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="7" width="3.5" height="8" rx="1" fill="#fff"/>
+          <rect x="6.25" y="3" width="3.5" height="12" rx="1" fill="#fff"/>
+          <rect x="11.5" y="1" width="3.5" height="14" rx="1" fill="#fff"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Forsaljningsoversikt</h1>
+        <span class="subtitle">Sovfabriken &middot; <span id="today-date"></span></span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="seg" id="period-seg">
+        <button data-val="mtd">MTD</button>
+        <button data-val="qtd">QTD</button>
+        <button data-val="ytd" class="active">YTD</button>
+        <button data-val="12m">12M</button>
+      </div>
+      <div class="date-badge">2026-01-01 &rarr; 2026-12-31</div>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <!-- MAIN CHART CARD -->
+  <div class="chart-card">
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="active" data-tab="bar">Tidserie</button>
+      <button data-tab="donut">Fordelning</button>
+      <div class="spacer"></div>
+      <div class="live"><span class="live-dot"></span> Live &middot; <span id="live-time"></span></div>
+    </div>
+
+    <!-- BAR/LINE CHART PANEL -->
+    <div id="panel-bar">
+      <div class="chart-toolbar">
+        <div class="toolbar-left">
+          <div class="breadcrumbs" id="breadcrumbs" style="display:none;"></div>
+          <span class="toolbar-title" id="chart-title">Omsattning</span>
+        </div>
+        <div class="toolbar-right">
+          <div class="chart-type-switch" id="chart-type-switch">
+            <button class="active" data-type="bar" title="Stapeldiagram">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="3" height="7" rx="0.5"/><rect x="6.5" y="4" width="3" height="10" rx="0.5"/><rect x="11" y="2" width="3" height="12" rx="0.5"/>
+              </svg>
+            </button>
+            <button data-type="line" title="Linjediagram">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2,12 5,7 8,9 11,4 14,6"/><circle cx="14" cy="6" r="1" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+          <div class="seg" id="view-mode-seg">
+            <button data-val="chart" class="active">Graf</button>
+            <button data-val="table">Tabell</button>
+            <button data-val="split">Delad</button>
+          </div>
+          <button class="tool-btn" id="btn-export" title="Exportera CSV">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M3 12v1.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V12"/>
+            </svg>
+            CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend" id="bar-legend"></div>
+
+      <!-- Chart + Table area -->
+      <div class="chart-area">
+        <div class="chart-container" id="bar-chart-container"></div>
+        <div id="bar-table-container" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- DONUT CHART PANEL -->
+    <div id="panel-donut" style="display:none;">
+      <div class="chart-toolbar">
+        <div class="toolbar-left">
+          <span class="toolbar-title">Fordelning</span>
+        </div>
+        <div class="toolbar-right">
+          <div class="seg" id="donut-source-seg">
+            <button data-val="channel" class="active">Per kanal</button>
+            <button data-val="category">Per kategori</button>
+          </div>
+          <div class="seg" id="donut-view-seg">
+            <button data-val="chart">Graf</button>
+            <button data-val="table">Tabell</button>
+            <button data-val="split" class="active">Delad</button>
+          </div>
+          <button class="tool-btn" id="btn-donut-export">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M3 12v1.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V12"/>
+            </svg>
+            CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="legend" id="donut-legend"></div>
+
+      <div class="donut-layout" id="donut-layout">
+        <div class="donut-chart-wrap">
+          <div id="donut-chart-container" style="width:260px;height:260px;"></div>
+        </div>
+        <div class="donut-table-wrap" id="donut-table-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="dashboard-footer">
+    <span>Kalla: Nyehandel Platform API &middot; Alla belopp i SEK exkl. moms &middot; Powered by NewChart.js v0.1.0</span>
+    <span>Klicka KPI-kort for att byta metric &middot; Dubbelklicka stapel for drill-down</span>
+  </div>
+</div>
+
+<!-- Custom tooltip (not NewChart's built-in) -->
+<div class="chart-tooltip" id="tooltip"></div>
+
+<!-- Include NewChart library -->
+<script src="/newchartjs.umd.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   DATA
+   ═══════════════════════════════════════════════════════════════ */
+const MONTHS = ["Jan","Feb","Mar","Apr","Maj","Jun","Jul","Aug","Sep","Okt","Nov","Dec"];
+const REV_26 = [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210];
+const REV_25 = [2200,2450,2380,2710,2590,2840,2310,2680,2920,2510,3120,3580];
+const ORD_26 = [412,468,431,502,478,528,419,487,519,453,564,611];
+const ORD_25 = [320,358,346,394,377,413,336,390,425,365,454,521];
+const AOV_26 = REV_26.map((r,i) => Math.round(r*1000/ORD_26[i]));
+const AOV_25 = REV_25.map((r,i) => Math.round(r*1000/ORD_25[i]));
+const BUDGET = [2700,2900,3000,3200,3100,3400,3000,3200,3500,3300,3700,4000];
+
+const CHANNEL_DATA = [
+  { label:"Direkt", value:12480, prev:9860 },
+  { label:"Google Ads", value:8320, prev:7110 },
+  { label:"Organisk", value:6940, prev:5230 },
+  { label:"Email", value:4680, prev:3920 },
+  { label:"Social", value:2510, prev:2180 },
+  { label:"Referral", value:1590, prev:1340 },
+];
+
+const CATEGORY_DATA = [
+  { label:"Madrasser", value:14200, orders:284, margin:42.3 },
+  { label:"Kuddar", value:8900, orders:1780, margin:51.2 },
+  { label:"Sangramar", value:6300, orders:126, margin:38.7 },
+  { label:"Baddtextil", value:4800, orders:960, margin:55.1 },
+  { label:"Tacken", value:3200, orders:640, margin:48.6 },
+  { label:"Tillbehor", value:1520, orders:304, margin:62.4 },
+];
+
+const SERIES_COLORS = ["#4c6ef5","#0ca678","#f08c00","#e03131","#7048e8","#1098ad","#d6336c","#5c7cfa","#20c997","#fcc419"];
+const COMPARE_COLOR = "#b3bac5";
+
+/* Drill-down generators */
+function genWeeks(monthVal) {
+  const w = [0.22,0.26,0.28,0.24];
+  return w.map((f,i) => ({ label: "V"+(i+1), value: Math.round(monthVal*f*(0.9+Math.random()*0.2)) }));
+}
+function genDays(weekVal) {
+  const days = ["Man","Tis","Ons","Tor","Fre","Lor","Son"];
+  const wt = [0.16,0.15,0.14,0.14,0.13,0.16,0.12];
+  return days.map((d,i) => ({ label:d, value: Math.round(weekVal*wt[i]*(0.85+Math.random()*0.3)) }));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+function fmt(n) {
+  if(n>=1e6) return (n/1e6).toFixed(1)+"M";
+  if(n>=1e4) return Math.round(n/1e3)+"k";
+  if(n>=1e3) return (n/1e3).toFixed(1)+"k";
+  return n.toLocaleString("sv-SE");
+}
+function fmtSEK(n) { return fmt(n)+" kr"; }
+function fmtFull(n) { return n.toLocaleString("sv-SE")+" kr"; }
+function pctChange(c,p) { return p===0?0:((c-p)/p*100); }
+
+function makeBadge(value) {
+  const pos = value >= 0;
+  return '<span class="badge '+(pos?"up":"down")+'">'+(pos?"&#9650;":"&#9660;")+" "+Math.abs(value).toFixed(1)+"%</span>";
+}
+
+function statusDotClass(value, target) {
+  const r = value/target;
+  return r>=1?"green":r>=0.9?"yellow":"red";
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SPARKLINE (inline SVG)
+   ═══════════════════════════════════════════════════════════════ */
+function sparklineSVG(data, w, h, color) {
+  w = w||80; h = h||28;
+  const min = Math.min(...data), max = Math.max(...data), range = max-min||1;
+  const pts = data.map((v,i) => ((i/(data.length-1))*w)+","+(h-((v-min)/range)*(h-4)-2)).join(" ");
+  const area = "0,"+h+" "+pts+" "+w+","+h;
+  const lastX = (data.length-1)/(data.length-1)*w;
+  const lastY = h-((data[data.length-1]-min)/range)*(h-4)-2;
+  return '<svg width="'+w+'" height="'+h+'" style="display:block">' +
+    '<polyline points="'+area+'" fill="'+color+'" fill-opacity="0.08" stroke="none"/>' +
+    '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<circle cx="'+lastX+'" cy="'+lastY+'" r="2" fill="'+color+'"/></svg>';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════ */
+let state = {
+  metric: "revenue",        // revenue | orders | aov
+  activeTab: "bar",         // bar | donut
+  chartType: "bar",         // bar | line
+  viewMode: "chart",        // chart | table | split
+  drillStack: [],           // [{label, data:[{label,value,prev,budget}]}]
+  legendVis: { current:true, previous:true, budget:true, average:true },
+  donutSource: "channel",   // channel | category
+  donutView: "split",       // chart | table | split
+  donutLegendVis: {},
+};
+
+let barChartInstance = null;
+let lineChartInstance = null;
+let donutChartInstance = null;
+
+/* ═══════════════════════════════════════════════════════════════
+   KPI CARDS
+   ═══════════════════════════════════════════════════════════════ */
+function renderKPIs() {
+  const totR26=REV_26.reduce((s,v)=>s+v,0)*1000, totR25=REV_25.reduce((s,v)=>s+v,0)*1000;
+  const totO26=ORD_26.reduce((s,v)=>s+v,0), totO25=ORD_25.reduce((s,v)=>s+v,0);
+  const aov26=Math.round(totR26/totO26), aov25=Math.round(totR25/totO25);
+  const budgetTarget = BUDGET.reduce((s,v)=>s+v,0)*1000;
+
+  const kpis = [
+    { id:"revenue", label:"Omsattning", value:totR26, prev:totR25, suffix:" kr",
+      spark:REV_26, color:SERIES_COLORS[0], target:budgetTarget },
+    { id:"orders", label:"Ordrar", value:totO26, prev:totO25, suffix:"",
+      spark:ORD_26, color:SERIES_COLORS[1], target:null },
+    { id:"aov", label:"AOV", value:aov26, prev:aov25, suffix:" kr",
+      spark:AOV_26, color:SERIES_COLORS[2], target:null },
+    { id:"margin", label:"Bruttomarginal", value:47.2, prev:44.8, suffix:"%",
+      spark:[42,43,44,45,44,46,45,47,48,46,48,47], color:SERIES_COLORS[3], target:null },
+  ];
+
+  const row = document.getElementById("kpi-row");
+  row.innerHTML = kpis.map(k => {
+    const chg = pctChange(k.value, k.prev);
+    const isActive = k.id === state.metric;
+    const sparkColor = isActive ? "#4c6ef5" : "#b3bac5";
+    let progressHTML = "";
+    if(k.target) {
+      const pct = Math.min(100, (k.value/k.target)*100);
+      const cls = k.value>=k.target?"var(--success)":k.value>=k.target*0.9?"var(--warning)":"var(--danger)";
+      progressHTML = '<div class="kpi-progress"><div class="kpi-progress-fill" style="width:'+pct+'%;background:'+cls+'"></div></div>';
+    }
+    return '<div class="kpi animate-in'+(isActive?" active":"")+'" data-metric="'+k.id+'">' +
+      '<div class="kpi-header"><div class="kpi-label">'+k.label+'</div>' +
+      (k.target ? '<span class="status-dot '+statusDotClass(k.value,k.target)+'"></span>' : '') +
+      '</div>' +
+      '<div class="kpi-value-row"><span class="kpi-value">'+fmt(k.value)+k.suffix+'</span>'+makeBadge(chg)+'</div>' +
+      '<div class="kpi-footer"><span class="kpi-prev">fg. '+fmt(k.prev)+k.suffix+'</span>' +
+      sparklineSVG(k.spark, 64, 22, sparkColor) + '</div>' +
+      progressHTML +
+      '</div>';
+  }).join("");
+
+  row.querySelectorAll(".kpi").forEach(el => {
+    el.addEventListener("click", () => {
+      const m = el.dataset.metric;
+      if(m === "margin") return;
+      state.metric = m;
+      state.drillStack = [];
+      renderKPIs();
+      renderBarChart();
+      updateBreadcrumbs();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BAR/LINE CHART
+   ═══════════════════════════════════════════════════════════════ */
+function getTopData() {
+  const curr = state.metric==="revenue"?REV_26:state.metric==="orders"?ORD_26:AOV_26;
+  const prev = state.metric==="revenue"?REV_25:state.metric==="orders"?ORD_25:AOV_25;
+  const bud = state.metric==="revenue"?BUDGET:null;
+  return MONTHS.map((m,i) => ({ label:m, value:curr[i], prev:prev[i], budget:bud?bud[i]:null }));
+}
+
+function getCurrentData() {
+  if(state.drillStack.length === 0) return getTopData();
+  return state.drillStack[state.drillStack.length-1].data;
+}
+
+function renderBarChart() {
+  const data = getCurrentData();
+  const isSEK = state.metric==="revenue"||state.metric==="aov";
+  const mult = state.metric==="aov"?1:1000;
+  const container = document.getElementById("bar-chart-container");
+  const tableContainer = document.getElementById("bar-table-container");
+  const show = state.viewMode;
+
+  // Update title
+  document.getElementById("chart-title").textContent =
+    state.metric==="revenue"?"Omsattning":state.metric==="orders"?"Ordrar":"Snittorder";
+
+  // Show/hide chart and table
+  container.style.display = (show==="chart"||show==="split") ? "block" : "none";
+  tableContainer.style.display = (show==="table"||show==="split") ? "block" : "none";
+  if(show==="split") tableContainer.className = "data-table-wrap split";
+  else tableContainer.className = "data-table-wrap";
+
+  // Destroy existing charts
+  if(barChartInstance) { barChartInstance.destroy(); barChartInstance = null; }
+  if(lineChartInstance) { lineChartInstance.destroy(); lineChartInstance = null; }
+
+  if(show==="chart"||show==="split") {
+    container.innerHTML = "";
+    container.style.minHeight = "350px";
+
+    // Build datasets based on legend visibility
+    const datasets = [];
+    if(state.legendVis.current) {
+      datasets.push({
+        label: state.drillStack.length===0 ? "2026" : "Nuvarande",
+        values: data.map(d => d.value),
+        color: SERIES_COLORS[0]
+      });
+    }
+    if(state.legendVis.previous) {
+      datasets.push({
+        label: state.drillStack.length===0 ? "2025" : "Foregaende",
+        values: data.map(d => d.prev || 0),
+        color: COMPARE_COLOR,
+        dash: true,
+        dashPattern: "5 3"
+      });
+    }
+
+    const labels = data.map(d => d.label);
+
+    // Build reference lines
+    const referenceLines = [];
+    if(state.legendVis.average) {
+      referenceLines.push({
+        value: "average",
+        label: "Snitt",
+        color: "#868e96",
+        dash: "4 3",
+        strokeWidth: 1
+      });
+    }
+    if(state.legendVis.budget && state.drillStack.length===0 && state.metric==="revenue") {
+      const budgetAvg = Math.round(BUDGET.reduce((s,v)=>s+v,0)/BUDGET.length);
+      referenceLines.push({
+        value: budgetAvg,
+        label: "Budget",
+        color: "#f08c00",
+        dash: "6 4",
+        strokeWidth: 1.5,
+        labelPosition: "right",
+        labelBackground: "#ffec99"
+      });
+    }
+
+    // Build per-bar markers (budget line per bar)
+    const barMarkers = [];
+    if(state.legendVis.budget && state.drillStack.length===0 && state.metric==="revenue") {
+      barMarkers.push({
+        values: BUDGET,
+        color: "#f08c00",
+        strokeWidth: 2
+      });
+    }
+
+    const sharedStyle = {
+      animation: { duration:600, easing:"easeOutCubic" },
+      fontFamily: "'Inter',sans-serif",
+      monoFamily: "'JetBrains Mono',monospace",
+      grid: { color:"#ebecf0", width:1 },
+      axis: { color:"#8993a4", fontSize:11 },
+      background: "#ffffff",
+      tooltip: { background:"#1a1d23", color:"#e8eaed", borderRadius:6, fontSize:11, padding:10 }
+    };
+
+    if(state.chartType === "bar") {
+      barChartInstance = NewChart.create("#bar-chart-container", {
+        type: "bar",
+        data: { labels, datasets },
+        style: { ...sharedStyle, bar: { borderRadius:4, gap:0.15 } },
+        options: {
+          responsive:true,
+          legend:{ enabled:false },
+          padding:20,
+          referenceLines: referenceLines,
+          barMarkers: barMarkers
+        }
+      });
+    } else {
+      lineChartInstance = NewChart.create("#bar-chart-container", {
+        type: "line",
+        data: { labels, datasets },
+        style: { ...sharedStyle, line: { width:2.5, tension:0.3, pointRadius:5, pointBorderWidth:2.5, pointBorderColor:"#ffffff" } },
+        options: {
+          responsive:true,
+          smooth:true,
+          showPoints:true,
+          fill: state.legendVis.current,
+          legend:{ enabled:false },
+          padding:20
+        }
+      });
+    }
+
+    // Add double-click drill-down
+    container.addEventListener("dblclick", handleDrillDown);
+  }
+
+  // Render table
+  if(show==="table"||show==="split") {
+    renderBarTable(data, isSEK, mult, tableContainer);
+  }
+}
+
+function handleDrillDown(e) {
+  if(state.drillStack.length >= 2) return;
+  const data = getCurrentData();
+  const container = document.getElementById("bar-chart-container");
+  const rect = container.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const pct = x / rect.width;
+  const idx = Math.min(data.length-1, Math.max(0, Math.floor(pct * data.length)));
+  const d = data[idx];
+
+  if(state.drillStack.length === 0) {
+    const weeks = genWeeks(d.value);
+    state.drillStack.push({
+      label: d.label,
+      data: weeks.map(w => ({ ...w, prev: Math.round(w.value*0.82), budget:null }))
+    });
+  } else if(state.drillStack.length === 1) {
+    const days = genDays(d.value);
+    state.drillStack.push({
+      label: d.label,
+      data: days.map(dy => ({ ...dy, prev: Math.round(dy.value*0.85), budget:null }))
+    });
+  }
+
+  updateBreadcrumbs();
+  renderBarChart();
+}
+
+function renderBarTable(data, isSEK, mult, container) {
+  const hasBudget = state.drillStack.length===0 && state.metric==="revenue";
+  let html = '<table class="data-table"><thead><tr>' +
+    '<th>Period</th>' +
+    '<th class="right">'+(isSEK?"Omsattning":"Antal")+'</th>' +
+    '<th class="right">Fg. period</th>' +
+    '<th class="right">Forandring</th>' +
+    (hasBudget?'<th class="right">Budget</th>':'') +
+    '<th class="center">Status</th>' +
+    '</tr></thead><tbody>';
+
+  data.forEach((d,i) => {
+    const chg = d.prev ? pctChange(d.value, d.prev) : 0;
+    const valStr = isSEK ? fmtSEK(d.value*mult) : fmt(d.value);
+    const prevStr = d.prev ? (isSEK ? fmtSEK(d.prev*mult) : fmt(d.prev)) : "–";
+    const budStr = d.budget ? fmtSEK(d.budget*mult) : "";
+    const statusHTML = d.budget
+      ? '<span class="status-dot '+statusDotClass(d.value,d.budget)+'"></span>'
+      : '<span style="color:'+(chg>=0?"var(--success)":"var(--danger)")+'">&#9679;</span>';
+
+    html += '<tr>' +
+      '<td class="label-cell">'+d.label+'</td>' +
+      '<td class="right mono">'+valStr+'</td>' +
+      '<td class="right mono">'+prevStr+'</td>' +
+      '<td class="right">'+makeBadge(chg)+'</td>' +
+      (hasBudget?'<td class="right mono">'+budStr+'</td>':'') +
+      '<td class="center">'+statusHTML+'</td>' +
+      '</tr>';
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BREADCRUMBS
+   ═══════════════════════════════════════════════════════════════ */
+function updateBreadcrumbs() {
+  const bc = document.getElementById("breadcrumbs");
+  const title = document.getElementById("chart-title");
+
+  if(state.drillStack.length === 0) {
+    bc.style.display = "none";
+    title.style.display = "";
+    return;
+  }
+
+  bc.style.display = "flex";
+  title.style.display = "none";
+
+  let html = '<button onclick="drillTo(-1)" title="Hem">' +
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#4c6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M2 8l6-5.5L14 8"/><path d="M3.5 9v5a.5.5 0 00.5.5h3v-3.5h2v3.5h3a.5.5 0 00.5-.5V9"/></svg></button>';
+
+  state.drillStack.forEach((s,i) => {
+    const isCurrent = i === state.drillStack.length-1;
+    html += '<span class="sep">&#8250;</span>';
+    html += '<button'+(isCurrent?' class="current"':' onclick="drillTo('+i+')"')+'>'+s.label+'</button>';
+  });
+
+  bc.innerHTML = html;
+}
+
+function drillTo(idx) {
+  if(idx === -1) state.drillStack = [];
+  else state.drillStack = state.drillStack.slice(0, idx+1);
+  updateBreadcrumbs();
+  renderBarChart();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEGEND
+   ═══════════════════════════════════════════════════════════════ */
+function renderBarLegend() {
+  const items = [
+    { key:"current", label:"2026", color:SERIES_COLORS[0] },
+    { key:"previous", label:"2025", color:COMPARE_COLOR, ref:true },
+    ...(state.metric==="revenue" ? [{ key:"budget", label:"Budget", color:"#f08c00", ref:true }] : []),
+    { key:"average", label:"Snitt", color:"#868e96", ref:true },
+  ];
+
+  const el = document.getElementById("bar-legend");
+  el.innerHTML = items.map(it => {
+    const vis = state.legendVis[it.key] !== false;
+    return '<button class="legend-item'+(vis?"":" hidden")+'" data-key="'+it.key+'">' +
+      '<span class="legend-swatch" style="background:'+(vis?it.color:"var(--text-faint)")+'"></span>' +
+      it.label +
+      (it.ref ? ' <span class="legend-ref">(ref)</span>' : '') +
+      '</button>';
+  }).join("");
+
+  el.querySelectorAll(".legend-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const k = btn.dataset.key;
+      state.legendVis[k] = state.legendVis[k] === false ? true : false;
+      renderBarLegend();
+      renderBarChart();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DONUT CHART
+   ═══════════════════════════════════════════════════════════════ */
+function renderDonutChart() {
+  const raw = state.donutSource==="channel" ? CHANNEL_DATA : CATEGORY_DATA;
+  const data = raw.filter((_,i) => state.donutLegendVis[i] !== false);
+  const total = data.reduce((s,d) => s+d.value, 0);
+  const show = state.donutView;
+  const chartWrap = document.querySelector(".donut-chart-wrap");
+  const tableWrap = document.getElementById("donut-table-container");
+
+  chartWrap.style.display = (show==="chart"||show==="split") ? "" : "none";
+  tableWrap.style.display = (show==="table"||show==="split") ? "" : "none";
+
+  // Destroy existing
+  if(donutChartInstance) { donutChartInstance.destroy(); donutChartInstance = null; }
+
+  if(show==="chart"||show==="split") {
+    const container = document.getElementById("donut-chart-container");
+    container.innerHTML = "";
+
+    const colors = data.map(d => SERIES_COLORS[raw.indexOf(d) % SERIES_COLORS.length]);
+
+    donutChartInstance = NewChart.create("#donut-chart-container", {
+      type: "pie",
+      data: {
+        labels: data.map(d => d.label),
+        datasets: [{
+          values: data.map(d => d.value),
+          colors: colors
+        }]
+      },
+      style: {
+        pie: { innerRadius:50, borderWidth:2, borderColor:"#ffffff" },
+        animation: { duration:600, easing:"easeOutCubic" },
+        fontFamily: "'Inter',sans-serif",
+        monoFamily: "'JetBrains Mono',monospace",
+        fontColor: "#172b4d",
+        background: "#ffffff",
+        tooltip: { background:"#1a1d23", color:"#e8eaed", borderRadius:6, fontSize:11, padding:10 }
+      },
+      options: {
+        responsive:true,
+        legend:{ enabled:false },
+        labels:{ enabled:false },
+        padding:10,
+        onClick: function(info) {
+          console.log("Donut slice clicked:", info.label, info.value, info.percent.toFixed(1)+"%");
+        }
+      }
+    });
+  }
+
+  // Table
+  if(show==="table"||show==="split") {
+    renderDonutTable(raw, total, tableWrap);
+  }
+
+  // Legend
+  renderDonutLegend(raw);
+}
+
+function renderDonutTable(raw, total, container) {
+  const isChannel = state.donutSource==="channel";
+  let html = '<table class="data-table"><thead><tr>' +
+    '<th>'+(isChannel?"Kanal":"Kategori")+'</th>' +
+    '<th class="right">Omsattning</th>' +
+    '<th class="right">Andel</th>' +
+    '<th class="right">'+(isChannel?"YoY":"Marginal")+'</th>' +
+    '</tr></thead><tbody>';
+
+  raw.forEach((d,i) => {
+    const pct = ((d.value/raw.reduce((s,x)=>s+x.value,0))*100).toFixed(1);
+    const lastCol = isChannel
+      ? makeBadge(pctChange(d.value, d.prev))
+      : d.margin+"%";
+
+    html += '<tr>' +
+      '<td class="label-cell"><span style="display:inline-flex;align-items:center;gap:8px">' +
+      '<span style="width:10px;height:10px;border-radius:3px;background:'+SERIES_COLORS[i%SERIES_COLORS.length]+';flex-shrink:0"></span>' +
+      d.label+'</span></td>' +
+      '<td class="right mono">'+fmtSEK(d.value*1000)+'</td>' +
+      '<td class="right mono">'+pct+'%</td>' +
+      '<td class="right">'+(isChannel?lastCol:'<span class="mono">'+lastCol+'</span>')+'</td>' +
+      '</tr>';
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderDonutLegend(raw) {
+  const el = document.getElementById("donut-legend");
+  el.innerHTML = raw.map((d,i) => {
+    const vis = state.donutLegendVis[i] !== false;
+    return '<button class="legend-item'+(vis?"":" hidden")+'" data-idx="'+i+'">' +
+      '<span class="legend-swatch" style="background:'+(vis?SERIES_COLORS[i%SERIES_COLORS.length]:"var(--text-faint)")+'"></span>' +
+      d.label + '</button>';
+  }).join("");
+
+  el.querySelectorAll(".legend-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.dataset.idx);
+      state.donutLegendVis[idx] = state.donutLegendVis[idx] === false ? true : false;
+      renderDonutChart();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CSV EXPORT
+   ═══════════════════════════════════════════════════════════════ */
+function exportCSV() {
+  const data = getCurrentData();
+  const isSEK = state.metric==="revenue"||state.metric==="aov";
+  const mult = state.metric==="aov"?1:1000;
+  const header = ["Period", state.metric==="revenue"?"Omsattning":state.metric==="orders"?"Ordrar":"AOV", "Foregaende"];
+  const csv = [header.join(";"), ...data.map(d => [d.label, d.value*mult, (d.prev||0)*mult].join(";"))].join("\n");
+  downloadCSV(csv, state.metric+"_export.csv");
+}
+
+function exportDonutCSV() {
+  const raw = state.donutSource==="channel" ? CHANNEL_DATA : CATEGORY_DATA;
+  const isChannel = state.donutSource==="channel";
+  const header = [isChannel?"Kanal":"Kategori","Omsattning",isChannel?"Foregaende":"Marginal"];
+  const csv = [header.join(";"), ...raw.map(d => {
+    return [d.label, d.value*1000, isChannel?(d.prev*1000):d.margin].join(";");
+  })].join("\n");
+  downloadCSV(csv, state.donutSource+"_export.csv");
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EVENT BINDING
+   ═══════════════════════════════════════════════════════════════ */
+function setupEvents() {
+  // Tab switching
+  document.querySelectorAll(".tab-bar button[data-tab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-bar button[data-tab]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.activeTab = btn.dataset.tab;
+      document.getElementById("panel-bar").style.display = state.activeTab==="bar"?"":"none";
+      document.getElementById("panel-donut").style.display = state.activeTab==="donut"?"":"none";
+      if(state.activeTab==="donut") renderDonutChart();
+    });
+  });
+
+  // Chart type switch
+  document.querySelectorAll("#chart-type-switch button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#chart-type-switch button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.chartType = btn.dataset.type;
+      renderBarChart();
+    });
+  });
+
+  // View mode segmented controls
+  setupSeg("view-mode-seg", val => { state.viewMode = val; renderBarChart(); });
+  setupSeg("donut-view-seg", val => { state.donutView = val; renderDonutChart(); });
+  setupSeg("donut-source-seg", val => {
+    state.donutSource = val;
+    state.donutLegendVis = {};
+    renderDonutChart();
+  });
+  setupSeg("period-seg", val => { /* period change - visual only for demo */ });
+
+  // Export
+  document.getElementById("btn-export").addEventListener("click", exportCSV);
+  document.getElementById("btn-donut-export").addEventListener("click", exportDonutCSV);
+}
+
+function setupSeg(id, onChange) {
+  const seg = document.getElementById(id);
+  if(!seg) return;
+  seg.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      seg.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      onChange(btn.dataset.val);
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════════ */
+function init() {
+  // Set date/time
+  document.getElementById("today-date").textContent = new Date().toLocaleDateString("sv-SE");
+  document.getElementById("live-time").textContent = new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+
+  // Update live time every minute
+  setInterval(() => {
+    document.getElementById("live-time").textContent = new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+  }, 60000);
+
+  setupEvents();
+  renderKPIs();
+  renderBarLegend();
+  renderBarChart();
+  updateBreadcrumbs();
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

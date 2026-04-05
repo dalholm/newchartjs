@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Sparkline Examples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6; --border-light: #ebecf0;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4; --text-faint: #b3bac5;
+      --primary: #4c6ef5; --success: #0ca678; --danger: #e03131; --warning: #f08c00;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; }
+
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .kpi-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--surface); }
+    .kpi-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .kpi-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .kpi-value { font-size: 22px; font-weight: 700; font-family: var(--mono); }
+    .kpi-spark { width: 100px; height: 32px; }
+    .kpi-change { font-size: 10px; font-weight: 600; font-family: var(--mono); margin-top: 4px; }
+    .kpi-change.up { color: var(--success); }
+    .kpi-change.down { color: var(--danger); }
+
+    /* Data Table with sparklines */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .data-table th { text-align: left; padding: 10px 12px; font-size: 10px; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border); background: #f8f9fb; }
+    .data-table th.right { text-align: right; }
+    .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+    .data-table td.right { text-align: right; font-family: var(--mono); }
+    .data-table td.name { font-weight: 500; }
+    .data-table tr:hover { background: #f8f9fb; }
+    .table-spark { width: 80px; height: 24px; display: inline-block; vertical-align: middle; }
+    .badge { font-size: 10px; font-weight: 600; font-family: var(--mono); border-radius: 3px;
+      padding: 1px 6px; display: inline-block; }
+    .badge.up { color: #099268; background: #c3fae8; }
+    .badge.down { color: #c92a2a; background: #ffc9c9; }
+
+    /* Variants showcase */
+    .variant-row { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+    .variant-item { text-align: center; }
+    .variant-item .label { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+    .spark-demo { border: 1px solid var(--border-light); border-radius: 4px; padding: 4px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <div class="page-header">
+    <h1>Sparkline Chart</h1>
+    <p>Kompakta inline-diagram utan axlar — for KPI-kort, tabellceller och statusoversikter.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. KPI Cards with sparklines -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>KPI-kort med trendlinjer</h2>
+        <p>Typisk ERP-dashboard-oversta-raden — stort varde + sparkline trend</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid" id="kpi-grid"></div>
+      </div>
+    </div>
+
+    <!-- 2. Data table with sparklines -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Produkttabell med trendkolumn</h2>
+        <p>Sparklines i tabellceller — visar 12-manaderstrend per produktrad</p>
+      </div>
+      <div class="example-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Produkt</th>
+              <th class="right">Omsattning</th>
+              <th>Trend (12m)</th>
+              <th class="right">Forandring</th>
+            </tr>
+          </thead>
+          <tbody id="product-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. Variant showcase -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Varianter: line, area, bar</h2>
+        <p>Tre renderingslage — samma data, olika visuell stil</p>
+      </div>
+      <div class="example-body">
+        <div class="variant-row" id="variant-row"></div>
+      </div>
+    </div>
+
+    <!-- 4. Bar sparklines with negative values -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Bar-sparklines med negativa varden</h2>
+        <p>Visar dagliga forandringar — negativa staplar i rott</p>
+      </div>
+      <div class="example-body">
+        <div class="kpi-grid" id="change-grid"></div>
+      </div>
+    </div>
+
+    <!-- 5. Reference lines -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Med referenslinje</h2>
+        <p>Streckad nolllinje eller malvarde — visar var trend ligger relativt mal</p>
+      </div>
+      <div class="example-body">
+        <div class="variant-row" id="ref-row"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+// Helper data
+const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+
+const kpis = [
+  { label: 'Omsattning', value: '38.9M', change: 12.4, data: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210], color: '#4c6ef5' },
+  { label: 'Ordrar', value: '5,872', change: 8.2, data: [412,468,431,502,478,528,419,487,519,453,564,611], color: '#0ca678' },
+  { label: 'Snittorder', value: '6,624', change: 3.8, data: [6917,6667,6868,6932,6715,6913,6897,6861,6898,6887,6898,6891], color: '#7048e8' },
+  { label: 'Returandel', value: '3.8%', change: -0.6, data: [4.2,4.0,4.5,3.9,4.1,3.7,3.8,3.5,3.6,3.9,3.4,3.8], color: '#e03131' }
+];
+
+// 1. KPI Cards
+const kpiGrid = document.getElementById('kpi-grid');
+kpis.forEach(kpi => {
+  const card = document.createElement('div');
+  card.className = 'kpi-card';
+  const isUp = kpi.change >= 0;
+  card.innerHTML = `
+    <div class="kpi-label">${kpi.label}</div>
+    <div class="kpi-row">
+      <div class="kpi-value">${kpi.value}</div>
+      <div class="kpi-spark" id="spark-${kpi.label.toLowerCase().replace(/[^a-z]/g,'')}"></div>
+    </div>
+    <div class="kpi-change ${isUp?'up':'down'}">${isUp?'&#9650;':'&#9660;'} ${Math.abs(kpi.change).toFixed(1)}%</div>
+  `;
+  kpiGrid.appendChild(card);
+
+  setTimeout(() => {
+    NewChart.create(`#spark-${kpi.label.toLowerCase().replace(/[^a-z]/g,'')}`, {
+      type: 'sparkline',
+      data: { datasets: [{ values: kpi.data, color: kpi.color }] },
+      options: { variant: 'area' }
+    });
+  }, 0);
+});
+
+// 2. Product table
+const products = [
+  { name: 'Madrasser', revenue: '14,200', change: 15.2, trend: [980,1050,1020,1180,1120,1280,1050,1200,1300,1100,1380,1480] },
+  { name: 'Kuddar', revenue: '8,900', change: 9.8, trend: [680,720,700,780,740,820,680,760,800,700,860,940] },
+  { name: 'Sangramar', revenue: '6,300', change: -2.1, trend: [580,540,560,520,500,530,480,520,500,490,510,480] },
+  { name: 'Baddtextil', revenue: '4,800', change: 22.4, trend: [320,340,360,380,400,420,380,410,440,400,460,500] },
+  { name: 'Tacken', revenue: '3,200', change: 5.6, trend: [240,250,260,270,265,280,260,275,290,270,300,310] },
+  { name: 'Tillbehor', revenue: '1,520', change: 18.9, trend: [100,105,110,120,125,135,115,130,140,120,150,165] }
+];
+
+const tbody = document.getElementById('product-table');
+products.forEach((p, i) => {
+  const tr = document.createElement('tr');
+  const isUp = p.change >= 0;
+  tr.innerHTML = `
+    <td class="name">${p.name}</td>
+    <td class="right">${p.revenue} tkr</td>
+    <td><div class="table-spark" id="table-spark-${i}"></div></td>
+    <td class="right"><span class="badge ${isUp?'up':'down'}">${isUp?'&#9650;':'&#9660;'} ${Math.abs(p.change).toFixed(1)}%</span></td>
+  `;
+  tbody.appendChild(tr);
+
+  setTimeout(() => {
+    NewChart.create(`#table-spark-${i}`, {
+      type: 'sparkline',
+      data: { datasets: [{ values: p.trend, color: isUp ? '#0ca678' : '#e03131' }] },
+      options: { variant: 'line' }
+    });
+  }, 0);
+});
+
+// 3. Variants
+const variantData = [28,32,25,38,34,42,30,36,40,35,44,48];
+const variants = ['line', 'area', 'bar'];
+const variantRow = document.getElementById('variant-row');
+variants.forEach(v => {
+  const item = document.createElement('div');
+  item.className = 'variant-item';
+  item.innerHTML = `
+    <div class="spark-demo" style="width:140px;height:40px;" id="variant-${v}"></div>
+    <div class="label">${v}</div>
+  `;
+  variantRow.appendChild(item);
+
+  setTimeout(() => {
+    NewChart.create(`#variant-${v}`, {
+      type: 'sparkline',
+      data: { datasets: [{ values: variantData, color: '#4c6ef5' }] },
+      options: { variant: v }
+    });
+  }, 0);
+});
+
+// 4. Bar sparklines with negatives
+const changes = [
+  { label: 'Marginalforandring', data: [1.2,-0.8,0.5,1.5,-0.3,0.8,-1.2,0.6,1.0,-0.5,1.4,0.9] },
+  { label: 'Lagerniva delta', data: [-200,150,-350,400,-100,280,-180,320,500,-150,400,-80] }
+];
+const changeGrid = document.getElementById('change-grid');
+changes.forEach((c, i) => {
+  const card = document.createElement('div');
+  card.className = 'kpi-card';
+  card.innerHTML = `
+    <div class="kpi-label">${c.label}</div>
+    <div style="width:200px;height:40px;margin-top:8px;" id="change-spark-${i}"></div>
+  `;
+  changeGrid.appendChild(card);
+
+  setTimeout(() => {
+    NewChart.create(`#change-spark-${i}`, {
+      type: 'sparkline',
+      data: { datasets: [{ values: c.data, color: '#4c6ef5' }] },
+      options: { variant: 'bar', highlightLast: false },
+      style: { sparkline: { negativeColor: '#e03131' } }
+    });
+  }, 0);
+});
+
+// 5. Reference lines
+const refRow = document.getElementById('ref-row');
+const refExamples = [
+  { label: 'Nolllinje', data: [2,-1,3,-2,1,4,-1,2,3,-1,2,5], ref: 0, color: '#4c6ef5' },
+  { label: 'Mallinje (400)', data: [380,390,410,395,420,405,430,415,440,425,450,460], ref: 400, color: '#0ca678' },
+  { label: 'Snitt-ref', data: [50,55,48,62,58,70,52,65,72,60,78,82], ref: 62.7, color: '#7048e8' }
+];
+refExamples.forEach((r, i) => {
+  const item = document.createElement('div');
+  item.className = 'variant-item';
+  item.innerHTML = `
+    <div class="spark-demo" style="width:160px;height:44px;" id="ref-spark-${i}"></div>
+    <div class="label">${r.label}</div>
+  `;
+  refRow.appendChild(item);
+
+  setTimeout(() => {
+    NewChart.create(`#ref-spark-${i}`, {
+      type: 'sparkline',
+      data: { datasets: [{ values: r.data, color: r.color }] },
+      options: { variant: 'area', referenceLine: r.ref }
+    });
+  }, 0);
+});
+</script>
+</body>
+</html>

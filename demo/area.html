@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Area Chart Examples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4;
+      --primary: #4c6ef5;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; }
+    .chart-container { width: 100%; min-height: 350px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <div class="page-header">
+    <h1>Area Chart</h1>
+    <p>Gradientfyllda ytor for cashflow, lagerbestand, kumulativa intakter och stacked fordelning over tid.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. Cashflow -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Kassaflodesanalys</h2>
+        <p>In- och utflodesserier med gradient-yta</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-cashflow"></div>
+      </div>
+    </div>
+
+    <!-- 2. Single cumulative -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Kumulativ omsattning</h2>
+        <p>Ackumulerad intakt med fylld yta</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-cumulative"></div>
+      </div>
+    </div>
+
+    <!-- 3. Multi-series area -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Trafikkallor over tid</h2>
+        <p>Flera serier med overlappande gradient-ytor</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-traffic"></div>
+      </div>
+    </div>
+
+    <!-- 4. Stacked area -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Intakter per region (stacked)</h2>
+        <p>Staplad area-vy visar total och per-region-bidrag</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-stacked-area"></div>
+      </div>
+    </div>
+
+    <!-- 5. Inventory levels -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Lagervarde over tid</h2>
+        <p>Mjuk area med ljus gradient — visar lagerniva per manad</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-inventory"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+
+// 1. Cashflow
+NewChart.create('#chart-cashflow', {
+  type: 'area',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Inflode', values: [3200,3500,3100,3800,3600,4000,3300,3700,3900,3400,4200,4500], color: '#0ca678' },
+      { label: 'Utflode', values: [2800,2900,3000,2700,3100,2900,3200,3000,2800,3100,3000,3200], color: '#e03131' }
+    ]
+  }
+});
+
+// 2. Cumulative
+const monthly = [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210];
+const cumulative = [monthly[0]];
+for (let i = 1; i < monthly.length; i++) cumulative.push(cumulative[i-1] + monthly[i]);
+
+NewChart.create('#chart-cumulative', {
+  type: 'area',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'Kumulativ omsattning (tkr)',
+      values: cumulative,
+      color: '#4c6ef5'
+    }]
+  }
+});
+
+// 3. Multi-series
+NewChart.create('#chart-traffic', {
+  type: 'area',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Direkt', values: [12000,13200,12800,14500,13800,15200,12500,14000,14800,13000,16000,17200], color: '#4c6ef5' },
+      { label: 'Organisk', values: [8400,9200,8800,10100,9600,10800,8900,10000,10500,9100,11200,12400], color: '#0ca678' },
+      { label: 'Betald', values: [5600,6100,5800,6800,6400,7200,5900,6600,7000,6100,7500,8200], color: '#f08c00' }
+    ]
+  },
+  style: {
+    area: { fillOpacity: 0.15 }
+  }
+});
+
+// 4. Stacked area
+NewChart.create('#chart-stacked-area', {
+  type: 'area',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Sverige', values: [1800,2000,1900,2200,2100,2400,1850,2150,2300,2000,2500,2700], color: '#4c6ef5' },
+      { label: 'Norge', values: [600,680,640,750,710,800,620,700,750,650,800,880], color: '#0ca678' },
+      { label: 'Finland', values: [350,400,380,430,410,460,370,420,450,380,480,530], color: '#f08c00' },
+      { label: 'Danmark', values: [200,240,220,280,260,290,210,250,270,230,310,340], color: '#7048e8' }
+    ]
+  },
+  options: { stacked: true },
+  style: {
+    area: { fillOpacity: 0.4 }
+  }
+});
+
+// 5. Inventory
+NewChart.create('#chart-inventory', {
+  type: 'area',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'Lagervarde (tkr)',
+      values: [8200,7800,8500,7600,8900,8100,7400,8300,9200,8800,9500,8600],
+      color: '#1098ad'
+    }]
+  },
+  style: {
+    area: { fillOpacity: 0.2 }
+  }
+});
+</script>
+</body>
+</html>

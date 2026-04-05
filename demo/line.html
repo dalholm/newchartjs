@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Line Chart Examples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4;
+      --primary: #4c6ef5;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; }
+    .chart-container { width: 100%; min-height: 350px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <div class="page-header">
+    <h1>Line Chart</h1>
+    <p>Trendlinjer, multi-serie, jamforelser med streckade linjer, och crosshair-interaktion.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. Single trend -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Orderingangstrend</h2>
+        <p>Enkel linje med crosshair och punkter</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-trend"></div>
+      </div>
+    </div>
+
+    <!-- 2. Multi-series -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Forsaljning per kanal</h2>
+        <p>Flera serier med legenden for att togla synlighet</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-multi"></div>
+      </div>
+    </div>
+
+    <!-- 3. Comparison with dashed previous period -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>2026 vs 2025 (streckad referens)</h2>
+        <p>Jamfor innevarande ar mot foregaende med streckad linje</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-compare"></div>
+      </div>
+    </div>
+
+    <!-- 4. Line with area fill -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Kumulativ intakt med area-fill</h2>
+        <p>LineChart med fill: true for att visualisera ackumulerade intakter</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-fill"></div>
+      </div>
+    </div>
+
+    <!-- 5. Straight lines (no smooth) -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Lagernivaer (raka linjer)</h2>
+        <p>smooth: false for stegvisa forandringar</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-straight"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+
+// 1. Single trend
+NewChart.create('#chart-trend', {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'Ordrar',
+      values: [412,468,431,502,478,528,419,487,519,453,564,611],
+      color: '#4c6ef5'
+    }]
+  }
+});
+
+// 2. Multi-series
+NewChart.create('#chart-multi', {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Direkt', values: [980,1120,1050,1250,1180,1340,1020,1210,1290,1100,1420,1520], color: '#4c6ef5' },
+      { label: 'Google Ads', values: [640,720,680,810,760,870,660,780,840,720,920,1000], color: '#0ca678' },
+      { label: 'Organisk', values: [480,560,520,630,590,680,500,600,650,540,720,790], color: '#f08c00' },
+      { label: 'Email', values: [320,380,350,420,390,450,340,400,430,360,480,530], color: '#7048e8' }
+    ]
+  }
+});
+
+// 3. Comparison with dashed
+NewChart.create('#chart-compare', {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '2026', values: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210], color: '#4c6ef5' },
+      { label: '2025', values: [2200,2450,2380,2710,2590,2840,2310,2680,2920,2510,3120,3580], color: '#b3bac5', dash: true, ref: true }
+    ]
+  }
+});
+
+// 4. Line with fill
+const cumulative = [2850];
+[3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210].forEach(v => cumulative.push(cumulative[cumulative.length-1]+v));
+
+NewChart.create('#chart-fill', {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'Kumulativ (tkr)',
+      values: cumulative,
+      color: '#0ca678'
+    }]
+  },
+  options: { fill: true }
+});
+
+// 5. Straight lines
+NewChart.create('#chart-straight', {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Lager A', values: [1200,1150,1080,1250,1180,1100,1050,1200,1320,1280,1350,1400], color: '#4c6ef5' },
+      { label: 'Lager B', values: [800,820,780,850,830,790,810,870,900,880,920,950], color: '#0ca678' }
+    ]
+  },
+  options: { smooth: false }
+});
+</script>
+</body>
+</html>

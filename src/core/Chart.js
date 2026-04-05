@@ -108,12 +108,24 @@ export class Chart {
   }
 
   /**
-   * Update container dimensions
+   * Update container dimensions.
+   * Temporarily hides chart content so getBoundingClientRect returns the
+   * element's CSS-defined size, not a size inflated by its own children
+   * (legend, SVG, etc.). This prevents the resize-loop where content pushes
+   * the element taller → ResizeObserver fires → re-render at larger size → repeat.
    */
   updateDimensions() {
+    // Hide children so they don't inflate the measurement
+    const children = Array.from(this.element.children);
+    const prevDisplay = children.map(c => c.style.display);
+    children.forEach(c => { c.style.display = 'none'; });
+
     const rect = this.element.getBoundingClientRect();
     this.width = Math.max(rect.width, 300) || 600;
     this.height = Math.max(rect.height, 300) || 400;
+
+    // Restore children
+    children.forEach((c, i) => { c.style.display = prevDisplay[i]; });
 
     if (this.renderer) {
       this.renderer.width = this.width;

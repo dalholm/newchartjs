@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Bar Chart Examples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4;
+      --primary: #4c6ef5;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; }
+    .chart-container { width: 100%; min-height: 350px; }
+    .chart-container.short { min-height: 300px; }
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .row > .example-card { flex: 1; min-width: 400px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <div class="page-header">
+    <h1>Bar Chart</h1>
+    <p>Vertikala och horisontella staplar, grupperade, stacked, och 100% stacked — typiska ERP-scenarion.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. Basic revenue bars -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Manatlig omsattning</h2>
+        <p>Enkel stapelserie med referenslinje for budget</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-revenue"></div>
+      </div>
+    </div>
+
+    <!-- 2. Grouped comparison -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Innevarande ar vs foregaende ar</h2>
+        <p>Grupperade staplar for periodjamforelse</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-comparison"></div>
+      </div>
+    </div>
+
+    <!-- 3. Stacked -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Intakter per produktkategori (stacked)</h2>
+        <p>Staplad vy visar total och fordelning per kategori</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-stacked"></div>
+      </div>
+    </div>
+
+    <!-- 4. 100% Stacked -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Kostnadfordelning (100% stacked)</h2>
+        <p>Visar proportionell fordelning per manad — varje stapel summerar till 100%</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-percent"></div>
+      </div>
+    </div>
+
+    <!-- 5. With bar markers -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Budget vs utfall med markers</h2>
+        <p>Per-stapel budgetmarkorer visar mal per manad</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-markers"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+
+// 1. Basic revenue
+NewChart.create('#chart-revenue', {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'Omsattning (tkr)',
+      values: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210],
+      color: '#4c6ef5'
+    }]
+  },
+  options: {
+    referenceLines: [
+      { value: 3200, label: 'Budget snitt', color: '#868e96', dash: '6 4' }
+    ]
+  }
+});
+
+// 2. Grouped comparison
+NewChart.create('#chart-comparison', {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '2026', values: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210], color: '#4c6ef5' },
+      { label: '2025', values: [2200,2450,2380,2710,2590,2840,2310,2680,2920,2510,3120,3580], color: '#b3bac5' }
+    ]
+  }
+});
+
+// 3. Stacked
+NewChart.create('#chart-stacked', {
+  type: 'bar',
+  data: {
+    labels: ['Q1','Q2','Q3','Q4'],
+    datasets: [
+      { label: 'Madrasser', values: [4200,4800,3900,5100], color: '#4c6ef5' },
+      { label: 'Kuddar', values: [2800,2600,2900,3100], color: '#0ca678' },
+      { label: 'Sangramar', values: [1800,2100,1600,2400], color: '#f08c00' },
+      { label: 'Tillbehor', values: [900,1100,800,1200], color: '#7048e8' }
+    ]
+  },
+  options: { stacked: true }
+});
+
+// 4. 100% Stacked
+NewChart.create('#chart-percent', {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Personal', values: [420,430,440,445,450,460,465,470,480,490,500,510], color: '#4c6ef5' },
+      { label: 'Material', values: [280,290,285,300,310,295,305,315,320,310,325,330], color: '#0ca678' },
+      { label: 'Logistik', values: [180,175,185,190,195,200,205,210,215,220,225,230], color: '#f08c00' },
+      { label: 'Ovrigt', values: [120,105,90,65,45,45,25,5,85,80,50,30], color: '#e03131' }
+    ]
+  },
+  options: { stacked: 'percent' }
+});
+
+// 5. Bar markers (budget per bar)
+const BUDGET = [2700,2900,3000,3200,3100,3400,3000,3200,3500,3300,3700,4000];
+NewChart.create('#chart-markers', {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'Utfall (tkr)',
+      values: [2850,3120,2960,3480,3210,3650,2890,3340,3580,3120,3890,4210],
+      color: '#4c6ef5'
+    }]
+  },
+  options: {
+    barMarkers: [
+      { label: 'Budget', values: BUDGET, color: '#f08c00', strokeWidth: 2 }
+    ]
+  }
+});
+</script>
+</body>
+</html>

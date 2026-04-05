@@ -162,6 +162,114 @@ export const LINE_DEFAULTS = {
 };
 
 /**
+ * Default configuration for Area charts
+ */
+export const AREA_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'area',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    line: {
+      width: 2,
+      tension: 0.4,
+      pointRadius: 4,
+      pointBorderWidth: 2,
+      pointBorderColor: '#ffffff'
+    },
+    area: {
+      fillOpacity: 0.25
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    smooth: true,
+    showPoints: true,
+    stacked: false,
+    axis: {
+      x: { enabled: true, label: '' },
+      y: { enabled: true, label: '' }
+    }
+  }
+};
+
+/**
+ * Default configuration for Gauge charts
+ */
+export const GAUGE_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'gauge',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    animation: {
+      duration: 800,
+      easing: 'easeOutCubic'
+    },
+    gauge: {
+      arcWidth: null, // auto-calculated from radius
+      trackColor: '#f1f3f5',
+      needle: true,
+      valueFontSize: 28,
+      tickFontSize: 10,
+      zones: [
+        { from: 0, to: 0.6, color: '#e03131' },
+        { from: 0.6, to: 0.85, color: '#f08c00' },
+        { from: 0.85, to: 1.0, color: '#0ca678' }
+      ]
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    legend: { enabled: false },
+    min: 0,
+    max: 100,
+    target: null,
+    ticks: 5,
+    showMax: true,
+    valueSuffix: '',
+    valuePrefix: '',
+    valueDecimals: 0
+  }
+};
+
+/**
+ * Default configuration for Sparkline charts
+ */
+export const SPARKLINE_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'sparkline',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    background: 'transparent',
+    animation: {
+      duration: 400,
+      easing: 'easeOutCubic'
+    },
+    sparkline: {
+      color: '#4c6ef5',
+      lineWidth: 1.5,
+      tension: 0.3,
+      dotRadius: 2.5,
+      barGap: 1,
+      barRadius: 1,
+      negativeColor: '#e03131',
+      referenceColor: '#b3bac5',
+      paddingX: 2,
+      paddingY: 4
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    responsive: true,
+    legend: { enabled: false },
+    tooltip: { enabled: false },
+    variant: 'line', // 'line', 'area', 'bar'
+    smooth: true,
+    highlightLast: true,
+    referenceLine: null
+  }
+};
+
+/**
  * Color palette
  */
 export const COLOR_PALETTE = PALETTE;

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewChart JS — Pie & Donut Chart Examples</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f6f8; --surface: #ffffff; --border: #dfe1e6;
+      --text: #172b4d; --text-sec: #5e6c84; --text-muted: #8993a4;
+      --primary: #4c6ef5;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono: 'JetBrains Mono','SF Mono','Fira Code',monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 13px; color: var(--text-sec); }
+    .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .examples { display: flex; flex-direction: column; gap: 20px; }
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .row > .example-card { flex: 1; min-width: 350px; }
+    .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8f9fb; }
+    .example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .example-header p { font-size: 11px; color: var(--text-muted); }
+    .example-body { padding: 16px 18px; display: flex; justify-content: center; }
+    .chart-container { width: 100%; min-height: 350px; }
+    .chart-container.small { max-width: 320px; min-height: 300px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="back-link">&larr; Alla demos</a>
+  <div class="page-header">
+    <h1>Pie & Donut Chart</h1>
+    <p>Fordelningsdiagram for kanaler, kategorier och kostnadsposter — med hover-explode och center-text.</p>
+  </div>
+
+  <div class="examples">
+    <!-- 1. Basic Pie -->
+    <div class="row">
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Forsaljning per kanal (Pie)</h2>
+          <p>Klassisk pie med procent-etiketter</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container small" id="chart-pie"></div>
+        </div>
+      </div>
+
+      <!-- 2. Donut -->
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Forsaljning per kanal (Donut)</h2>
+          <p>Donut med totalsumma i mitten — hover visar detaljer</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container small" id="chart-donut"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Category breakdown -->
+    <div class="row">
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Produktkategorier</h2>
+          <p>Fordelning av intakter per produktgrupp</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container small" id="chart-category"></div>
+        </div>
+      </div>
+
+      <!-- 4. Cost breakdown -->
+      <div class="example-card">
+        <div class="example-header">
+          <h2>Kostnadsfordelning</h2>
+          <p>Donut med varde-etiketter istallet for procent</p>
+        </div>
+        <div class="example-body">
+          <div class="chart-container small" id="chart-costs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Large donut with many slices -->
+    <div class="example-card">
+      <div class="example-header">
+        <h2>Leverantorsandel — topp 8</h2>
+        <p>Donut med manga segment och legend till hoger</p>
+      </div>
+      <div class="example-body">
+        <div class="chart-container" id="chart-suppliers" style="max-width: 500px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/newchartjs.umd.js"></script>
+<script>
+const channelLabels = ['Direkt','Google Ads','Organisk','Email','Social','Referral'];
+const channelValues = [12480,8320,6940,4680,2510,1590];
+
+// 1. Pie
+NewChart.create('#chart-pie', {
+  type: 'pie',
+  data: {
+    labels: channelLabels,
+    datasets: [{ values: channelValues }]
+  },
+  options: {
+    labels: { position: 'outside', format: 'percent' }
+  }
+});
+
+// 2. Donut
+NewChart.create('#chart-donut', {
+  type: 'pie',
+  data: {
+    labels: channelLabels,
+    datasets: [{ values: channelValues }]
+  },
+  style: {
+    pie: { innerRadius: 70 }
+  },
+  options: {
+    labels: { position: 'outside', format: 'percent' }
+  }
+});
+
+// 3. Category
+NewChart.create('#chart-category', {
+  type: 'pie',
+  data: {
+    labels: ['Madrasser','Kuddar','Sangramar','Baddtextil','Tacken','Tillbehor'],
+    datasets: [{ values: [14200,8900,6300,4800,3200,1520] }]
+  },
+  style: {
+    pie: { innerRadius: 65 }
+  },
+  options: {
+    labels: { position: 'outside', format: 'label' }
+  }
+});
+
+// 4. Cost breakdown with value labels
+NewChart.create('#chart-costs', {
+  type: 'pie',
+  data: {
+    labels: ['Personal','Material','Logistik','Marknadsforing','Lokaler','IT'],
+    datasets: [{ values: [5200,3400,1800,1200,900,600] }]
+  },
+  style: {
+    pie: { innerRadius: 60 }
+  },
+  options: {
+    labels: { position: 'outside', format: 'value' }
+  }
+});
+
+// 5. Suppliers
+NewChart.create('#chart-suppliers', {
+  type: 'pie',
+  data: {
+    labels: ['Hilding Anders','Bico','Jensen','Hastens','Carpe Diem','Dux','Tempur','Ovriga'],
+    datasets: [{ values: [28,18,14,12,9,7,5,7] }]
+  },
+  style: {
+    pie: { innerRadius: 80 }
+  },
+  options: {
+    legend: { position: 'right' },
+    labels: { position: 'none' }
+  }
+});
+</script>
+</body>
+</html>
