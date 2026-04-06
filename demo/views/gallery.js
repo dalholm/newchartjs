@@ -62,6 +62,7 @@ export default function galleryView() {
         ${card('/combo', 'Combo Chart', 'Mix bars and lines on shared axes — revenue vs. margin.', 'chart new', '5 examples', comboPreview())}
         ${card('/scatter', 'Scatter & Bubble', 'Correlation analysis, risk/reward matrices, bubble sizing.', 'chart new', '5 examples', scatterPreview())}
         ${card('/kpicard', 'KPI Card', 'Config-driven KPI cards with value, trend sparkline, change badge.', 'chart new', '7 examples', kpiPreview())}
+        ${card('/trendbadge', 'TrendBadge', 'Inline trend indicators with change chip, value formatting, and sparkline.', 'chart new', '7 examples', trendbadgePreview())}
         ${card('/networkball', 'AI Network Ball', 'Circular node network with a traveling AI cursor. Visualize processing and connections.', 'chart new', '4 examples', networkballPreview())}
       </div>
 
@@ -134,11 +135,13 @@ function donutPreview() {
 }
 
 function gaugePreview() {
+  // Points on circle center=(40,48) r=30, arc from (10,48) to (70,48) through top
+  // f=0→(10,48), f=1/3→(25,22), f=2/3→(55,22), f=0.78→(63,29), f=1→(70,48)
   return `<svg viewBox="0 0 80 55" width="80" height="55">
     <path d="M10,48 A30,30 0 1,1 70,48" fill="none" stroke="var(--border)" stroke-width="8" stroke-linecap="round"/>
-    <path d="M10,48 A30,30 0 0,1 28,16" fill="none" stroke="var(--danger)" stroke-width="8" stroke-linecap="round"/>
-    <path d="M28,16 A30,30 0 0,1 52,16" fill="none" stroke="var(--warning)" stroke-width="8" stroke-linecap="round"/>
-    <path d="M52,16 A30,30 0 0,1 62,33" fill="none" stroke="var(--success)" stroke-width="8" stroke-linecap="round"/>
+    <path d="M10,48 A30,30 0 0,1 25,22" fill="none" stroke="var(--danger)" stroke-width="8" stroke-linecap="butt"/>
+    <path d="M25,22 A30,30 0 0,1 55,22" fill="none" stroke="var(--warning)" stroke-width="8" stroke-linecap="butt"/>
+    <path d="M55,22 A30,30 0 0,1 63,29" fill="none" stroke="var(--success)" stroke-width="8" stroke-linecap="butt"/>
     <text x="40" y="45" text-anchor="middle" font-size="11" font-weight="700" font-family="var(--mono)" fill="var(--text)">78%</text>
   </svg>`;
 }
@@ -199,6 +202,23 @@ function kpiPreview() {
         <span style="font-size:7px;font-weight:600;color:var(--success-dk);background:var(--success-bg);padding:0 3px;border-radius:2px;">+20.1%</span>
         <svg width="40" height="12" viewBox="0 0 40 12"><polyline points="2,10 8,7 14,9 20,5 26,6 32,3 38,2" stroke="var(--primary)" stroke-width="1" fill="none"/></svg>
       </div>
+    </div>
+  </div>`;
+}
+
+function trendbadgePreview() {
+  return `<div style="display:flex;gap:12px;align-items:center;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px;">
+      <div>
+        <div style="font-size:7px;font-weight:600;color:var(--text-muted);text-transform:uppercase;">Revenue</div>
+        <div style="font-size:13px;font-weight:700;font-family:var(--mono);color:var(--text);">38.9k</div>
+      </div>
+      <span style="font-size:7px;font-weight:600;color:var(--success-dk);background:var(--success-bg);padding:1px 4px;border-radius:3px;">&#9650; 20.1%</span>
+      <svg width="40" height="14" viewBox="0 0 40 14"><polyline points="2,12 8,9 14,10 20,6 26,7 32,4 38,2" stroke="var(--primary)" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <span style="font-size:8px;font-weight:600;color:var(--success-dk);background:var(--success-bg);padding:2px 5px;border-radius:3px;">&#9650; 12.3%</span>
+      <span style="font-size:8px;font-weight:600;color:var(--danger);background:var(--danger-bg);padding:2px 5px;border-radius:3px;">&#9660; 5.7%</span>
     </div>
   </div>`;
 }
