@@ -39,10 +39,17 @@ describe('EASING_FUNCTIONS', () => {
   });
 
   it('all easing functions return values between 0-1 at t=0.5', () => {
+    // Back easings intentionally overshoot [0,1] range
+    const overshootEasings = ['easeOutBack', 'easeOutElastic'];
     for (const [name, fn] of Object.entries(easings)) {
       const val = fn(0.5);
-      expect(val, `${name}(0.5)`).toBeGreaterThanOrEqual(0);
-      expect(val, `${name}(0.5)`).toBeLessThanOrEqual(1);
+      if (overshootEasings.includes(name)) {
+        expect(val, `${name}(0.5)`).toBeGreaterThanOrEqual(0);
+        expect(val, `${name}(0.5)`).toBeLessThanOrEqual(1.2);
+      } else {
+        expect(val, `${name}(0.5)`).toBeGreaterThanOrEqual(0);
+        expect(val, `${name}(0.5)`).toBeLessThanOrEqual(1);
+      }
     }
   });
 });
