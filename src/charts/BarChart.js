@@ -117,7 +117,8 @@ export class BarChart extends Chart {
         this.renderer.line(chartX, y, chartX + chartWidth, y, {
           stroke: style.grid.color,
           strokeWidth: style.grid.width || 1,
-          opacity: 0.5
+          opacity: style.grid.opacity ?? 0.5,
+          strokeDasharray: style.grid.dash || undefined
         });
 
         if (hasYAxis) {

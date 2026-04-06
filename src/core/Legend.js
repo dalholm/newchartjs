@@ -115,16 +115,50 @@ export class Legend {
       });
 
       // Marker swatch
-      const marker = createElement('span', {
-        style: {
-          width: (this.options.marker.size || 10) + 'px',
-          height: (this.options.marker.height || 3) + 'px',
+      const markerSize = this.options.marker.size || 10;
+      const markerHeight = this.options.marker.height || 3;
+      const markerShape = this.options.marker.shape || 'bar';
+      const markerColor = vis ? item.color : mutedColor;
+
+      const markerStyle = {
+        flexShrink: '0',
+        transition: 'background-color 0.15s, border-color 0.15s'
+      };
+
+      if (markerShape === 'circle') {
+        const d = Math.min(markerSize, 10);
+        Object.assign(markerStyle, {
+          width: d + 'px',
+          height: d + 'px',
+          borderRadius: '50%',
+          backgroundColor: markerColor
+        });
+      } else if (markerShape === 'square') {
+        const d = Math.min(markerSize, 10);
+        Object.assign(markerStyle, {
+          width: d + 'px',
+          height: d + 'px',
           borderRadius: '2px',
-          backgroundColor: vis ? item.color : mutedColor,
-          flexShrink: '0',
-          transition: 'background-color 0.15s'
-        }
-      });
+          backgroundColor: markerColor
+        });
+      } else if (markerShape === 'line') {
+        Object.assign(markerStyle, {
+          width: markerSize + 'px',
+          height: '0px',
+          borderTop: `2px solid ${markerColor}`,
+          backgroundColor: 'transparent'
+        });
+      } else {
+        // Default 'bar' shape — wide rectangle
+        Object.assign(markerStyle, {
+          width: markerSize + 'px',
+          height: markerHeight + 'px',
+          borderRadius: '2px',
+          backgroundColor: markerColor
+        });
+      }
+
+      const marker = createElement('span', { style: markerStyle });
 
       // Label
       const label = createElement('span', {

@@ -146,23 +146,55 @@
       label: 'ERP',
       desc: 'Dense, precise, data-heavy',
       tokens: {
+        // Animation
+        '--nc-animation-duration': '400',
+        '--nc-animation-easing': 'easeOutCubic',
+        // Grid
+        '--nc-grid-dash': '',
+        '--nc-grid-opacity': '0.4',
+        // Bar
         '--nc-bar-border-radius': '2',
+        '--nc-bar-gap': '0.15',
+        // Line
         '--nc-line-width': '1.5',
         '--nc-line-tension': '0.3',
         '--nc-line-point-radius': '3',
         '--nc-line-point-border-width': '1.5',
+        '--nc-line-point-fill': 'solid',
+        // Area
+        '--nc-area-fill-opacity': '0.2',
+        // Tooltip
         '--nc-tooltip-border-radius': '4',
         '--nc-tooltip-padding': '6',
+        '--nc-tooltip-shadow': '0 2px 8px rgba(0,0,0,0.15)',
+        // Legend
+        '--nc-legend-font-size': '11',
+        '--nc-legend-marker-shape': 'bar',
+        '--nc-legend-marker-size': '8',
+        '--nc-legend-marker-height': '3',
+        // Pie
+        '--nc-pie-border-width': '1',
+        '--nc-pie-padding': '0',
+        // Gauge
         '--nc-gauge-needle': '1',
         '--nc-gauge-rounded-ends': '0',
         '--nc-gauge-value-font-size': '24',
-        '--nc-gauge-tick-font-size': '10'
+        '--nc-gauge-tick-font-size': '10',
+        // Scatter
+        '--nc-scatter-point-radius': '4',
+        '--nc-scatter-point-opacity': '0.8',
+        // Combo
+        '--nc-combo-bar-border-radius': '2',
+        '--nc-combo-line-width': '1.5',
+        '--nc-combo-point-radius': '3'
       },
       config: {
         style: {
           bar: { borderRadius: 2 },
           gauge: { needle: true, roundedEnds: false },
-          tooltip: { borderRadius: 4 }
+          tooltip: { borderRadius: 4 },
+          line: { pointFill: 'solid' },
+          legend: { marker: { shape: 'bar', size: 8, height: 3 } }
         }
       }
     },
@@ -170,23 +202,55 @@
       label: 'Modern',
       desc: 'Rounded, soft, spacious',
       tokens: {
+        // Animation
+        '--nc-animation-duration': '700',
+        '--nc-animation-easing': 'easeOutQuart',
+        // Grid
+        '--nc-grid-dash': '',
+        '--nc-grid-opacity': '0.35',
+        // Bar
         '--nc-bar-border-radius': '8',
+        '--nc-bar-gap': '0.25',
+        // Line
         '--nc-line-width': '2.5',
         '--nc-line-tension': '0.4',
         '--nc-line-point-radius': '5',
         '--nc-line-point-border-width': '2.5',
+        '--nc-line-point-fill': 'solid',
+        // Area
+        '--nc-area-fill-opacity': '0.18',
+        // Tooltip
         '--nc-tooltip-border-radius': '12',
         '--nc-tooltip-padding': '10',
+        '--nc-tooltip-shadow': '0 12px 32px rgba(0,0,0,0.12)',
+        // Legend
+        '--nc-legend-font-size': '12',
+        '--nc-legend-marker-shape': 'circle',
+        '--nc-legend-marker-size': '8',
+        // Pie
+        '--nc-pie-border-width': '3',
+        '--nc-pie-padding': '0.02',
+        // Gauge
         '--nc-gauge-needle': '0',
         '--nc-gauge-rounded-ends': '1',
         '--nc-gauge-value-font-size': '32',
-        '--nc-gauge-tick-font-size': '10'
+        '--nc-gauge-tick-font-size': '10',
+        // Scatter
+        '--nc-scatter-point-radius': '6',
+        '--nc-scatter-point-opacity': '0.75',
+        // Combo
+        '--nc-combo-bar-border-radius': '8',
+        '--nc-combo-line-width': '2.5',
+        '--nc-combo-point-radius': '5'
       },
       config: {
         style: {
           bar: { borderRadius: 8 },
           gauge: { needle: false, roundedEnds: true },
-          tooltip: { borderRadius: 12 }
+          tooltip: { borderRadius: 12 },
+          pie: { padAngle: 0.02 },
+          line: { pointFill: 'solid' },
+          legend: { marker: { shape: 'circle', size: 8 } }
         }
       }
     },
@@ -194,23 +258,113 @@
       label: 'Classic',
       desc: 'Sharp, angular, traditional',
       tokens: {
+        // Animation
+        '--nc-animation-duration': '500',
+        '--nc-animation-easing': 'easeOutCubic',
+        // Grid
+        '--nc-grid-dash': '4 3',
+        '--nc-grid-opacity': '0.45',
+        // Bar
         '--nc-bar-border-radius': '0',
+        '--nc-bar-gap': '0.2',
+        // Line
         '--nc-line-width': '1.5',
         '--nc-line-tension': '0',
         '--nc-line-point-radius': '3.5',
         '--nc-line-point-border-width': '1.5',
+        '--nc-line-point-fill': 'hollow',
+        // Area
+        '--nc-area-fill-opacity': '0.15',
+        // Tooltip
         '--nc-tooltip-border-radius': '0',
         '--nc-tooltip-padding': '8',
+        '--nc-tooltip-shadow': '0 2px 6px rgba(0,0,0,0.2)',
+        // Legend
+        '--nc-legend-font-size': '11',
+        '--nc-legend-marker-shape': 'square',
+        '--nc-legend-marker-size': '8',
+        // Pie
+        '--nc-pie-border-width': '2',
+        '--nc-pie-padding': '0',
+        // Gauge
         '--nc-gauge-needle': '1',
         '--nc-gauge-rounded-ends': '0',
         '--nc-gauge-value-font-size': '26',
-        '--nc-gauge-tick-font-size': '10'
+        '--nc-gauge-tick-font-size': '10',
+        // Scatter
+        '--nc-scatter-point-radius': '4',
+        '--nc-scatter-point-opacity': '0.9',
+        // Combo
+        '--nc-combo-bar-border-radius': '0',
+        '--nc-combo-line-width': '1.5',
+        '--nc-combo-point-radius': '3.5'
       },
       config: {
         style: {
           bar: { borderRadius: 0 },
           gauge: { needle: true, roundedEnds: false },
-          tooltip: { borderRadius: 0 }
+          tooltip: { borderRadius: 0 },
+          pie: { padAngle: 0 },
+          line: { pointFill: 'hollow' },
+          legend: { marker: { shape: 'square', size: 8 } }
+        }
+      }
+    },
+    vivid: {
+      label: 'Vivid',
+      desc: 'Bold, punchy, high-impact',
+      tokens: {
+        // Animation
+        '--nc-animation-duration': '800',
+        '--nc-animation-easing': 'easeOutBack',
+        // Grid
+        '--nc-grid-dash': '',
+        '--nc-grid-opacity': '0.25',
+        // Bar
+        '--nc-bar-border-radius': '12',
+        '--nc-bar-gap': '0.3',
+        // Line
+        '--nc-line-width': '3',
+        '--nc-line-tension': '0.45',
+        '--nc-line-point-radius': '6',
+        '--nc-line-point-border-width': '3',
+        '--nc-line-point-fill': 'solid',
+        // Area
+        '--nc-area-fill-opacity': '0.35',
+        // Tooltip
+        '--nc-tooltip-border-radius': '16',
+        '--nc-tooltip-padding': '12',
+        '--nc-tooltip-shadow': '0 16px 48px rgba(0,0,0,0.2)',
+        // Legend
+        '--nc-legend-font-size': '13',
+        '--nc-legend-marker-shape': 'circle',
+        '--nc-legend-marker-size': '10',
+        // Pie
+        '--nc-pie-border-width': '3',
+        '--nc-pie-padding': '0.03',
+        // Gauge
+        '--nc-gauge-needle': '0',
+        '--nc-gauge-rounded-ends': '1',
+        '--nc-gauge-value-font-size': '36',
+        '--nc-gauge-tick-font-size': '11',
+        // Scatter
+        '--nc-scatter-point-radius': '7',
+        '--nc-scatter-point-opacity': '0.85',
+        '--nc-scatter-point-border-width': '3',
+        // Combo
+        '--nc-combo-bar-border-radius': '12',
+        '--nc-combo-line-width': '3',
+        '--nc-combo-point-radius': '6',
+        '--nc-combo-tension': '0.45'
+      },
+      config: {
+        style: {
+          bar: { borderRadius: 12 },
+          gauge: { needle: false, roundedEnds: true },
+          tooltip: { borderRadius: 16 },
+          pie: { padAngle: 0.03 },
+          line: { pointFill: 'solid' },
+          legend: { marker: { shape: 'circle', size: 10 } }
         }
       }
     }
@@ -260,6 +414,11 @@
       label: 'Mono',
       light: ['#212529','#495057','#6c757d','#868e96','#adb5bd','#ced4da','#343a40','#5a6370','#798490','#a1aab4'],
       dark:  ['#e9ecef','#ced4da','#adb5bd','#868e96','#6c757d','#495057','#dee2e6','#b0b8c2','#8c95a0','#6d767e']
+    },
+    vivid: {
+      label: 'Vivid',
+      light: ['#6c2bd9','#e8155f','#ff6d00','#00b85e','#0090ff','#d4175b','#00a6a6','#f5a623','#8338ec','#06d6a0'],
+      dark:  ['#a855f7','#fb7185','#ff9e40','#34d399','#60a5fa','#f472b6','#2dd4bf','#fbbf24','#a78bfa','#6ee7b7']
     }
   };
 

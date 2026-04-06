@@ -37,7 +37,9 @@ export const DEFAULT_CONFIG = {
     fontColor: '#374151',
     grid: {
       color: '#E5E7EB',
-      width: 1
+      width: 1,
+      dash: null, // null = solid, string e.g. '4 2' for dashed
+      opacity: 0.5
     },
     axis: {
       color: '#374151',
@@ -59,7 +61,7 @@ export const DEFAULT_CONFIG = {
     legend: {
       fontSize: 12,
       color: '#374151',
-      marker: { size: 8 }
+      marker: { size: 10, height: 3, shape: 'bar' } // shape: 'bar', 'circle', 'square', 'line'
     }
   },
   options: {
@@ -117,7 +119,8 @@ export const PIE_DEFAULTS = {
       endAngle: Math.PI * 1.5,
       innerRadius: 0, // 0 for pie, > 0 for donut
       borderWidth: 2,
-      borderColor: '#ffffff'
+      borderColor: '#ffffff',
+      padAngle: 0 // radians of spacing between slices (e.g. 0.02)
     }
   },
   options: {
@@ -147,7 +150,8 @@ export const LINE_DEFAULTS = {
       tension: 0.4, // Bezier curve tension (only used when smooth: 'bezier')
       pointRadius: 4,
       pointBorderWidth: 2,
-      pointBorderColor: '#ffffff'
+      pointBorderColor: '#ffffff',
+      pointFill: 'solid' // 'solid' or 'hollow'
     }
   },
   options: {
@@ -175,7 +179,8 @@ export const AREA_DEFAULTS = {
       tension: 0.4,
       pointRadius: 4,
       pointBorderWidth: 2,
-      pointBorderColor: '#ffffff'
+      pointBorderColor: '#ffffff',
+      pointFill: 'solid'
     },
     area: {
       fillOpacity: 0.25

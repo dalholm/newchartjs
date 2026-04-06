@@ -33,6 +33,8 @@ const TOKEN_MAP = [
   // Grid
   { token: '--nc-grid-color', path: 'style.grid.color', type: 'string' },
   { token: '--nc-grid-width', path: 'style.grid.width', type: 'number' },
+  { token: '--nc-grid-dash', path: 'style.grid.dash', type: 'string' },
+  { token: '--nc-grid-opacity', path: 'style.grid.opacity', type: 'number' },
 
   // Axis
   { token: '--nc-axis-color', path: 'style.axis.color', type: 'string' },
@@ -41,6 +43,7 @@ const TOKEN_MAP = [
 
   // Animation
   { token: '--nc-animation-duration', path: 'style.animation.duration', type: 'number' },
+  { token: '--nc-animation-easing', path: 'style.animation.easing', type: 'string' },
 
   // Tooltip
   { token: '--nc-tooltip-background', path: 'style.tooltip.background', type: 'string' },
@@ -49,11 +52,14 @@ const TOKEN_MAP = [
   { token: '--nc-tooltip-padding', path: 'style.tooltip.padding', type: 'number' },
   { token: '--nc-tooltip-border-radius', path: 'style.tooltip.borderRadius', type: 'number' },
   { token: '--nc-tooltip-shadow', path: 'style.tooltip.shadow', type: 'string' },
+  { token: '--nc-tooltip-border', path: 'style.tooltip.border', type: 'string' },
 
   // Legend
   { token: '--nc-legend-font-size', path: 'style.legend.fontSize', type: 'number' },
   { token: '--nc-legend-color', path: 'style.legend.color', type: 'string' },
   { token: '--nc-legend-marker-size', path: 'style.legend.marker.size', type: 'number' },
+  { token: '--nc-legend-marker-height', path: 'style.legend.marker.height', type: 'number' },
+  { token: '--nc-legend-marker-shape', path: 'style.legend.marker.shape', type: 'string' },
 
   // Bar
   { token: '--nc-bar-border-radius', path: 'style.bar.borderRadius', type: 'number' },
@@ -66,11 +72,16 @@ const TOKEN_MAP = [
   { token: '--nc-line-point-radius', path: 'style.line.pointRadius', type: 'number' },
   { token: '--nc-line-point-border-width', path: 'style.line.pointBorderWidth', type: 'number' },
   { token: '--nc-line-point-border-color', path: 'style.line.pointBorderColor', type: 'string' },
+  { token: '--nc-line-point-fill', path: 'style.line.pointFill', type: 'string' },
+
+  // Area
+  { token: '--nc-area-fill-opacity', path: 'style.area.fillOpacity', type: 'number' },
 
   // Pie
   { token: '--nc-pie-border-width', path: 'style.pie.borderWidth', type: 'number' },
   { token: '--nc-pie-border-color', path: 'style.pie.borderColor', type: 'string' },
   { token: '--nc-pie-inner-radius', path: 'style.pie.innerRadius', type: 'number' },
+  { token: '--nc-pie-padding', path: 'style.pie.padAngle', type: 'number' },
 
   // Gauge
   { token: '--nc-gauge-arc-width', path: 'style.gauge.arcWidth', type: 'number' },
@@ -79,6 +90,17 @@ const TOKEN_MAP = [
   { token: '--nc-gauge-rounded-ends', path: 'style.gauge.roundedEnds', type: 'boolean' },
   { token: '--nc-gauge-value-font-size', path: 'style.gauge.valueFontSize', type: 'number' },
   { token: '--nc-gauge-tick-font-size', path: 'style.gauge.tickFontSize', type: 'number' },
+
+  // Scatter
+  { token: '--nc-scatter-point-radius', path: 'style.scatter.pointRadius', type: 'number' },
+  { token: '--nc-scatter-point-opacity', path: 'style.scatter.pointOpacity', type: 'number' },
+  { token: '--nc-scatter-point-border-width', path: 'style.scatter.pointBorderWidth', type: 'number' },
+
+  // Combo
+  { token: '--nc-combo-bar-border-radius', path: 'style.combo.barBorderRadius', type: 'number' },
+  { token: '--nc-combo-line-width', path: 'style.combo.lineWidth', type: 'number' },
+  { token: '--nc-combo-point-radius', path: 'style.combo.pointRadius', type: 'number' },
+  { token: '--nc-combo-tension', path: 'style.combo.tension', type: 'number' },
 ];
 
 /** Number of palette slots to check */

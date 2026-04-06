@@ -40,6 +40,7 @@ export class PieChart extends Chart {
     const endAngle = style.pie?.endAngle || Math.PI * 1.5;
     const availableAngle = endAngle - startAngle;
 
+    const padAngle = style.pie?.padAngle || 0;
     let currentAngle = startAngle;
 
     values.forEach((value, index) => {
@@ -48,12 +49,15 @@ export class PieChart extends Chart {
 
       const color = dataset.colors?.[index] || this.getPaletteColor(index);
 
+      // Apply pad angle: shrink each slice symmetrically
+      const pad = values.length > 1 ? padAngle / 2 : 0;
+
       slices.push({
         index,
         value: Math.abs(value),
         percent: (Math.abs(value) / total) * 100,
-        startAngle: currentAngle,
-        endAngle: currentAngle + sliceAngle,
+        startAngle: currentAngle + pad,
+        endAngle: currentAngle + sliceAngle - pad,
         midAngle,
         color,
         label: data.labels?.[index] || `Slice ${index + 1}`,

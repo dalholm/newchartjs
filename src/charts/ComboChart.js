@@ -95,7 +95,8 @@ export class ComboChart extends Chart {
         this.renderer.line(chartX, y, chartX + chartWidth, y, {
           stroke: style.grid.color,
           strokeWidth: style.grid.width || 1,
-          opacity: 0.5
+          opacity: style.grid.opacity ?? 0.5,
+          strokeDasharray: style.grid.dash || undefined
         });
 
         if (hasYAxis) {
@@ -258,9 +259,10 @@ export class ComboChart extends Chart {
       const pointElements = [];
       points.forEach((point, pointIndex) => {
         if (pointRadius > 0) {
+          const isHollow = style.line?.pointFill === 'hollow';
           const pointEl = this.renderer.circle(point[0], point[1], pointRadius, {
-            fill: color,
-            stroke: style.line?.pointBorderColor || '#ffffff',
+            fill: isHollow ? (style.background || '#ffffff') : color,
+            stroke: isHollow ? color : (style.line?.pointBorderColor || '#ffffff'),
             strokeWidth: style.line?.pointBorderWidth || 2,
             opacity: 0
           });

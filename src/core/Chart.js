@@ -380,8 +380,12 @@ export class Chart {
       ref: dataset.ref || false
     }));
 
+    const legendStyle = this.config.style.legend || {};
     const legendOptions = {
       ...this.config.options.legend,
+      fontSize: legendStyle.fontSize || undefined,
+      color: legendStyle.color || undefined,
+      marker: legendStyle.marker || undefined,
       dark: this._dark,
       onToggle: (key, visible, visibilityMap) => {
         this._legendVisibility = visibilityMap;
