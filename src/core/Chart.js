@@ -105,6 +105,42 @@ export class Chart {
       this._themeMediaQuery.addEventListener('change', this._themeChangeHandler);
     }
 
+    // Watch for CSS class changes on <html> (e.g. dark mode toggle)
+    // Re-reads CSS tokens and re-renders when detected
+    this._htmlClassObserver = null;
+    this._userConfig = config;
+    if (typeof MutationObserver !== 'undefined' && this.config.options?.cssTokens !== false) {
+      this._htmlClassObserver = new MutationObserver(debounce(() => {
+        // Re-resolve CSS tokens and check if they changed
+        const newTokens = resolveCSSTokens(this.element);
+        const newTheme = newTokens.options?.theme;
+        const wasDark = this._dark;
+
+        // Detect theme from CSS token or from dark class
+        if (newTheme) {
+          this._dark = isDarkMode(newTheme);
+        } else if (typeof document !== 'undefined') {
+          // Check if html has 'dark' class (common pattern)
+          const htmlDark = document.documentElement.classList.contains('dark');
+          this._dark = htmlDark;
+        }
+
+        // Re-apply theme and re-render if anything changed
+        this._applyTheme(this._userConfig);
+        if (this.legend) { this.legend.destroy(); this.legend = null; }
+        if (this.dataTable) { this.dataTable.destroy(); this.dataTable = null; }
+        if (this.tooltip) { this.tooltip.destroy(); }
+        this.tooltip = new Tooltip(this.container, this.config.style.tooltip);
+        if (this.renderer) { this.renderer.destroy(); }
+        this.initRenderer();
+        this.draw();
+      }, 100));
+      this._htmlClassObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    }
+
     // Animation state
     this.animationCancels = [];
     this.isAnimating = false;
@@ -560,6 +596,10 @@ export class Chart {
 
     if (this._themeMediaQuery && this._themeChangeHandler) {
       this._themeMediaQuery.removeEventListener('change', this._themeChangeHandler);
+    }
+
+    if (this._htmlClassObserver) {
+      this._htmlClassObserver.disconnect();
     }
 
     if (this.tooltip) {

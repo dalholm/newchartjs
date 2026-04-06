@@ -1,0 +1,135 @@
+/* ═══ NewChart Demo — Shared Styles ═══ */
+
+/* ── Reset ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── Design Tokens ── */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-alt: #f8f9fb;
+  --border: #dfe1e6;
+  --border-light: #ebecf0;
+  --border-focus: #4c6ef5;
+  --text: #172b4d;
+  --text-sec: #5e6c84;
+  --text-muted: #8993a4;
+  --text-faint: #b3bac5;
+  --primary: #4c6ef5;
+  --primary-dk: #3b5bdb;
+  --primary-lt: #edf2ff;
+  --primary-faint: #dbe4ff;
+  --success: #0ca678;
+  --success-dk: #099268;
+  --success-lt: #e6fcf5;
+  --success-bg: #c3fae8;
+  --danger: #e03131;
+  --danger-dk: #c92a2a;
+  --danger-lt: #fff5f5;
+  --danger-bg: #ffc9c9;
+  --warning: #f08c00;
+  --warning-lt: #fff9db;
+  --warning-bg: #ffec99;
+  --purple: #7048e8;
+  --teal: #1098ad;
+  --neutral: #868e96;
+  --radius: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Page Layout ── */
+.page { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+.page--narrow { max-width: 960px; }
+.page--medium { max-width: 1000px; }
+
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.page-header p { font-size: 13px; color: var(--text-sec); line-height: 1.6; }
+
+.back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; color: var(--primary); text-decoration: none; }
+.back-link:hover { text-decoration: underline; }
+
+/* ── Examples Grid ── */
+.examples { display: flex; flex-direction: column; gap: 20px; }
+
+.example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.example-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface-alt); }
+.example-header h2 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.example-header p { font-size: 11px; color: var(--text-muted); }
+.example-body { padding: 16px 18px; }
+.example-body--centered { display: flex; justify-content: center; }
+
+/* ── Row helper ── */
+.row { display: flex; gap: 20px; flex-wrap: wrap; }
+.row > .example-card { flex: 1; min-width: 300px; }
+
+/* ── Chart Container ── */
+.chart-container { width: 100%; min-height: 350px; }
+.chart-container.short { min-height: 300px; }
+.chart-container.small { max-width: 320px; min-height: 300px; }
+.chart-container.wide { max-width: 400px; }
+.chart-container.compact { width: 260px; min-height: 240px; }
+
+/* ── Data Table ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th {
+  text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border); background: var(--surface-alt);
+  white-space: nowrap;
+}
+.data-table th.right { text-align: right; }
+.data-table th.center { text-align: center; }
+.data-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+.data-table td.right { text-align: right; font-family: var(--mono); }
+.data-table td.center { text-align: center; }
+.data-table td.mono { font-family: var(--mono); }
+.data-table td.name { font-weight: 500; }
+.data-table td.label-cell { font-weight: 500; color: var(--text); }
+.data-table tr:hover { background: var(--primary-lt); }
+
+/* ── Badge ── */
+.badge {
+  font-size: 10px; font-weight: 600; font-family: var(--mono);
+  border-radius: 3px; padding: 1px 6px; display: inline-block; white-space: nowrap;
+}
+.badge.up { color: var(--success-dk); background: var(--success-bg); }
+.badge.down { color: var(--danger-dk); background: var(--danger-bg); }
+
+/* ── KPI Cards ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.kpi-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--surface); }
+.kpi-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.kpi-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kpi-value { font-size: 22px; font-weight: 700; font-family: var(--mono); }
+.kpi-spark { width: 100px; height: 32px; }
+.kpi-change { font-size: 10px; font-weight: 600; font-family: var(--mono); margin-top: 4px; }
+.kpi-change.up { color: var(--success); }
+.kpi-change.down { color: var(--danger); }
+
+/* ── Sparkline helpers ── */
+.table-spark { width: 80px; height: 24px; display: inline-block; vertical-align: middle; }
+.variant-row { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+.variant-item { text-align: center; }
+.variant-item .label { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+.spark-demo { border: 1px solid var(--border-light); border-radius: 4px; padding: 4px; background: var(--surface); }
+
+/* ── Code Hint ── */
+.code-hint {
+  margin-top: 12px; padding: 10px 14px; background: var(--surface-alt);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 11px; font-family: var(--mono); color: var(--text-sec);
+  white-space: pre-wrap; line-height: 1.6; overflow-x: auto;
+}

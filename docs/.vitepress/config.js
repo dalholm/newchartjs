@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/newchartjs/',
   title: 'NewChart JS',
   description: 'A zero-dependency charting library for professional business applications',
 
@@ -41,7 +42,7 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/nyehandel/newchartjs' }
+      { icon: 'github', link: 'https://github.com/dalholm/newchartjs' }
     ],
 
     search: {

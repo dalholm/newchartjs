@@ -38,7 +38,7 @@ export class SparklineChart extends Chart {
 
     const values = dataset.values;
     const variant = options.variant || 'line';
-    const color = dataset.color || style.sparkline?.color || this.getPaletteColor(0);
+    const color = dataset.color || this.getPaletteColor(0);
     const padX = style.sparkline?.paddingX ?? 2;
     const padY = style.sparkline?.paddingY ?? 4;
 

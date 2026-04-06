@@ -13,6 +13,7 @@ import ComboChart from './charts/ComboChart.js';
 import ScatterChart from './charts/ScatterChart.js';
 import NetworkBallChart from './charts/NetworkBallChart.js';
 import { KPICard, createKPICard } from './core/KPICard.js';
+import { TrendBadge, createTrendBadge } from './core/TrendBadge.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
 import { COMPARE_COLOR, COLOR_PALETTE, DARK_STYLE, DARK_KPI_COLORS, isDarkMode, getDarkPalette } from './core/defaults.js';
 import DataTable from './core/DataTable.js';
@@ -110,6 +111,19 @@ const NewChart = {
    * @returns {KPICard} Card instance
    */
   kpiCard: createKPICard,
+
+  /**
+   * TrendBadge component
+   */
+  TrendBadge,
+
+  /**
+   * Create a trend badge (convenience factory)
+   * @param {Element|string} element - DOM element or selector
+   * @param {Object} config - Badge configuration
+   * @returns {TrendBadge} Badge instance
+   */
+  trendBadge: createTrendBadge,
 
   /**
    * Get list of supported CSS custom property tokens
