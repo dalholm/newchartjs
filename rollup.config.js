@@ -11,7 +11,8 @@ export default {
       file: 'dist/newchartjs.umd.js',
       format: 'umd',
       name: 'NewChart',
-      sourcemap: !isProduction
+      sourcemap: !isProduction,
+      outro: 'if(exports.default){Object.keys(exports.default).forEach(function(k){if(!(k in exports))exports[k]=exports.default[k]});}'
     },
     {
       file: 'dist/newchartjs.esm.js',

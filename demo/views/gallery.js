@@ -82,6 +82,7 @@ export default function galleryView() {
       <div class="section"><h2>Full Demos</h2></div>
       <div class="grid">
         ${card('/dashboard', 'ERP Dashboard', 'Complete sales dashboard with KPI cards, drill-down, table, CSV export.', 'demo', 'Full demo', dashboardPreview())}
+        ${card('/ecommerce', 'E-Commerce Dashboard', 'Webshop analytics: funnel, sankey, treemap, heatmap, cohort, waterfall, bullet.', 'demo new', 'Full demo', ecommercePreview())}
       </div>
 
       <div class="footer">NewChart JS v0.1.0 &mdash; Zero-dependency charting for professional applications</div>
@@ -372,6 +373,32 @@ function kpiComparisonPreview() {
       <div style="display:flex;align-items:center;gap:3px;margin-top:3px;">
         <span style="font-size:7px;color:var(--success-dk);font-weight:600;">&#9650; 12.4%</span>
       </div>
+    </div>
+  </div>`;
+}
+
+function ecommercePreview() {
+  return `<div style="display:flex;gap:10px;align-items:center;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;width:60px;">
+      <div style="width:100%;height:8px;background:var(--primary);border-radius:2px;"></div>
+      <div style="width:78%;height:8px;background:var(--success);border-radius:2px;"></div>
+      <div style="width:52%;height:8px;background:var(--warning);border-radius:2px;"></div>
+      <div style="width:30%;height:8px;background:var(--danger);border-radius:2px;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;width:50px;">
+      <div style="height:8px;background:#0ca678;border-radius:1px;opacity:0.3;"></div>
+      <div style="height:8px;background:#0ca678;border-radius:1px;opacity:0.6;"></div>
+      <div style="height:8px;background:#0ca678;border-radius:1px;opacity:0.9;"></div>
+      <div style="height:8px;background:#0ca678;border-radius:1px;opacity:0.5;"></div>
+      <div style="height:8px;background:#0ca678;border-radius:1px;opacity:0.7;"></div>
+      <div style="height:8px;background:#0ca678;border-radius:1px;opacity:0.4;"></div>
+      <div style="height:8px;background:#0ca678;border-radius:1px;opacity:0.8;"></div>
+      <div style="height:8px;background:#0ca678;border-radius:1px;opacity:0.2;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:2px;width:45px;height:36px;">
+      <div style="background:var(--primary);border-radius:2px;grid-row:span 2;"></div>
+      <div style="background:var(--success);border-radius:2px;"></div>
+      <div style="background:var(--warning);border-radius:2px;"></div>
     </div>
   </div>`;
 }

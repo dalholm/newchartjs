@@ -25,6 +25,8 @@ import sankeyView from './views/sankey.js';
 import treemapView from './views/treemap.js';
 import rangeView from './views/range.js';
 import kpicomparisonView from './views/kpicomparison.js';
+import ecommerceView from './views/ecommerce.js';
+import largedataView from './views/largedata.js';
 
 // Register routes
 router.register('/', galleryView);
@@ -49,6 +51,8 @@ router.register('/sankey', sankeyView);
 router.register('/treemap', treemapView);
 router.register('/range', rangeView);
 router.register('/kpicomparison', kpicomparisonView);
+router.register('/ecommerce', ecommerceView);
+router.register('/largedata', largedataView);
 
 // Start
 router.start();
