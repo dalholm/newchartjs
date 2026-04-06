@@ -2,7 +2,7 @@ node_modules/
 dist/
 .DS_Store
 *.map
-./.claude
+.claude/
 .idea
 docs/.vitepress/cache
 docs/.vitepress/dist
