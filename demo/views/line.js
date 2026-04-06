@@ -45,8 +45,7 @@ export default function lineView() {
           labels: api.MONTHS,
           datasets: [{
             label: 'Orders',
-            values: [412,468,431,502,478,528,419,487,519,453,564,611],
-            color: '#4c6ef5'
+            values: [412,468,431,502,478,528,419,487,519,453,564,611]
           }]
         }
       }));
@@ -57,10 +56,10 @@ export default function lineView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Direct', values: [980,1120,1050,1250,1180,1340,1020,1210,1290,1100,1420,1520], color: '#4c6ef5' },
-            { label: 'Google Ads', values: [640,720,680,810,760,870,660,780,840,720,920,1000], color: '#0ca678' },
-            { label: 'Organic', values: [480,560,520,630,590,680,500,600,650,540,720,790], color: '#f08c00' },
-            { label: 'Email', values: [320,380,350,420,390,450,340,400,430,360,480,530], color: '#7048e8' }
+            { label: 'Direct', values: [980,1120,1050,1250,1180,1340,1020,1210,1290,1100,1420,1520] },
+            { label: 'Google Ads', values: [640,720,680,810,760,870,660,780,840,720,920,1000] },
+            { label: 'Organic', values: [480,560,520,630,590,680,500,600,650,540,720,790] },
+            { label: 'Email', values: [320,380,350,420,390,450,340,400,430,360,480,530] }
           ]
         }
       }));
@@ -84,8 +83,7 @@ export default function lineView() {
           labels: api.MONTHS,
           datasets: [{
             label: 'Cumulative (k)',
-            values: cumulative,
-            color: '#0ca678'
+            values: cumulative
           }]
         },
         options: { fill: true }
@@ -97,8 +95,8 @@ export default function lineView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Warehouse A', values: [1200,1150,1080,1250,1180,1100,1050,1200,1320,1280,1350,1400], color: '#4c6ef5' },
-            { label: 'Warehouse B', values: [800,820,780,850,830,790,810,870,900,880,920,950], color: '#0ca678' }
+            { label: 'Warehouse A', values: [1200,1150,1080,1250,1180,1100,1050,1200,1320,1280,1350,1400] },
+            { label: 'Warehouse B', values: [800,820,780,850,830,790,810,870,900,880,920,950] }
           ]
         },
         options: { smooth: false }

@@ -95,13 +95,13 @@ card.update({ value: 41500000 });</div>
       // 1. Full featured row
       createRow('kpi-full', [
         { label: 'Revenue', value: 38920000, previous: 32410000, suffix: ' kr',
-          sparkline: { values: MONTHS_DATA, color: '#4c6ef5' }, target: 42000000 },
+          sparkline: { values: MONTHS_DATA }, target: 42000000 },
         { label: 'Orders', value: 5872, previous: 5453, suffix: '',
-          sparkline: { values: ORDERS_DATA, color: '#0ca678' } },
+          sparkline: { values: ORDERS_DATA } },
         { label: 'Avg Order', value: 6624, previous: 5943, suffix: ' kr',
-          sparkline: { values: AOV_DATA, color: '#7048e8' } },
+          sparkline: { values: AOV_DATA } },
         { label: 'Gross Margin', value: 47.2, previous: 44.8, suffix: '%', decimals: 1,
-          sparkline: { values: [42,43,44,45,44,46,45,47,48,46,48,47], color: '#e03131' } }
+          sparkline: { values: [42,43,44,45,44,46,45,47,48,46,48,47] } }
       ]);
 
       // 2. Progress/target
@@ -110,18 +110,18 @@ card.update({ value: 41500000 });</div>
         { label: 'Orders Q4', value: 1628, previous: null, suffix: '', target: 1500,
           thresholds: { good: 1.0, warning: 0.85 } },
         { label: 'NPS Score', value: 72, previous: 68, suffix: '', target: 80,
-          sparkline: { values: [65,68,66,70,71,69,72,71,73,72,74,72], color: '#0ca678' } }
+          sparkline: { values: [65,68,66,70,71,69,72,71,73,72,74,72] } }
       ]);
 
       // 3. Sparkline variants
       const sparkValues = [28,32,25,38,34,42,30,36,40,35,44,48];
       createRow('kpi-variants', [
         { label: 'Trend (line)', value: 48, previous: 28, suffix: '',
-          sparkline: { values: sparkValues, color: '#4c6ef5', variant: 'line' } },
+          sparkline: { values: sparkValues, variant: 'line' } },
         { label: 'Trend (area)', value: 48, previous: 28, suffix: '',
-          sparkline: { values: sparkValues, color: '#0ca678', variant: 'area' } },
+          sparkline: { values: sparkValues, variant: 'area' } },
         { label: 'Trend (bar)', value: 48, previous: 28, suffix: '',
-          sparkline: { values: sparkValues, color: '#7048e8', variant: 'bar' } }
+          sparkline: { values: sparkValues, variant: 'bar' } }
       ]);
 
       // 4. Selectable
@@ -156,9 +156,9 @@ card.update({ value: 41500000 });</div>
           previous: 11200000,
           formatPrevious: (v) => 'prev. ' + (v / 1e6).toFixed(1) + ' MSEK' },
         { label: 'Delivery Time', value: 3.2, suffix: ' days', decimals: 1, previous: 4.1,
-          sparkline: { values: [4.5,4.2,4.0,3.8,3.6,3.5,3.4,3.3,3.2,3.1,3.2,3.2], color: '#0ca678' } },
+          sparkline: { values: [4.5,4.2,4.0,3.8,3.6,3.5,3.4,3.3,3.2,3.1,3.2,3.2] } },
         { label: 'Return Rate', value: 3.8, prefix: '', suffix: '%', decimals: 1, previous: 4.2,
-          sparkline: { values: [4.2,4.0,4.5,3.9,4.1,3.7,3.8,3.5,3.6,3.9,3.4,3.8], color: '#e03131', variant: 'bar' } }
+          sparkline: { values: [4.2,4.0,4.5,3.9,4.1,3.7,3.8,3.5,3.6,3.9,3.4,3.8], variant: 'bar' } }
       ]);
 
       // 6. Minimal (no sparkline)
@@ -181,7 +181,7 @@ card.update({ value: 41500000 });</div>
           previous: 32410000,
           suffix: ' kr',
           target: 42000000,
-          sparkline: { values: MONTHS_DATA.slice(), color: '#4c6ef5' }
+          sparkline: { values: MONTHS_DATA.slice() }
         });
         cards.push(updateCard);
       }

@@ -1,14 +1,48 @@
 /**
  * NewChart Demo — Theme Selector
  * Floating UI with dark/light toggle + color palette presets.
- * Charts auto-update via MutationObserver (html.dark class) and CSS tokens (--nc-*).
+ *
+ * Token architecture:
+ *   :root (set by applyTheme)
+ *     ├── --primary, --primary-dk, --primary-lt, --primary-faint  ← derived from palette accent
+ *     ├── --border-focus                                          ← palette accent
+ *     ├── --nc-palette-1 … --nc-palette-10                        ← chart colors (cascade to all containers)
+ *     └── dark-mode base tokens via <style> block
+ *
+ *   .chart-container
+ *     └── inherits --nc-palette-* from :root (no per-element overrides needed)
  */
 (function () {
+  // ── Color utilities ───────────────────────────────────────────────────
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    var n = parseInt(hex, 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+  }
+
+  function rgbToHex(r, g, b) {
+    return '#' + ((1 << 24) + (clamp(r) << 16) + (clamp(g) << 8) + clamp(b)).toString(16).slice(1);
+  }
+
+  function clamp(v) { return Math.max(0, Math.min(255, Math.round(v))); }
+
+  /** Mix two hex colors. amount=0 → base, amount=1 → target */
+  function mix(base, target, amount) {
+    var b = hexToRgb(base), t = hexToRgb(target);
+    return rgbToHex(
+      b.r + (t.r - b.r) * amount,
+      b.g + (t.g - b.g) * amount,
+      b.b + (t.b - b.b) * amount
+    );
+  }
+
   // ── Dark-mode CSS overrides ──────────────────────────────────────────
+  // Base dark tokens — palette-derived inline styles on :root override these
   var darkCSS = document.createElement('style');
   darkCSS.textContent = `
     html.dark { color-scheme: dark; }
-    html.dark :root {
+    html.dark {
       --bg: #1a1c2e;
       --surface: #232538;
       --surface-alt: #1e2035;
@@ -38,26 +72,26 @@
 
     /* Gallery cards (index.html) */
     html.dark .card-preview { background: var(--surface-alt) !important; }
-    html.dark .card-tag.chart { background: #1e2249; color: #5c7cfa; }
-    html.dark .card-tag.demo  { background: #0d2e23; color: #20c997; }
-    html.dark .card-tag.new   { background: #2e2510; color: #fcc419; }
+    html.dark .card-tag.chart { background: var(--primary-faint); color: var(--primary); }
+    html.dark .card-tag.demo  { background: var(--success-lt); color: var(--success); }
+    html.dark .card-tag.new   { background: var(--warning-lt); color: var(--warning); }
 
     /* Example cards (all sub-pages) */
     html.dark .example-header { background: var(--surface-alt) !important; }
     html.dark .example-card   { background: var(--surface); border-color: var(--border); }
 
-    /* Data tables (sparkline.html, dashboard.html) */
+    /* Data tables */
     html.dark .data-table th       { background: var(--surface-alt) !important; color: var(--text-muted); border-bottom-color: var(--border); }
     html.dark .data-table td       { border-bottom-color: var(--border-light); color: var(--text); }
     html.dark .data-table td.name  { color: var(--text); }
     html.dark .data-table td.right { color: var(--text-sec); }
-    html.dark .data-table tr:hover { background: rgba(92,124,250,0.08) !important; }
+    html.dark .data-table tr:hover { background: var(--primary-lt) !important; }
 
     /* Badges */
-    html.dark .badge.up   { color: #20c997; background: rgba(32,201,151,0.15); }
-    html.dark .badge.down { color: #ff6b6b; background: rgba(255,107,107,0.15); }
+    html.dark .badge.up   { color: var(--success); background: var(--success-lt); }
+    html.dark .badge.down { color: var(--danger); background: var(--danger-lt); }
 
-    /* KPI cards (sparkline.html, kpicard.html) */
+    /* KPI cards */
     html.dark .kpi-card        { background: var(--surface); border-color: var(--border); }
     html.dark .kpi-value       { color: var(--text); }
     html.dark .kpi-label       { color: var(--text-muted); }
@@ -68,15 +102,15 @@
     html.dark .spark-demo          { border-color: var(--border-light) !important; background: var(--surface); }
     html.dark .variant-item .label { color: var(--text-muted); }
 
-    /* Code blocks (docs.html) */
+    /* Code blocks */
     html.dark .example-body code { background: var(--surface-alt); color: var(--text); }
 
-    /* Buttons (networkball.html) */
+    /* Buttons */
     html.dark .btn           { background: var(--surface); border-color: var(--border); color: var(--text); }
     html.dark .btn:hover     { background: var(--surface-alt); border-color: var(--text-muted); }
     html.dark .btn.green     { color: var(--success); }
 
-    /* Code hint (kpicard.html) */
+    /* Code hint */
     html.dark .code-hint { background: var(--surface-alt) !important; color: var(--text-sec); border-color: var(--border); }
 
     /* Dashboard tooltip */
@@ -87,12 +121,12 @@
 
     /* Chart containers — NC token defaults for dark */
     html.dark .chart-container {
-      --nc-background: #232538;
-      --nc-font-color: #e0e4ef;
-      --nc-grid-color: #2e3150;
-      --nc-axis-color: #6b7394;
-      --nc-tooltip-background: #1a1c2e;
-      --nc-tooltip-color: #e0e4ef;
+      --nc-background: var(--surface);
+      --nc-font-color: var(--text);
+      --nc-grid-color: var(--border);
+      --nc-axis-color: var(--text-muted);
+      --nc-tooltip-background: var(--bg);
+      --nc-tooltip-color: var(--text);
       --nc-tooltip-shadow: 0 8px 24px rgba(0,0,0,0.5);
     }
   `;
@@ -137,6 +171,10 @@
     }
   };
 
+  // UI tokens derived from palette accent color
+  var UI_TOKENS = ['--primary', '--primary-dk', '--primary-lt', '--primary-faint', '--border-focus'];
+  var PALETTE_SIZE = 10;
+
   // ── State ────────────────────────────────────────────────────────────
   var state = loadState();
 
@@ -156,24 +194,37 @@
 
   // ── Theme application ────────────────────────────────────────────────
   function applyTheme() {
-    // Dark/light
-    document.documentElement.classList.toggle('dark', state.dark);
+    var root = document.documentElement;
 
-    // Palette CSS tokens on all chart containers + sparkline hosts
+    // Toggle dark class
+    root.classList.toggle('dark', state.dark);
+
     var palette = PALETTES[state.palette];
     var colors = palette ? (state.dark ? palette.dark : palette.light) : null;
-    var containers = document.querySelectorAll('.chart-container');
 
-    containers.forEach(function (el) {
-      for (var i = 1; i <= 10; i++) {
-        el.style.removeProperty('--nc-palette-' + i);
-      }
-      if (colors) {
-        colors.forEach(function (c, idx) {
-          el.style.setProperty('--nc-palette-' + (idx + 1), c);
-        });
-      }
-    });
+    // Clear previous tokens from :root inline styles
+    var i;
+    for (i = 1; i <= PALETTE_SIZE; i++) {
+      root.style.removeProperty('--nc-palette-' + i);
+    }
+    UI_TOKENS.forEach(function (t) { root.style.removeProperty(t); });
+
+    if (colors) {
+      // Set chart palette tokens on :root — cascades to all chart containers
+      colors.forEach(function (c, idx) {
+        root.style.setProperty('--nc-palette-' + (idx + 1), c);
+      });
+
+      // Derive UI accent tokens from primary palette color
+      var accent = colors[0];
+      var bgTarget = state.dark ? '#1a1c2e' : '#ffffff';
+
+      root.style.setProperty('--primary', accent);
+      root.style.setProperty('--primary-dk', mix(accent, '#000000', 0.2));
+      root.style.setProperty('--primary-lt', mix(accent, bgTarget, state.dark ? 0.85 : 0.9));
+      root.style.setProperty('--primary-faint', mix(accent, bgTarget, state.dark ? 0.92 : 0.95));
+      root.style.setProperty('--border-focus', accent);
+    }
 
     updateUI();
     saveState();
@@ -366,7 +417,7 @@
     }
   });
 
-  // Re-apply palette tokens when new .chart-container elements appear
+  // Re-apply when new .chart-container elements appear (SPA navigation)
   if (typeof MutationObserver !== 'undefined') {
     var chartObserver = new MutationObserver(function (mutations) {
       var needsApply = false;

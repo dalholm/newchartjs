@@ -43,7 +43,6 @@ export default function scatterView() {
         data: {
           datasets: [{
             label: 'Products',
-            color: '#4c6ef5',
             values: [
               { x: 12, y: 840 }, { x: 18, y: 720 }, { x: 25, y: 580 },
               { x: 32, y: 490 }, { x: 40, y: 380 }, { x: 48, y: 310 },
@@ -69,7 +68,7 @@ export default function scatterView() {
         data: {
           datasets: [
             {
-              label: 'Enterprise', color: '#4c6ef5',
+              label: 'Enterprise',
               values: [
                 { x: 85, y: 12 }, { x: 92, y: 8 }, { x: 78, y: 15 },
                 { x: 95, y: 6 }, { x: 88, y: 10 }, { x: 82, y: 14 },
@@ -77,7 +76,7 @@ export default function scatterView() {
               ]
             },
             {
-              label: 'Mid-market', color: '#0ca678',
+              label: 'Mid-market',
               values: [
                 { x: 45, y: 28 }, { x: 52, y: 22 }, { x: 38, y: 35 },
                 { x: 55, y: 20 }, { x: 42, y: 30 }, { x: 48, y: 25 },
@@ -85,7 +84,7 @@ export default function scatterView() {
               ]
             },
             {
-              label: 'SMB', color: '#f08c00',
+              label: 'SMB',
               values: [
                 { x: 15, y: 65 }, { x: 20, y: 55 }, { x: 12, y: 72 },
                 { x: 25, y: 48 }, { x: 18, y: 60 }, { x: 22, y: 52 },
@@ -107,7 +106,7 @@ export default function scatterView() {
         type: 'scatter',
         data: {
           datasets: [{
-            label: 'Products', color: '#7048e8',
+            label: 'Products',
             values: [
               { x: 2.1, y: 15, size: 320, label: 'Widget Pro' },
               { x: 4.5, y: 8, size: 180, label: 'Dashboard' },
@@ -136,7 +135,7 @@ export default function scatterView() {
         data: {
           datasets: [
             {
-              label: 'High performers', color: '#0ca678',
+              label: 'High performers',
               values: [
                 { x: 72, y: 85, size: 300, label: 'Project Alpha' },
                 { x: 65, y: 78, size: 220, label: 'Project Beta' },
@@ -144,7 +143,7 @@ export default function scatterView() {
               ]
             },
             {
-              label: 'Under review', color: '#f08c00',
+              label: 'Under review',
               values: [
                 { x: 35, y: 70, size: 180, label: 'Project Delta' },
                 { x: 28, y: 82, size: 250, label: 'Project Epsilon' },
@@ -152,7 +151,7 @@ export default function scatterView() {
               ]
             },
             {
-              label: 'At risk', color: '#e03131',
+              label: 'At risk',
               values: [
                 { x: 20, y: 25, size: 120, label: 'Project Eta' },
                 { x: 30, y: 30, size: 200, label: 'Project Theta' },
@@ -179,7 +178,7 @@ export default function scatterView() {
         type: 'scatter',
         data: {
           datasets: [{
-            label: 'Regions', color: '#1098ad',
+            label: 'Regions',
             values: [
               { x: 120, y: 89, label: 'Stockholm' },
               { x: 95, y: 78, label: 'Gothenburg' },

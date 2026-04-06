@@ -105,27 +105,24 @@ export class Chart {
       this._themeMediaQuery.addEventListener('change', this._themeChangeHandler);
     }
 
-    // Watch for CSS class changes on <html> (e.g. dark mode toggle)
+    // Watch for class and style changes on <html> (dark toggle + palette tokens on :root)
+    // and style changes on the chart element (per-element token overrides)
     // Re-reads CSS tokens and re-renders when detected
-    this._htmlClassObserver = null;
+    this._htmlObserver = null;
+    this._elementStyleObserver = null;
     this._userConfig = config;
     if (typeof MutationObserver !== 'undefined' && this.config.options?.cssTokens !== false) {
-      this._htmlClassObserver = new MutationObserver(debounce(() => {
-        // Re-resolve CSS tokens and check if they changed
+      const reapplyFromCSS = debounce(() => {
         const newTokens = resolveCSSTokens(this.element);
         const newTheme = newTokens.options?.theme;
-        const wasDark = this._dark;
 
-        // Detect theme from CSS token or from dark class
         if (newTheme) {
           this._dark = isDarkMode(newTheme);
         } else if (typeof document !== 'undefined') {
-          // Check if html has 'dark' class (common pattern)
           const htmlDark = document.documentElement.classList.contains('dark');
           this._dark = htmlDark;
         }
 
-        // Re-apply theme and re-render if anything changed
         this._applyTheme(this._userConfig);
         if (this.legend) { this.legend.destroy(); this.legend = null; }
         if (this.dataTable) { this.dataTable.destroy(); this.dataTable = null; }
@@ -134,10 +131,20 @@ export class Chart {
         if (this.renderer) { this.renderer.destroy(); }
         this.initRenderer();
         this.draw();
-      }, 100));
-      this._htmlClassObserver.observe(document.documentElement, {
+      }, 100);
+
+      // Watch both class (dark toggle) and style (palette tokens) on <html>
+      this._htmlObserver = new MutationObserver(reapplyFromCSS);
+      this._htmlObserver.observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ['class']
+        attributeFilter: ['class', 'style']
+      });
+
+      // Also watch style on the chart element for per-element overrides
+      this._elementStyleObserver = new MutationObserver(reapplyFromCSS);
+      this._elementStyleObserver.observe(this.element, {
+        attributes: true,
+        attributeFilter: ['style']
       });
     }
 
@@ -598,8 +605,12 @@ export class Chart {
       this._themeMediaQuery.removeEventListener('change', this._themeChangeHandler);
     }
 
-    if (this._htmlClassObserver) {
-      this._htmlClassObserver.disconnect();
+    if (this._htmlObserver) {
+      this._htmlObserver.disconnect();
+    }
+
+    if (this._elementStyleObserver) {
+      this._elementStyleObserver.disconnect();
     }
 
     if (this.tooltip) {

@@ -44,8 +44,8 @@ export default function areaView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Inflow', values: [3200,3500,3100,3800,3600,4000,3300,3700,3900,3400,4200,4500], color: '#0ca678' },
-            { label: 'Outflow', values: [2800,2900,3000,2700,3100,2900,3200,3000,2800,3100,3000,3200], color: '#e03131' }
+            { label: 'Inflow', values: [3200,3500,3100,3800,3600,4000,3300,3700,3900,3400,4200,4500] },
+            { label: 'Outflow', values: [2800,2900,3000,2700,3100,2900,3200,3000,2800,3100,3000,3200] }
           ]
         }
       }));
@@ -61,8 +61,7 @@ export default function areaView() {
           labels: api.MONTHS,
           datasets: [{
             label: 'Cumulative Revenue (k)',
-            values: cumulative,
-            color: '#4c6ef5'
+            values: cumulative
           }]
         }
       }));
@@ -73,9 +72,9 @@ export default function areaView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Direct', values: [12000,13200,12800,14500,13800,15200,12500,14000,14800,13000,16000,17200], color: '#4c6ef5' },
-            { label: 'Organic', values: [8400,9200,8800,10100,9600,10800,8900,10000,10500,9100,11200,12400], color: '#0ca678' },
-            { label: 'Paid', values: [5600,6100,5800,6800,6400,7200,5900,6600,7000,6100,7500,8200], color: '#f08c00' }
+            { label: 'Direct', values: [12000,13200,12800,14500,13800,15200,12500,14000,14800,13000,16000,17200] },
+            { label: 'Organic', values: [8400,9200,8800,10100,9600,10800,8900,10000,10500,9100,11200,12400] },
+            { label: 'Paid', values: [5600,6100,5800,6800,6400,7200,5900,6600,7000,6100,7500,8200] }
           ]
         },
         style: {
@@ -89,10 +88,10 @@ export default function areaView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Sweden', values: [1800,2000,1900,2200,2100,2400,1850,2150,2300,2000,2500,2700], color: '#4c6ef5' },
-            { label: 'Norway', values: [600,680,640,750,710,800,620,700,750,650,800,880], color: '#0ca678' },
-            { label: 'Finland', values: [350,400,380,430,410,460,370,420,450,380,480,530], color: '#f08c00' },
-            { label: 'Denmark', values: [200,240,220,280,260,290,210,250,270,230,310,340], color: '#7048e8' }
+            { label: 'Sweden', values: [1800,2000,1900,2200,2100,2400,1850,2150,2300,2000,2500,2700] },
+            { label: 'Norway', values: [600,680,640,750,710,800,620,700,750,650,800,880] },
+            { label: 'Finland', values: [350,400,380,430,410,460,370,420,450,380,480,530] },
+            { label: 'Denmark', values: [200,240,220,280,260,290,210,250,270,230,310,340] }
           ]
         },
         options: { stacked: true },
@@ -108,8 +107,7 @@ export default function areaView() {
           labels: api.MONTHS,
           datasets: [{
             label: 'Inventory Value (k)',
-            values: [8200,7800,8500,7600,8900,8100,7400,8300,9200,8800,9500,8600],
-            color: '#1098ad'
+            values: [8200,7800,8500,7600,8900,8100,7400,8300,9200,8800,9500,8600]
           }]
         },
         style: {

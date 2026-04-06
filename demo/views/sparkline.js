@@ -164,9 +164,9 @@ export default function sparklineView() {
         if (!refRow) return;
 
         const refExamples = [
-          { label: 'Zero Line', data: [2,-1,3,-2,1,4,-1,2,3,-1,2,5], ref: 0, color: '#4c6ef5' },
-          { label: 'Target Line (400)', data: [380,390,410,395,420,405,430,415,440,425,450,460], ref: 400, color: '#0ca678' },
-          { label: 'Avg Ref', data: [50,55,48,62,58,70,52,65,72,60,78,82], ref: 62.7, color: '#7048e8' }
+          { label: 'Zero Line', data: [2,-1,3,-2,1,4,-1,2,3,-1,2,5], ref: 0 },
+          { label: 'Target Line (400)', data: [380,390,410,395,420,405,430,415,440,425,450,460], ref: 400 },
+          { label: 'Avg Ref', data: [50,55,48,62,58,70,52,65,72,60,78,82], ref: 62.7 }
         ];
 
         refExamples.forEach((r, i) => {

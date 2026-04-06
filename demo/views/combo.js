@@ -44,8 +44,8 @@ export default function comboView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Revenue (k)', values: [320,380,350,420,390,460,410,480,450,520,490,560], type: 'bar', color: '#4c6ef5' },
-            { label: 'Margin %', values: [28,31,29,33,30,35,32,36,34,38,35,40], type: 'line', color: '#0ca678' }
+            { label: 'Revenue (k)', values: [320,380,350,420,390,460,410,480,450,520,490,560], type: 'bar' },
+            { label: 'Margin %', values: [28,31,29,33,30,35,32,36,34,38,35,40], type: 'line' }
           ]
         }
       }));
@@ -56,9 +56,9 @@ export default function comboView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Direct Sales', values: [180,210,195,240,220,260,230,270,255,290,275,310], type: 'bar', color: '#4c6ef5' },
-            { label: 'Online Sales', values: [140,160,155,180,170,200,180,210,195,230,215,250], type: 'bar', color: '#7048e8' },
-            { label: 'Growth %', values: [5,8,6,12,9,15,10,16,13,18,14,20], type: 'line', color: '#f08c00' }
+            { label: 'Direct Sales', values: [180,210,195,240,220,260,230,270,255,290,275,310], type: 'bar' },
+            { label: 'Online Sales', values: [140,160,155,180,170,200,180,210,195,230,215,250], type: 'bar' },
+            { label: 'Growth %', values: [5,8,6,12,9,15,10,16,13,18,14,20], type: 'line' }
           ]
         }
       }));
@@ -69,8 +69,8 @@ export default function comboView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Actual', values: [290,340,310,380,355,410,370,430,405,470,440,510], type: 'bar', color: '#4c6ef5' },
-            { label: 'Forecast', values: [300,330,320,370,360,400,390,420,410,450,440,480], type: 'line', color: '#868e96', dash: true, dashPattern: '6 4' }
+            { label: 'Actual', values: [290,340,310,380,355,410,370,430,405,470,440,510], type: 'bar' },
+            { label: 'Forecast', values: [300,330,320,370,360,400,390,420,410,450,440,480], type: 'line', dash: true, dashPattern: '6 4' }
           ]
         },
         options: {
@@ -86,8 +86,8 @@ export default function comboView() {
         data: {
           labels: ['Q1','Q2','Q3','Q4'],
           datasets: [
-            { label: 'Volume (units)', values: [12400,11800,13200,14500], type: 'bar', color: '#1098ad' },
-            { label: 'Turnover rate', values: [4.2,4.8,4.5,5.1], type: 'line', color: '#d6336c' }
+            { label: 'Volume (units)', values: [12400,11800,13200,14500], type: 'bar' },
+            { label: 'Turnover rate', values: [4.2,4.8,4.5,5.1], type: 'line' }
           ]
         },
         options: { smooth: false }
@@ -99,9 +99,9 @@ export default function comboView() {
         data: {
           labels: api.MONTHS,
           datasets: [
-            { label: 'Orders', values: [1200,1350,1280,1500,1420,1600,1480,1700,1620,1800,1720,1900], type: 'bar', color: '#4c6ef5' },
-            { label: 'Conversion %', values: [3.2,3.5,3.3,3.8,3.6,4.0,3.7,4.2,3.9,4.4,4.1,4.6], type: 'line', color: '#0ca678' },
-            { label: 'Return %', values: [2.1,1.8,2.0,1.6,1.9,1.5,1.7,1.4,1.6,1.3,1.5,1.2], type: 'line', color: '#e03131' }
+            { label: 'Orders', values: [1200,1350,1280,1500,1420,1600,1480,1700,1620,1800,1720,1900], type: 'bar' },
+            { label: 'Conversion %', values: [3.2,3.5,3.3,3.8,3.6,4.0,3.7,4.2,3.9,4.4,4.1,4.6], type: 'line' },
+            { label: 'Return %', values: [2.1,1.8,2.0,1.6,1.9,1.5,1.7,1.4,1.6,1.3,1.5,1.2], type: 'line' }
           ]
         }
       }));

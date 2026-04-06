@@ -324,8 +324,14 @@ export default function dashboardView() {
         { label: 'Accessories', value: 1520, orders: 304, margin: 62.4 },
       ];
 
-      const SERIES_COLORS = ['#4c6ef5','#0ca678','#f08c00','#e03131','#7048e8','#1098ad','#d6336c','#5c7cfa','#20c997','#fcc419'];
+      const DEFAULT_COLORS = ['#4c6ef5','#0ca678','#f08c00','#e03131','#7048e8','#1098ad','#d6336c','#5c7cfa','#20c997','#fcc419'];
       const COMPARE_COLOR = '#b3bac5';
+
+      /** Read palette color from CSS tokens (set by theme.js on :root) */
+      function getPaletteColor(index) {
+        var val = getComputedStyle(document.documentElement).getPropertyValue('--nc-palette-' + (index + 1)).trim();
+        return val || DEFAULT_COLORS[index % DEFAULT_COLORS.length];
+      }
 
       /* Drill-down generators */
       function genWeeks(monthVal) {
@@ -391,13 +397,13 @@ export default function dashboardView() {
 
         const kpis = [
           { id: 'revenue', label: 'Revenue', value: totR26, previous: totR25, suffix: ' SEK',
-            sparkline: { values: REV_26, color: SERIES_COLORS[0] }, target: budgetTarget },
+            sparkline: { values: REV_26 }, target: budgetTarget },
           { id: 'orders', label: 'Orders', value: totO26, previous: totO25, suffix: '',
-            sparkline: { values: ORD_26, color: SERIES_COLORS[1] }, target: null },
+            sparkline: { values: ORD_26 }, target: null },
           { id: 'aov', label: 'AOV', value: aov26, previous: aov25, suffix: ' SEK',
-            sparkline: { values: AOV_26, color: SERIES_COLORS[2] }, target: null },
+            sparkline: { values: AOV_26 }, target: null },
           { id: 'margin', label: 'Gross Margin', value: 47.2, previous: 44.8, suffix: '%', decimals: 1,
-            sparkline: { values: [42,43,44,45,44,46,45,47,48,46,48,47], color: SERIES_COLORS[3] }, target: null },
+            sparkline: { values: [42,43,44,45,44,46,45,47,48,46,48,47] }, target: null },
         ];
 
         kpiInstances.forEach(inst => inst.destroy());
@@ -413,7 +419,6 @@ export default function dashboardView() {
           row.appendChild(el);
 
           const isActive = k.id === state.metric;
-          const sparkColor = isActive ? '#4c6ef5' : '#b3bac5';
 
           const card = NewChart.kpiCard(el, {
             label: k.label,
@@ -423,7 +428,7 @@ export default function dashboardView() {
             decimals: k.decimals || 0,
             target: k.target,
             active: isActive,
-            sparkline: k.sparkline ? { ...k.sparkline, color: sparkColor } : null,
+            sparkline: k.sparkline || null,
             onClick: k.id !== 'margin' ? () => {
               state.metric = k.id;
               state.drillStack = [];
@@ -450,7 +455,6 @@ export default function dashboardView() {
           animation: { duration: 800, easing: 'easeOutCubic' },
           fontFamily: "'Inter',sans-serif",
           monoFamily: "'JetBrains Mono',monospace",
-          background: '#ffffff',
           gauge: { needle: false, valueFontSize: 20 }
         };
 
@@ -553,8 +557,7 @@ export default function dashboardView() {
         if (state.legendVis.current) {
           datasets.push({
             label: state.drillStack.length === 0 ? '2026' : 'Current',
-            values: data.map(d => d.value),
-            color: SERIES_COLORS[0]
+            values: data.map(d => d.value)
           });
         }
         if (state.legendVis.previous) {
@@ -704,7 +707,7 @@ export default function dashboardView() {
         title.style.display = 'none';
 
         let html = '<button data-drill="-1" title="Home">' +
-          '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#4c6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+          '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
           '<path d="M2 8l6-5.5L14 8"/><path d="M3.5 9v5a.5.5 0 00.5.5h3v-3.5h2v3.5h3a.5.5 0 00.5-.5V9"/></svg></button>';
 
         state.drillStack.forEach((s, i) => {
@@ -729,7 +732,7 @@ export default function dashboardView() {
       /* ═══ LEGEND ═══ */
       function renderBarLegend() {
         const items = [
-          { key: 'current', label: '2026', color: SERIES_COLORS[0] },
+          { key: 'current', label: '2026', color: getPaletteColor(0) },  // dynamic
           { key: 'previous', label: '2025', color: COMPARE_COLOR, ref: true },
           ...(state.metric === 'revenue' ? [{ key: 'budget', label: 'Budget', color: '#f08c00', ref: true }] : []),
           { key: 'average', label: 'Average', color: '#868e96', ref: true },
@@ -771,7 +774,7 @@ export default function dashboardView() {
         if (donutChartInstance) { donutChartInstance.destroy(); donutChartInstance = null; }
         if (_donutTable) { _donutTable.destroy(); _donutTable = null; }
 
-        const colors = data.map(d => SERIES_COLORS[raw.indexOf(d) % SERIES_COLORS.length]);
+        const colors = data.map(d => getPaletteColor(raw.indexOf(d)));
         const isChannel = state.donutSource === 'channel';
         const rawTotal = raw.reduce((s, x) => s + x.value, 0);
 
@@ -838,7 +841,7 @@ export default function dashboardView() {
               columns: [
                 { key: '_label', label: isChannel ? 'Channel' : 'Category', align: 'left',
                   render: (row, ri) => {
-                    const color = colors[ri] || SERIES_COLORS[ri % SERIES_COLORS.length];
+                    const color = colors[ri] || getPaletteColor(ri);
                     return '<span style="display:inline-flex;align-items:center;gap:8px">' +
                       '<span style="width:10px;height:10px;border-radius:3px;background:' + color + ';flex-shrink:0"></span>' +
                       data[ri].label + '</span>';
@@ -869,7 +872,7 @@ export default function dashboardView() {
         el.innerHTML = raw.map((d, i) => {
           const vis = state.donutLegendVis[i] !== false;
           return '<button class="legend-item' + (vis ? '' : ' hidden') + '" data-idx="' + i + '">' +
-            '<span class="legend-swatch" style="background:' + (vis ? SERIES_COLORS[i % SERIES_COLORS.length] : 'var(--text-faint)') + '"></span>' +
+            '<span class="legend-swatch" style="background:' + (vis ? getPaletteColor(i) : 'var(--text-faint)') + '"></span>' +
             d.label + '</button>';
         }).join('');
 

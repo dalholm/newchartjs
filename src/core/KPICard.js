@@ -384,7 +384,7 @@ export class KPICard {
         data: {
           datasets: [{
             values: sparkline.values,
-            color: sparkline.color || this.config.colors.value
+            color: sparkline.color
           }]
         },
         options: {
