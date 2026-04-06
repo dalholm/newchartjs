@@ -213,7 +213,7 @@ export class BarChart extends Chart {
 
       // Column highlight background (hidden by default)
       const highlight = this.renderer.rect(groupX + 1, chartY, barWidth - 2, chartHeight, {
-        fill: '#4c6ef5',
+        fill: this.getPaletteColor(0),
         opacity: 0,
         borderRadius: 2
       });
@@ -421,7 +421,7 @@ export class BarChart extends Chart {
             footer = {
               label: footerLabel,
               value: `${isPositive ? '+' : ''}${change.toFixed(1)}%`,
-              color: isPositive ? '#69db7c' : '#ff8787'
+              color: isPositive ? (this._dark ? '#69db7c' : '#0ca678') : (this._dark ? '#ff8787' : '#e03131')
             };
           }
 

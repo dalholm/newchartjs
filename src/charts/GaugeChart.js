@@ -221,7 +221,7 @@ export class GaugeChart extends Chart {
         cx + markerOuterR * Math.cos(targetAngle), cy + markerOuterR * Math.sin(targetAngle),
         cx + markerInnerR * Math.cos(targetAngle), cy + markerInnerR * Math.sin(targetAngle),
         {
-          stroke: options.targetColor || '#1a1d23',
+          stroke: options.targetColor || style.fontColor || '#1a1d23',
           strokeWidth: 2.5,
           strokeLinecap: 'round'
         }
@@ -261,12 +261,12 @@ export class GaugeChart extends Chart {
 
       this.renderer.path(
         `M ${nx} ${ny} L ${nlx} ${nly} L ${nrx} ${nry} Z`,
-        { fill: options.needleColor || '#1a1d23' }
+        { fill: options.needleColor || style.fontColor || '#1a1d23' }
       );
 
       // Center circle
       this.renderer.circle(cx, cy, 5, {
-        fill: options.needleColor || '#1a1d23'
+        fill: options.needleColor || style.fontColor || '#1a1d23'
       });
     }
 
@@ -289,7 +289,7 @@ export class GaugeChart extends Chart {
     const label = dataset.label || data.labels?.[0] || '';
     if (label) {
       this.renderer.text(label, cx, cy + (style.gauge?.needle !== false ? 48 : 22), {
-        fill: '#8993a4',
+        fill: style.axis?.color || '#8993a4',
         fontSize: 11,
         fontFamily: style.fontFamily,
         textAnchor: 'middle',
@@ -303,7 +303,7 @@ export class GaugeChart extends Chart {
         `av ${formatNumber(max, 0)}`,
         cx, cy + (style.gauge?.needle !== false ? 62 : 36),
         {
-          fill: '#b3bac5',
+          fill: style.grid?.color || '#b3bac5',
           fontSize: 9,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',
@@ -388,7 +388,7 @@ export class GaugeChart extends Chart {
     const label = dataset.label || data.labels?.[0] || '';
     if (label) {
       this.renderer.text(label, cx, cy + 18, {
-        fill: '#8993a4',
+        fill: style.axis?.color || '#8993a4',
         fontSize: 11,
         fontFamily: style.fontFamily,
         textAnchor: 'middle',
@@ -471,7 +471,7 @@ export class GaugeChart extends Chart {
         targetX, barY - 4,
         targetX, barY + barHeight + 4,
         {
-          stroke: options.targetColor || '#1a1d23',
+          stroke: options.targetColor || style.fontColor || '#1a1d23',
           strokeWidth: 2,
           strokeLinecap: 'round'
         }
@@ -508,7 +508,7 @@ export class GaugeChart extends Chart {
     const label = dataset.label || data.labels?.[0] || '';
     if (label) {
       this.renderer.text(label, this.width / 2, barY - 38, {
-        fill: '#8993a4',
+        fill: style.axis?.color || '#8993a4',
         fontSize: 11,
         fontFamily: style.fontFamily,
         textAnchor: 'middle',
@@ -518,14 +518,14 @@ export class GaugeChart extends Chart {
 
     // Min/max labels
     this.renderer.text(formatNumber(min, 0), barX, barY + barHeight + 14, {
-      fill: '#b3bac5',
+      fill: style.grid?.color || '#b3bac5',
       fontSize: 9,
       fontFamily: style.fontFamily,
       textAnchor: 'start',
       dominantBaseline: 'middle'
     });
     this.renderer.text(formatNumber(max, 0), barX + barWidth, barY + barHeight + 14, {
-      fill: '#b3bac5',
+      fill: style.grid?.color || '#b3bac5',
       fontSize: 9,
       fontFamily: style.fontFamily,
       textAnchor: 'end',
@@ -611,7 +611,7 @@ export class GaugeChart extends Chart {
     const label = dataset.label || data.labels?.[0] || '';
     if (label) {
       this.renderer.text(label, cx, cy + 28, {
-        fill: '#8993a4',
+        fill: style.axis?.color || '#8993a4',
         fontSize: 11,
         fontFamily: style.fontFamily,
         textAnchor: 'middle',

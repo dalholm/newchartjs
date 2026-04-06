@@ -18,12 +18,16 @@ export class Legend {
       position: 'top',
       enabled: true,
       fontSize: 11,
-      color: '#172b4d',
+      color: options.dark ? '#e0e4ef' : '#172b4d',
       marker: { size: 10, height: 3 },
       interactive: true,
       dark: false,
       ...options
     };
+    // Ensure color matches dark mode even if caller set dark but not color
+    if (options.dark && !options.color) {
+      this.options.color = '#e0e4ef';
+    }
 
     this.element = null;
     this._visibility = {};
@@ -84,6 +88,12 @@ export class Legend {
       const vis = this._visibility[key] !== false;
 
       const dk = this.options.dark;
+      // Dark/light color tokens
+      const borderColor = vis ? (dk ? 'rgba(255,255,255,0.12)' : '#dfe1e6') : (dk ? 'rgba(255,255,255,0.06)' : '#ebecf0');
+      const bgColor = vis ? (dk ? 'rgba(255,255,255,0.06)' : '#ffffff') : (dk ? 'rgba(255,255,255,0.03)' : '#f8f9fb');
+      const textColor = vis ? this.options.color : (dk ? '#6b7394' : '#b3bac5');
+      const mutedColor = dk ? '#6b7394' : '#8993a4';
+
       const itemEl = createElement('div', {
         style: {
           display: 'flex',
@@ -92,11 +102,11 @@ export class Legend {
           padding: '3px 8px',
           fontSize: this.options.fontSize + 'px',
           fontFamily: 'inherit',
-          border: `1px solid ${vis ? (dk ? '#2d3139' : '#dfe1e6') : (dk ? '#252830' : '#ebecf0')}`,
+          border: `1px solid ${borderColor}`,
           borderRadius: '3px',
           cursor: 'pointer',
-          background: vis ? (dk ? '#1a1d23' : '#ffffff') : (dk ? '#1e2028' : '#f8f9fb'),
-          color: vis ? this.options.color : (dk ? '#6b7280' : '#b3bac5'),
+          background: bgColor,
+          color: textColor,
           opacity: vis ? '1' : '0.5',
           transition: 'all 0.15s',
           whiteSpace: 'nowrap',
@@ -104,13 +114,13 @@ export class Legend {
         }
       });
 
-      // Marker swatch — thin line style like prototype
+      // Marker swatch
       const marker = createElement('span', {
         style: {
           width: (this.options.marker.size || 10) + 'px',
           height: (this.options.marker.height || 3) + 'px',
           borderRadius: '2px',
-          backgroundColor: vis ? item.color : '#b3bac5',
+          backgroundColor: vis ? item.color : mutedColor,
           flexShrink: '0',
           transition: 'background-color 0.15s'
         }
@@ -131,7 +141,7 @@ export class Legend {
           textContent: '(ref)',
           style: {
             fontSize: '9px',
-            color: dk ? '#6b7280' : '#8993a4',
+            color: mutedColor,
             marginLeft: '2px'
           }
         });

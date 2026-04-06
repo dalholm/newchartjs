@@ -218,7 +218,7 @@ export class PieChart extends Chart {
       });
 
       this._centerTextLabel = this.renderer.text('total', cx, cy + 14, {
-        fill: '#8993a4',
+        fill: style.axis?.color || '#8993a4',
         fontSize: 9,
         fontFamily: style.fontFamily,
         textAnchor: 'middle',

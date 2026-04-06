@@ -170,7 +170,7 @@ export class ComboChart extends Chart {
       const groupX = chartX + labelIndex * barWidth;
 
       const highlight = this.renderer.rect(groupX + 1, chartY, barWidth - 2, chartHeight, {
-        fill: '#4c6ef5',
+        fill: this.getPaletteColor(0),
         opacity: 0,
         borderRadius: 2
       });
