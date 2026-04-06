@@ -1,0 +1,289 @@
+/**
+ * Gauge Chart view
+ */
+export default function gaugeView() {
+  return {
+    title: 'Gauge Chart',
+    style: `
+      .example-body { display: flex; justify-content: center; }
+      .chart-container { min-height: 280px; }
+    `,
+    html: `
+      <a href="/" class="back-link">&larr; All demos</a>
+      <div class="page-header">
+        <h1>Gauge Chart</h1>
+        <p>KPI gauges with threshold zones, needle and target markers — perfect for ERP dashboards and scorecards.</p>
+      </div>
+      <div class="examples">
+        <div class="row">
+          <div class="example-card">
+            <div class="example-header"><h2>Revenue Target</h2><p>Percent of annual budget achieved — green/yellow/red zones</p></div>
+            <div class="example-body"><div class="chart-container wide" id="chart-revenue"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Gross Margin</h2><p>Current margin vs target of 45%</p></div>
+            <div class="example-body"><div class="chart-container wide" id="chart-margin"></div></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="example-card">
+            <div class="example-header"><h2>SLA Compliance</h2><p>System uptime with strict threshold (99% = yellow, 99.9% = green)</p></div>
+            <div class="example-body"><div class="chart-container wide" id="chart-sla"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Warehouse Capacity</h2><p>Utilization rate — inverted zones (high = red)</p></div>
+            <div class="example-body"><div class="chart-container wide" id="chart-capacity"></div></div>
+          </div>
+        </div>
+        <div class="example-card">
+          <div class="example-header"><h2>Operational KPIs</h2><p>Compact gauges for overview — typical ERP KPI panel</p></div>
+          <div class="example-body" style="flex-wrap: wrap; gap: 12px;">
+            <div class="chart-container compact" id="gauge-orders"></div>
+            <div class="chart-container compact" id="gauge-nps"></div>
+            <div class="chart-container compact" id="gauge-delivery"></div>
+            <div class="chart-container compact" id="gauge-returns"></div>
+          </div>
+        </div>
+        <div class="example-card">
+          <div class="example-header"><h2>Revenue with Custom Format</h2><p>Displays value in millions with prefix and suffix — custom formatValue</p></div>
+          <div class="example-body"><div class="chart-container wide" id="chart-custom"></div></div>
+        </div>
+        <div class="row">
+          <div class="example-card">
+            <div class="example-header"><h2>Ring — CPU Usage</h2><p><code>variant: 'ring'</code> — Full 360° donut, clean and minimal</p></div>
+            <div class="example-body"><div class="chart-container compact" id="ring-cpu"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Ring — Disk Usage</h2><p>Inverted zones (high = red)</p></div>
+            <div class="example-body"><div class="chart-container compact" id="ring-disk"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Ring — Score</h2><p>Thick ring with custom arc width</p></div>
+            <div class="example-body"><div class="chart-container compact" id="ring-score"></div></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="example-card">
+            <div class="example-header"><h2>Linear — Budget Utilization</h2><p><code>variant: 'linear'</code> — Horizontal bar gauge with target</p></div>
+            <div class="example-body"><div class="chart-container wide" style="min-height: 120px;" id="linear-budget"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Linear — Storage</h2><p>Inverted zones, no target</p></div>
+            <div class="example-body"><div class="chart-container wide" style="min-height: 120px;" id="linear-storage"></div></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="example-card">
+            <div class="example-header"><h2>Compact — Battery Level</h2><p><code>variant: 'compact'</code> — Minimal semicircle, no needle or ticks</p></div>
+            <div class="example-body"><div class="chart-container compact" style="min-height: 160px;" id="compact-battery"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Compact — Quality Score</h2><p>Simple half-circle with value</p></div>
+            <div class="example-body"><div class="chart-container compact" style="min-height: 160px;" id="compact-quality"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Compact — Completion</h2><p>Single color zone</p></div>
+            <div class="example-body"><div class="chart-container compact" style="min-height: 160px;" id="compact-completion"></div></div>
+          </div>
+        </div>
+      </div>
+    `,
+    mount() {
+      const charts = [];
+
+      // 1. Revenue target
+      charts.push(NewChart.create('#chart-revenue', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Annual Budget', values: [78] }] },
+        options: {
+          min: 0, max: 100, target: 100, valueSuffix: '%',
+          zones: [
+            { from: 0, to: 0.5, color: '#e03131' },
+            { from: 0.5, to: 0.8, color: '#f08c00' },
+            { from: 0.8, to: 1.0, color: '#0ca678' }
+          ]
+        }
+      }));
+
+      // 2. Margin
+      charts.push(NewChart.create('#chart-margin', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Gross Margin', values: [42.3] }] },
+        options: {
+          min: 0, max: 60, target: 45, valueSuffix: '%', valueDecimals: 1,
+          zones: [
+            { from: 0, to: 0.5, color: '#e03131' },
+            { from: 0.5, to: 0.75, color: '#f08c00' },
+            { from: 0.75, to: 1.0, color: '#0ca678' }
+          ]
+        }
+      }));
+
+      // 3. SLA
+      charts.push(NewChart.create('#chart-sla', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'SLA Compliance', values: [99.7] }] },
+        options: {
+          min: 95, max: 100, target: 99.9, valueSuffix: '%', valueDecimals: 1, ticks: 5,
+          zones: [
+            { from: 0, to: 0.6, color: '#e03131' },
+            { from: 0.6, to: 0.9, color: '#f08c00' },
+            { from: 0.9, to: 1.0, color: '#0ca678' }
+          ]
+        }
+      }));
+
+      // 4. Capacity (inverted)
+      charts.push(NewChart.create('#chart-capacity', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Warehouse Capacity', values: [87] }] },
+        options: {
+          min: 0, max: 100, target: 75, valueSuffix: '%', targetLabel: 'Optimal: 75%',
+          zones: [
+            { from: 0, to: 0.6, color: '#0ca678' },
+            { from: 0.6, to: 0.85, color: '#f08c00' },
+            { from: 0.85, to: 1.0, color: '#e03131' }
+          ]
+        }
+      }));
+
+      // 5. Compact gauges
+      charts.push(NewChart.create('#gauge-orders', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Order Fulfillment', values: [94] }] },
+        options: { min: 0, max: 100, valueSuffix: '%', ticks: 4, showMax: false },
+        style: { gauge: { valueFontSize: 22 } }
+      }));
+
+      charts.push(NewChart.create('#gauge-nps', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'NPS', values: [72] }] },
+        options: {
+          min: -100, max: 100, ticks: 4, showMax: false,
+          zones: [
+            { from: 0, to: 0.5, color: '#e03131' },
+            { from: 0.5, to: 0.75, color: '#f08c00' },
+            { from: 0.75, to: 1.0, color: '#0ca678' }
+          ]
+        },
+        style: { gauge: { valueFontSize: 22 } }
+      }));
+
+      charts.push(NewChart.create('#gauge-delivery', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Delivery Accuracy', values: [96.2] }] },
+        options: { min: 80, max: 100, valueSuffix: '%', valueDecimals: 1, ticks: 4, showMax: false },
+        style: { gauge: { valueFontSize: 22 } }
+      }));
+
+      charts.push(NewChart.create('#gauge-returns', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Return Rate', values: [3.8] }] },
+        options: {
+          min: 0, max: 10, valueSuffix: '%', valueDecimals: 1, ticks: 5, showMax: false,
+          zones: [
+            { from: 0, to: 0.3, color: '#0ca678' },
+            { from: 0.3, to: 0.6, color: '#f08c00' },
+            { from: 0.6, to: 1.0, color: '#e03131' }
+          ]
+        },
+        style: { gauge: { valueFontSize: 22 } }
+      }));
+
+      // 6. Custom format
+      charts.push(NewChart.create('#chart-custom', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Total Revenue', values: [38.9] }] },
+        options: {
+          min: 0, max: 50, target: 42, targetLabel: 'Target: 42M',
+          formatValue: (v) => v.toFixed(1) + 'M',
+          zones: [
+            { from: 0, to: 0.6, color: '#e03131' },
+            { from: 0.6, to: 0.85, color: '#f08c00' },
+            { from: 0.85, to: 1.0, color: '#0ca678' }
+          ]
+        }
+      }));
+
+      // Ring variants
+      charts.push(NewChart.create('#ring-cpu', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'CPU', values: [67] }] },
+        options: { variant: 'ring', min: 0, max: 100, valueSuffix: '%' },
+        style: { gauge: { valueFontSize: 24 } }
+      }));
+
+      charts.push(NewChart.create('#ring-disk', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Disk Usage', values: [84] }] },
+        options: {
+          variant: 'ring', min: 0, max: 100, valueSuffix: '%',
+          zones: [
+            { from: 0, to: 0.6, color: '#0ca678' },
+            { from: 0.6, to: 0.85, color: '#f08c00' },
+            { from: 0.85, to: 1.0, color: '#e03131' }
+          ]
+        },
+        style: { gauge: { valueFontSize: 24 } }
+      }));
+
+      charts.push(NewChart.create('#ring-score', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Score', values: [92] }] },
+        options: { variant: 'ring', min: 0, max: 100 },
+        style: { gauge: { arcWidth: 20, valueFontSize: 28 } }
+      }));
+
+      // Linear variants
+      charts.push(NewChart.create('#linear-budget', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Budget Utilization', values: [72] }] },
+        options: {
+          variant: 'linear', min: 0, max: 100, target: 85,
+          valueSuffix: '%', targetLabel: 'Target: 85%'
+        }
+      }));
+
+      charts.push(NewChart.create('#linear-storage', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Storage Used', values: [7.2] }] },
+        options: {
+          variant: 'linear', min: 0, max: 10,
+          valueSuffix: ' GB', valueDecimals: 1,
+          zones: [
+            { from: 0, to: 0.6, color: '#0ca678' },
+            { from: 0.6, to: 0.85, color: '#f08c00' },
+            { from: 0.85, to: 1.0, color: '#e03131' }
+          ]
+        }
+      }));
+
+      // Compact variants
+      charts.push(NewChart.create('#compact-battery', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Battery', values: [43] }] },
+        options: { variant: 'compact', min: 0, max: 100, valueSuffix: '%' },
+        style: { gauge: { valueFontSize: 22 } }
+      }));
+
+      charts.push(NewChart.create('#compact-quality', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Quality Score', values: [88] }] },
+        options: { variant: 'compact', min: 0, max: 100 },
+        style: { gauge: { valueFontSize: 22 } }
+      }));
+
+      charts.push(NewChart.create('#compact-completion', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Completion', values: [65] }] },
+        options: {
+          variant: 'compact', min: 0, max: 100, valueSuffix: '%',
+          zones: [{ from: 0, to: 1.0, color: '#4c6ef5' }]
+        },
+        style: { gauge: { valueFontSize: 22 } }
+      }));
+
+      return () => charts.forEach(c => c?.destroy());
+    }
+  };
+}
