@@ -25,6 +25,7 @@
 
 import SparklineChart from '../charts/SparklineChart.js';
 import { formatNumber } from './utils.js';
+import { DARK_KPI_COLORS, isDarkMode } from './defaults.js';
 
 /**
  * Default KPI card configuration
@@ -77,9 +78,12 @@ export class KPICard {
     }
 
     this.config = { ...KPI_DEFAULTS, ...config };
-    if (config.colors) {
-      this.config.colors = { ...KPI_DEFAULTS.colors, ...config.colors };
-    }
+
+    // Apply dark mode colors as base if theme is dark/auto
+    this._dark = isDarkMode(config.theme);
+    const baseColors = this._dark ? { ...KPI_DEFAULTS.colors, ...DARK_KPI_COLORS } : KPI_DEFAULTS.colors;
+    this.config.colors = { ...baseColors, ...(config.colors || {}) };
+
     if (config.thresholds) {
       this.config.thresholds = { ...KPI_DEFAULTS.thresholds, ...config.thresholds };
     }

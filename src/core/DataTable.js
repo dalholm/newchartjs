@@ -28,6 +28,7 @@ export class DataTable {
       columns: null,
       fontFamily: 'inherit',
       monoFamily: 'monospace',
+      dark: false,
       ...options
     };
 
@@ -116,11 +117,13 @@ export class DataTable {
   _render() {
     const isSplit = this.options.viewMode === 'split';
 
+    const dk = this.options.dark;
+
     if (!this.element) {
       this.element = createElement('div', {
         class: 'newchart-datatable',
         style: {
-          border: '1px solid #ebecf0',
+          border: `1px solid ${dk ? '#2d3139' : '#ebecf0'}`,
           borderRadius: '4px',
           overflow: 'hidden',
           marginTop: isSplit ? '12px' : '0',
@@ -129,6 +132,13 @@ export class DataTable {
         }
       });
       this.container.appendChild(this.element);
+    }
+
+    // Dark mode class for CSS hover styles
+    if (dk) {
+      this.element.classList.add('nc-dark');
+    } else {
+      this.element.classList.remove('nc-dark');
     }
 
     // Update split styling
@@ -158,8 +168,8 @@ export class DataTable {
         fontSize: '10px',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
-        borderBottom: '2px solid #dfe1e6',
-        background: '#f8f9fb',
+        borderBottom: `2px solid ${dk ? '#3d4350' : '#dfe1e6'}`,
+        background: dk ? '#1e2028' : '#f8f9fb',
         position: 'sticky',
         top: '0',
         whiteSpace: 'nowrap',
@@ -178,8 +188,8 @@ export class DataTable {
       Object.assign(tr.style, {
         transition: 'background 0.08s',
         cursor: 'pointer',
-        background: ri % 2 === 0 ? '#ffffff' : '#f8f9fb',
-        borderBottom: '1px solid #ebecf0'
+        background: ri % 2 === 0 ? (dk ? '#1a1d23' : '#ffffff') : (dk ? '#1e2028' : '#f8f9fb'),
+        borderBottom: `1px solid ${dk ? '#2d3139' : '#ebecf0'}`
       });
 
       this._columns.forEach((col, ci) => {
@@ -189,7 +199,7 @@ export class DataTable {
           textAlign: col.align || 'left',
           fontFamily: col.mono ? this.options.monoFamily : 'inherit',
           fontWeight: ci === 0 ? '500' : '400',
-          color: ci === 0 ? '#172b4d' : '#5e6c84'
+          color: ci === 0 ? (dk ? '#e0e2e7' : '#172b4d') : (dk ? '#a1a7b3' : '#5e6c84')
         });
 
         const value = row[col.key];
@@ -267,7 +277,10 @@ export class DataTable {
     if (DataTable._stylesInjected) return;
     const style = document.createElement('style');
     style.id = 'newchart-datatable-styles';
-    style.textContent = '.newchart-datatable tr.hovered { background: #edf2ff !important; }';
+    style.textContent = [
+      '.newchart-datatable tr.hovered { background: #edf2ff !important; }',
+      '.newchart-datatable.nc-dark tr.hovered { background: rgba(92,124,250,0.1) !important; }'
+    ].join('\n');
     document.head.appendChild(style);
     DataTable._stylesInjected = true;
   }

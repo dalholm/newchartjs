@@ -235,7 +235,7 @@ export class GaugeChart extends Chart {
           cx + targetLabelR * Math.cos(targetAngle),
           cy + targetLabelR * Math.sin(targetAngle),
           {
-            fill: '#5e6c84',
+            fill: style.fontColor || '#5e6c84',
             fontSize: 9,
             fontFamily: style.fontFamily,
             textAnchor: 'middle',
@@ -481,7 +481,7 @@ export class GaugeChart extends Chart {
         options.targetLabel || formatNumber(target, 0),
         targetX, barY + barHeight + 18,
         {
-          fill: '#5e6c84',
+          fill: style.fontColor || '#5e6c84',
           fontSize: 9,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',

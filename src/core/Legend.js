@@ -21,6 +21,7 @@ export class Legend {
       color: '#172b4d',
       marker: { size: 10, height: 3 },
       interactive: true,
+      dark: false,
       ...options
     };
 
@@ -82,6 +83,7 @@ export class Legend {
       const key = item.key || item.label;
       const vis = this._visibility[key] !== false;
 
+      const dk = this.options.dark;
       const itemEl = createElement('div', {
         style: {
           display: 'flex',
@@ -90,11 +92,11 @@ export class Legend {
           padding: '3px 8px',
           fontSize: this.options.fontSize + 'px',
           fontFamily: 'inherit',
-          border: `1px solid ${vis ? '#dfe1e6' : '#ebecf0'}`,
+          border: `1px solid ${vis ? (dk ? '#2d3139' : '#dfe1e6') : (dk ? '#252830' : '#ebecf0')}`,
           borderRadius: '3px',
           cursor: 'pointer',
-          background: vis ? '#ffffff' : '#f8f9fb',
-          color: vis ? '#172b4d' : '#b3bac5',
+          background: vis ? (dk ? '#1a1d23' : '#ffffff') : (dk ? '#1e2028' : '#f8f9fb'),
+          color: vis ? this.options.color : (dk ? '#6b7280' : '#b3bac5'),
           opacity: vis ? '1' : '0.5',
           transition: 'all 0.15s',
           whiteSpace: 'nowrap',
@@ -129,7 +131,7 @@ export class Legend {
           textContent: '(ref)',
           style: {
             fontSize: '9px',
-            color: '#8993a4',
+            color: dk ? '#6b7280' : '#8993a4',
             marginLeft: '2px'
           }
         });

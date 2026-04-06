@@ -205,7 +205,7 @@ export class PieChart extends Chart {
     // White center circle + center text for donut charts
     if (isDonut) {
       this.renderer.circle(cx, cy, innerRadius - 2, {
-        fill: '#ffffff'
+        fill: style.background || '#ffffff'
       });
 
       this._centerTextValue = this.renderer.text(formatNumber(total, 0), cx, cy - 3, {

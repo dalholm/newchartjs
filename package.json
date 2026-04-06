@@ -18,7 +18,11 @@
     "serve": "node scripts/serve.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "docs:prepare": "mkdir -p docs/public/demo && cp demo/*.html docs/public/demo/ && cp demo/theme.js docs/public/ && cp dist/newchartjs.umd.js docs/public/",
+    "docs:dev": "npm run docs:prepare && vitepress dev docs",
+    "docs:build": "npm run docs:prepare && vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "keywords": [
     "chart",
@@ -44,6 +48,7 @@
     "rollup": "^4.0.0",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^2.0.2",
+    "vitepress": "^1.6.4",
     "vitest": "^4.1.2"
   }
 }

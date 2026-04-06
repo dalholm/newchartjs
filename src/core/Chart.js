@@ -4,7 +4,7 @@
 
 import { SVGRenderer, CanvasRenderer } from './Renderer.js';
 import { deepMerge, debounce, formatNumber } from './utils.js';
-import { DEFAULT_CONFIG } from './defaults.js';
+import { DEFAULT_CONFIG, DARK_STYLE, isDarkMode, getDarkPalette } from './defaults.js';
 import { resolveCSSTokens } from './CSSTokens.js';
 import Tooltip from './Tooltip.js';
 import Legend from './Legend.js';
@@ -30,6 +30,23 @@ export class Chart {
     if (this.config.options?.cssTokens !== false) {
       const cssOverrides = resolveCSSTokens(this.element);
       this.config = deepMerge(this.config, cssOverrides);
+    }
+
+    // Apply dark theme: defaults < dark overrides < user config < CSS tokens
+    this._dark = isDarkMode(this.config.options?.theme);
+    if (this._dark) {
+      // Build dark base, then re-apply user config on top
+      const darkBase = deepMerge(DEFAULT_CONFIG, { style: DARK_STYLE });
+      this.config = deepMerge(darkBase, config);
+      // Set dark palette unless user provided their own
+      if (!config.palette && !(this.config.options?.cssTokens !== false && resolveCSSTokens(this.element).palette)) {
+        this.config.palette = getDarkPalette();
+      }
+      // Re-apply CSS tokens on top of dark config
+      if (this.config.options?.cssTokens !== false) {
+        const cssOverrides = resolveCSSTokens(this.element);
+        this.config = deepMerge(this.config, cssOverrides);
+      }
     }
 
     this.initialConfig = JSON.parse(JSON.stringify(this.config));
@@ -67,6 +84,27 @@ export class Chart {
       this.setupResizeObserver();
     }
 
+    // Listen for system theme changes when theme is 'auto'
+    this._themeMediaQuery = null;
+    this._themeChangeHandler = null;
+    if (this.config.options?.theme === 'auto' && typeof window !== 'undefined' && window.matchMedia) {
+      this._themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      this._themeChangeHandler = () => {
+        const wasDark = this._dark;
+        this._dark = this._themeMediaQuery.matches;
+        if (this._dark !== wasDark) {
+          // Re-merge config with correct theme
+          this._applyTheme(config);
+          if (this.renderer) {
+            this.renderer.destroy();
+          }
+          this.initRenderer();
+          this.draw();
+        }
+      };
+      this._themeMediaQuery.addEventListener('change', this._themeChangeHandler);
+    }
+
     // Animation state
     this.animationCancels = [];
     this.isAnimating = false;
@@ -82,6 +120,26 @@ export class Chart {
 
     // Initial render
     this.draw();
+  }
+
+  /**
+   * Apply theme to config (used for initial setup and auto theme changes)
+   * @param {Object} userConfig - Original user-supplied config
+   */
+  _applyTheme(userConfig) {
+    if (this._dark) {
+      const darkBase = deepMerge(DEFAULT_CONFIG, { style: DARK_STYLE });
+      this.config = deepMerge(darkBase, userConfig);
+      if (!userConfig.palette) {
+        this.config.palette = getDarkPalette();
+      }
+    } else {
+      this.config = deepMerge(DEFAULT_CONFIG, userConfig);
+    }
+    if (this.config.options?.cssTokens !== false) {
+      const cssOverrides = resolveCSSTokens(this.element);
+      this.config = deepMerge(this.config, cssOverrides);
+    }
   }
 
   /**
@@ -281,6 +339,7 @@ export class Chart {
 
     const legendOptions = {
       ...this.config.options.legend,
+      dark: this._dark,
       onToggle: (key, visible, visibilityMap) => {
         this._legendVisibility = visibilityMap;
         // Re-render chart with updated visibility
@@ -342,7 +401,8 @@ export class Chart {
       this.dataTable = new DataTable(this.element, {
         ...tableOpts,
         fontFamily: this.config.style.fontFamily,
-        monoFamily: this.config.style.monoFamily
+        monoFamily: this.config.style.monoFamily,
+        dark: this._dark
       });
 
       // Wire table→chart hover sync
@@ -498,6 +558,10 @@ export class Chart {
       this.resizeObserver.disconnect();
     }
 
+    if (this._themeMediaQuery && this._themeChangeHandler) {
+      this._themeMediaQuery.removeEventListener('change', this._themeChangeHandler);
+    }
+
     if (this.tooltip) {
       this.tooltip.destroy();
     }
@@ -544,7 +608,7 @@ export class Chart {
 
         const img = new Image();
         img.onload = () => {
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = this.config.style.background || '#ffffff';
           ctx.fillRect(0, 0, this.width, this.height);
           ctx.drawImage(img, 0, 0);
           resolve(canvas.toDataURL('image/png'));

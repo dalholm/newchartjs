@@ -4,3 +4,5 @@ dist/
 *.map
 ./.claude
 .idea
+docs/.vitepress/cache
+docs/.vitepress/dist

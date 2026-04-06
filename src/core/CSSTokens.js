@@ -21,6 +21,9 @@
  * Type 'number' will parseFloat the CSS value, 'string' keeps it as-is.
  */
 const TOKEN_MAP = [
+  // Theme
+  { token: '--nc-theme', path: 'options.theme', type: 'string' },
+
   // Global
   { token: '--nc-background', path: 'style.background', type: 'string' },
   { token: '--nc-font-family', path: 'style.fontFamily', type: 'string' },

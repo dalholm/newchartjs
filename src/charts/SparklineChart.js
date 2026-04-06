@@ -65,7 +65,7 @@ export class SparklineChart extends Chart {
 
       this.renderer.circle(lastX, lastY, dotRadius, {
         fill: color,
-        stroke: '#ffffff',
+        stroke: style.background || '#ffffff',
         strokeWidth: 1.5
       });
     }

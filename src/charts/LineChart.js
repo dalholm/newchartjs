@@ -206,7 +206,7 @@ export class LineChart extends Chart {
 
     // Create crosshair line (hidden)
     this._crosshairLine = this.renderer.line(0, chartY, 0, chartY + chartHeight, {
-      stroke: '#dfe1e6',
+      stroke: style.grid?.color || '#dfe1e6',
       strokeWidth: 1,
       strokeDasharray: '3 3',
       opacity: 0

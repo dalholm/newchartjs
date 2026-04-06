@@ -128,13 +128,15 @@ export class Tooltip {
   _renderRich(content) {
     const mono = this.options.monoFamily || 'monospace';
 
+    const sep = this.options.separatorColor || '#333';
+
     // Header
     if (content.header) {
       const header = document.createElement('div');
       Object.assign(header.style, {
         fontWeight: '600',
         marginBottom: '4px',
-        borderBottom: '1px solid #333',
+        borderBottom: `1px solid ${sep}`,
         paddingBottom: '4px'
       });
       header.textContent = content.header;
@@ -197,7 +199,7 @@ export class Tooltip {
     if (content.footer) {
       const footer = document.createElement('div');
       Object.assign(footer.style, {
-        borderTop: '1px solid #333',
+        borderTop: `1px solid ${sep}`,
         marginTop: '4px',
         paddingTop: '4px',
         display: 'flex',
@@ -206,7 +208,7 @@ export class Tooltip {
       });
 
       const label = document.createElement('span');
-      label.style.color = '#8993a4';
+      label.style.color = this.options.footerLabelColor || '#8993a4';
       label.textContent = content.footer.label;
       footer.appendChild(label);
 
