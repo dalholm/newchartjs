@@ -12,8 +12,17 @@ import SparklineChart from './charts/SparklineChart.js';
 import ComboChart from './charts/ComboChart.js';
 import ScatterChart from './charts/ScatterChart.js';
 import NetworkBallChart from './charts/NetworkBallChart.js';
+import FunnelChart from './charts/FunnelChart.js';
+import WaterfallChart from './charts/WaterfallChart.js';
+import HeatmapChart from './charts/HeatmapChart.js';
+import CohortChart from './charts/CohortChart.js';
+import BulletChart from './charts/BulletChart.js';
+import SankeyChart from './charts/SankeyChart.js';
+import TreemapChart from './charts/TreemapChart.js';
+import RangeChart from './charts/RangeChart.js';
 import { KPICard, createKPICard } from './core/KPICard.js';
 import { TrendBadge, createTrendBadge } from './core/TrendBadge.js';
+import { KPIComparisonCard, createKPIComparisonCard } from './core/KPIComparisonCard.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
 import { COMPARE_COLOR, COLOR_PALETTE, DARK_STYLE, DARK_KPI_COLORS, isDarkMode, getDarkPalette } from './core/defaults.js';
 import { deepMerge } from './core/utils.js';
@@ -87,6 +96,30 @@ const NewChart = {
       case 'networkball':
         ChartClass = NetworkBallChart;
         break;
+      case 'funnel':
+        ChartClass = FunnelChart;
+        break;
+      case 'waterfall':
+        ChartClass = WaterfallChart;
+        break;
+      case 'heatmap':
+        ChartClass = HeatmapChart;
+        break;
+      case 'cohort':
+        ChartClass = CohortChart;
+        break;
+      case 'bullet':
+        ChartClass = BulletChart;
+        break;
+      case 'sankey':
+        ChartClass = SankeyChart;
+        break;
+      case 'treemap':
+        ChartClass = TreemapChart;
+        break;
+      case 'range':
+        ChartClass = RangeChart;
+        break;
       default:
         throw new Error(`Unknown chart type: ${chartType}`);
     }
@@ -111,6 +144,14 @@ const NewChart = {
   ComboChart,
   ScatterChart,
   NetworkBallChart,
+  FunnelChart,
+  WaterfallChart,
+  HeatmapChart,
+  CohortChart,
+  BulletChart,
+  SankeyChart,
+  TreemapChart,
+  RangeChart,
 
   /**
    * KPI Card component
@@ -170,6 +211,16 @@ const NewChart = {
   DARK_KPI_COLORS,
 
   /**
+   * KPI Comparison Card component
+   */
+  KPIComparisonCard,
+
+  /**
+   * Create a KPI comparison card (convenience factory)
+   */
+  kpiComparisonCard: createKPIComparisonCard,
+
+  /**
    * Check if dark mode is active for a given theme value
    * @param {string} theme - 'light', 'dark', or 'auto'
    * @returns {boolean}
@@ -180,4 +231,41 @@ const NewChart = {
 // DataTable not in the object literal above — attach here
 NewChart.DataTable = DataTable;
 
+// Named exports for tree-shaking
+export {
+  BarChart,
+  PieChart,
+  LineChart,
+  AreaChart,
+  GaugeChart,
+  SparklineChart,
+  ComboChart,
+  ScatterChart,
+  NetworkBallChart,
+  FunnelChart,
+  WaterfallChart,
+  HeatmapChart,
+  CohortChart,
+  BulletChart,
+  SankeyChart,
+  TreemapChart,
+  RangeChart,
+  KPICard,
+  createKPICard,
+  TrendBadge,
+  createTrendBadge,
+  KPIComparisonCard,
+  createKPIComparisonCard,
+  DataTable,
+  getSupportedTokens,
+  COMPARE_COLOR,
+  COLOR_PALETTE,
+  DARK_STYLE,
+  DARK_KPI_COLORS,
+  isDarkMode,
+  getDarkPalette,
+  deepMerge
+};
+
+// Default export for backwards compatibility
 export default NewChart;

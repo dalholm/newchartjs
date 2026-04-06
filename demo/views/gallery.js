@@ -66,6 +66,19 @@ export default function galleryView() {
         ${card('/networkball', 'AI Network Ball', 'Circular node network with a traveling AI cursor. Visualize processing and connections.', 'chart new', '4 examples', networkballPreview())}
       </div>
 
+      <div class="section"><h2>E-Commerce & Insights</h2></div>
+      <div class="grid">
+        ${card('/funnel', 'Funnel Chart', 'Conversion funnels — website visits to purchase with drop-off rates.', 'chart new', '2 examples', funnelPreview())}
+        ${card('/waterfall', 'Waterfall Chart', 'Revenue bridge: gross to net, monthly deltas, running totals.', 'chart new', '2 examples', waterfallPreview())}
+        ${card('/heatmap', 'Heatmap', 'Color-coded grids for sales by hour, category performance, patterns.', 'chart new', '2 examples', heatmapPreview())}
+        ${card('/cohort', 'Cohort Chart', 'Customer retention analysis — track cohort behavior over time.', 'chart new', '1 example', cohortPreview())}
+        ${card('/bullet', 'Bullet Chart', 'Compact actual-vs-target for KPI dashboards. Stephen Few pattern.', 'chart new', '1 example', bulletPreview())}
+        ${card('/sankey', 'Sankey Chart', 'Traffic and revenue flow diagrams between stages and touchpoints.', 'chart new', '1 example', sankeyPreview())}
+        ${card('/treemap', 'Treemap', 'Nested rectangles — size shows revenue, labels show growth rate.', 'chart new', '1 example', treemapPreview())}
+        ${card('/range', 'Range Chart', 'Timeline with campaign zones, event annotations, and trend lines.', 'chart new', '1 example', rangePreview())}
+        ${card('/kpicomparison', 'KPI Comparison', 'Enhanced KPI cards with sparkline, target progress, trend badge.', 'chart new', '6 examples', kpiComparisonPreview())}
+      </div>
+
       <div class="section"><h2>Full Demos</h2></div>
       <div class="grid">
         ${card('/dashboard', 'ERP Dashboard', 'Complete sales dashboard with KPI cards, drill-down, table, CSV export.', 'demo', 'Full demo', dashboardPreview())}
@@ -242,6 +255,125 @@ function networkballPreview() {
     <circle cx="50" cy="50" r="4" fill="var(--success)"/>
     <circle cx="50" cy="50" r="1.5" fill="#fff"/>
   </svg>`;
+}
+
+function funnelPreview() {
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;width:120px;">
+    <div style="width:100%;height:10px;background:var(--primary);border-radius:2px;"></div>
+    <div style="width:80%;height:10px;background:var(--success);border-radius:2px;"></div>
+    <div style="width:55%;height:10px;background:var(--warning);border-radius:2px;"></div>
+    <div style="width:35%;height:10px;background:var(--danger);border-radius:2px;"></div>
+    <div style="width:22%;height:10px;background:var(--purple);border-radius:2px;"></div>
+  </div>`;
+}
+
+function waterfallPreview() {
+  return `<svg width="120" height="60" viewBox="0 0 120 60">
+    <rect x="5" y="5" width="14" height="50" rx="2" fill="var(--success)"/>
+    <rect x="23" y="15" width="14" height="12" rx="2" fill="var(--danger)"/>
+    <rect x="41" y="20" width="14" height="8" rx="2" fill="var(--danger)"/>
+    <rect x="59" y="24" width="14" height="10" rx="2" fill="var(--danger)"/>
+    <rect x="77" y="30" width="14" height="6" rx="2" fill="var(--danger)"/>
+    <rect x="95" y="30" width="14" height="25" rx="2" fill="var(--primary)"/>
+    <line x1="19" y1="5" x2="23" y2="5" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="2 1"/>
+    <line x1="37" y1="15" x2="41" y2="15" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="2 1"/>
+  </svg>`;
+}
+
+function heatmapPreview() {
+  const colors = ['#e8f5e9','#a5d6a7','#66bb6a','#388e3c','#1b5e20'];
+  let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;width:100px;">';
+  for (let i = 0; i < 28; i++) {
+    const c = colors[Math.floor(Math.random() * colors.length)];
+    html += `<div style="width:12px;height:10px;background:${c};border-radius:1px;"></div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function cohortPreview() {
+  return `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;width:90px;">
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.9;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.7;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.5;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.35;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.2;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.85;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.65;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.45;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.25;"></div>
+    <div style="height:12px;background:transparent;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.8;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.55;"></div>
+    <div style="height:12px;background:#1565c0;border-radius:1px;opacity:0.3;"></div>
+    <div style="height:12px;background:transparent;"></div>
+    <div style="height:12px;background:transparent;"></div>
+  </div>`;
+}
+
+function bulletPreview() {
+  return `<div style="display:flex;flex-direction:column;gap:6px;width:120px;">
+    <div style="position:relative;height:14px;background:linear-gradient(to right,#f1f3f5 60%,#dee2e6 80%,#ced4da 100%);border-radius:2px;">
+      <div style="position:absolute;top:3px;left:0;height:8px;width:75%;background:var(--primary);border-radius:2px;"></div>
+      <div style="position:absolute;top:1px;left:82%;height:12px;width:2px;background:var(--text);"></div>
+    </div>
+    <div style="position:relative;height:14px;background:linear-gradient(to right,#f1f3f5 60%,#dee2e6 80%,#ced4da 100%);border-radius:2px;">
+      <div style="position:absolute;top:3px;left:0;height:8px;width:60%;background:var(--success);border-radius:2px;"></div>
+      <div style="position:absolute;top:1px;left:70%;height:12px;width:2px;background:var(--text);"></div>
+    </div>
+    <div style="position:relative;height:14px;background:linear-gradient(to right,#f1f3f5 60%,#dee2e6 80%,#ced4da 100%);border-radius:2px;">
+      <div style="position:absolute;top:3px;left:0;height:8px;width:88%;background:var(--warning);border-radius:2px;"></div>
+      <div style="position:absolute;top:1px;left:90%;height:12px;width:2px;background:var(--text);"></div>
+    </div>
+  </div>`;
+}
+
+function sankeyPreview() {
+  return `<svg width="120" height="70" viewBox="0 0 120 70">
+    <path d="M5,5 C40,5 60,10 95,10 L95,20 C60,20 40,15 5,15 Z" fill="var(--primary)" opacity="0.3"/>
+    <path d="M5,20 C40,20 60,30 95,25 L95,35 C60,40 40,30 5,30 Z" fill="var(--success)" opacity="0.3"/>
+    <path d="M5,35 C40,35 60,50 95,40 L95,50 C60,60 40,45 5,45 Z" fill="var(--warning)" opacity="0.3"/>
+    <path d="M5,50 C40,50 60,55 95,55 L95,65 C60,65 40,60 5,60 Z" fill="var(--purple)" opacity="0.3"/>
+    <rect x="0" y="3" width="6" height="60" rx="2" fill="var(--primary)"/>
+    <rect x="93" y="8" width="6" height="60" rx="2" fill="var(--success)"/>
+  </svg>`;
+}
+
+function treemapPreview() {
+  return `<div style="display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:2px;width:100px;height:60px;">
+    <div style="background:var(--primary);border-radius:3px;grid-row:span 2;"></div>
+    <div style="background:var(--success);border-radius:3px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;">
+      <div style="background:var(--warning);border-radius:2px;"></div>
+      <div style="background:var(--purple);border-radius:2px;"></div>
+    </div>
+  </div>`;
+}
+
+function rangePreview() {
+  return `<div style="width:120px;height:50px;position:relative;">
+    <div style="position:absolute;left:10%;top:0;width:25%;height:100%;background:var(--primary);opacity:0.08;border-radius:2px;"></div>
+    <div style="position:absolute;left:60%;top:0;width:30%;height:100%;background:var(--danger);opacity:0.08;border-radius:2px;"></div>
+    <svg viewBox="0 0 120 50" style="position:absolute;left:0;top:0;width:100%;height:100%;" fill="none">
+      <polyline points="5,38 20,30 35,32 50,22 65,26 80,18 95,14 110,10" stroke="var(--primary)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <line x1="50" y1="0" x2="50" y2="50" stroke="var(--purple)" stroke-width="1" stroke-dasharray="3 2"/>
+    </svg>
+  </div>`;
+}
+
+function kpiComparisonPreview() {
+  return `<div style="display:flex;gap:6px;align-items:center;">
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;min-width:80px;">
+      <div style="font-size:6px;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Revenue</div>
+      <div style="font-size:13px;font-weight:700;font-family:var(--mono);color:var(--text);">38.9M</div>
+      <div style="height:4px;background:var(--border);border-radius:2px;margin-top:4px;">
+        <div style="height:100%;width:78%;background:var(--success);border-radius:2px;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:3px;margin-top:3px;">
+        <span style="font-size:7px;color:var(--success-dk);font-weight:600;">&#9650; 12.4%</span>
+      </div>
+    </div>
+  </div>`;
 }
 
 function dashboardPreview() {

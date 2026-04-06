@@ -126,6 +126,151 @@ const CHANGES = {
   inventory: [-200,150,-350,400,-100,280,-180,320,500,-150,400,-80],
 };
 
+// ─── Funnel data ──────────────────────────────────────────────────
+
+const FUNNEL_ECOMMERCE = {
+  labels: ['Website Visits', 'Product Views', 'Add to Cart', 'Checkout', 'Purchase'],
+  values: [45200, 28400, 12800, 8200, 5870]
+};
+
+const FUNNEL_SIGNUP = {
+  labels: ['Landing Page', 'Sign Up Started', 'Email Verified', 'Profile Complete', 'First Purchase'],
+  values: [32000, 18500, 14200, 9800, 6100]
+};
+
+// ─── Waterfall data ───────────────────────────────────────────────
+
+const WATERFALL_REVENUE = {
+  labels: ['Gross Revenue', 'Discounts', 'Returns', 'Shipping Cost', 'Payment Fees', 'Net Revenue'],
+  values: [48500, -4200, -2800, -3100, -1450, 0],
+  types: ['increase', 'decrease', 'decrease', 'decrease', 'decrease', 'total']
+};
+
+const WATERFALL_MONTHLY = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'H1 Total'],
+  values: [2850, 270, -160, 520, -270, 440, 0],
+  types: ['increase', 'increase', 'decrease', 'increase', 'decrease', 'increase', 'total']
+};
+
+// ─── Heatmap data ─────────────────────────────────────────────────
+
+const HEATMAP_SALES_BY_HOUR = {
+  xLabels: ['06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23'],
+  yLabels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+  values: [
+    [2,5,12,28,35,42,38,32,45,52,48,55,62,58,45,38,28,15],
+    [1,4,10,25,32,38,35,30,42,48,45,52,58,55,42,35,25,12],
+    [3,6,14,30,38,45,42,35,48,55,52,58,65,60,48,40,30,18],
+    [2,5,11,26,34,40,36,31,44,50,46,53,60,56,44,36,26,14],
+    [4,8,16,32,40,48,44,38,52,58,54,62,68,65,52,42,32,20],
+    [8,15,22,38,48,55,52,45,58,65,62,68,72,68,55,48,38,25],
+    [6,12,18,32,40,45,42,38,48,52,48,55,58,52,42,35,28,18]
+  ]
+};
+
+// ─── Cohort data ──────────────────────────────────────────────────
+
+const COHORT_RETENTION = {
+  labels: ['Jan 2026', 'Feb 2026', 'Mar 2026', 'Apr 2026', 'May 2026', 'Jun 2026'],
+  periodLabels: ['Users', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6'],
+  values: [
+    [4200, 68, 52, 41, 35, 30, 26],
+    [4800, 72, 56, 44, 37, 32],
+    [3900, 65, 48, 38, 31],
+    [5100, 70, 54, 42],
+    [4600, 74, 58],
+    [5200, 71]
+  ]
+};
+
+// ─── Bullet data ──────────────────────────────────────────────────
+
+const BULLET_KPIS = [
+  { label: 'Revenue', subtitle: 'YTD (M kr)', value: 38.9, target: 42, comparative: 34.5, min: 0, max: 50 },
+  { label: 'New Customers', subtitle: 'This Quarter', value: 1850, target: 2000, comparative: 1620, min: 0, max: 2500 },
+  { label: 'Avg Order Value', subtitle: 'kr', value: 6624, target: 7000, comparative: 6100, min: 0, max: 8000 },
+  { label: 'Customer Satisfaction', subtitle: 'NPS', value: 78, target: 80, comparative: 72, min: 0, max: 100 },
+  { label: 'Return Rate', subtitle: '%', value: 3.8, target: 3.0, comparative: 4.2, min: 0, max: 8 }
+];
+
+// ─── Sankey data ──────────────────────────────────────────────────
+
+const SANKEY_TRAFFIC = {
+  nodes: [
+    { id: 'Google', label: 'Google', color: '#4c6ef5' },
+    { id: 'Direct', label: 'Direct', color: '#0ca678' },
+    { id: 'Social', label: 'Social', color: '#f08c00' },
+    { id: 'Email', label: 'Email', color: '#7048e8' },
+    { id: 'Homepage', label: 'Homepage', color: '#1098ad' },
+    { id: 'Category', label: 'Category Page', color: '#d6336c' },
+    { id: 'Product', label: 'Product Page', color: '#5c7cfa' },
+    { id: 'Cart', label: 'Cart', color: '#20c997' },
+    { id: 'Purchase', label: 'Purchase', color: '#0ca678' },
+    { id: 'Bounce', label: 'Bounce', color: '#e03131' }
+  ],
+  links: [
+    { source: 'Google', target: 'Homepage', value: 12000 },
+    { source: 'Google', target: 'Product', value: 8000 },
+    { source: 'Direct', target: 'Homepage', value: 9000 },
+    { source: 'Social', target: 'Product', value: 5000 },
+    { source: 'Social', target: 'Homepage', value: 2000 },
+    { source: 'Email', target: 'Product', value: 4000 },
+    { source: 'Email', target: 'Category', value: 2000 },
+    { source: 'Homepage', target: 'Category', value: 15000 },
+    { source: 'Homepage', target: 'Bounce', value: 8000 },
+    { source: 'Category', target: 'Product', value: 14000 },
+    { source: 'Category', target: 'Bounce', value: 5000 },
+    { source: 'Product', target: 'Cart', value: 18000 },
+    { source: 'Product', target: 'Bounce', value: 13000 },
+    { source: 'Cart', target: 'Purchase', value: 12000 },
+    { source: 'Cart', target: 'Bounce', value: 6000 }
+  ]
+};
+
+// ─── Treemap data ─────────────────────────────────────────────────
+
+const TREEMAP_CATEGORIES = {
+  labels: ['Mattresses','Pillows','Bed Frames','Bath Textiles','Duvets','Accessories',
+           'Sheets','Blankets','Nightstands','Mattress Protectors'],
+  values: [14200, 8900, 6300, 4800, 3200, 1520, 2800, 2100, 1800, 1400],
+  growth: [15.2, 9.8, -2.1, 22.4, 5.6, 18.9, 8.3, -4.2, 12.1, 6.8]
+};
+
+// ─── Range chart data ─────────────────────────────────────────────
+
+const RANGE_CAMPAIGNS = {
+  labels: MONTHS,
+  datasets: [
+    { label: 'Revenue (k)', values: REV_26, fill: true }
+  ],
+  zones: [
+    { from: 0, to: 2, label: 'Winter Sale', color: '#4c6ef5', opacity: 0.08 },
+    { from: 4, to: 5, label: 'Spring Campaign', color: '#0ca678', opacity: 0.08 },
+    { from: 9, to: 11, label: 'Black Friday + Xmas', color: '#e03131', opacity: 0.08 }
+  ],
+  annotations: [
+    { index: 3, label: 'New website launch', color: '#7048e8' },
+    { index: 7, label: 'Price increase', color: '#f08c00' }
+  ]
+};
+
+// ─── KPI Comparison data ──────────────────────────────────────────
+
+const KPI_COMPARISON = [
+  { label: 'Revenue', value: 38900000, previousValue: 34600000, target: 42000000,
+    prefix: '', suffix: ' kr', sparklineData: REV_26, direction: 'up-good' },
+  { label: 'Orders', value: 5872, previousValue: 5420, target: 6500,
+    sparklineData: [412,468,431,502,478,528,419,487,519,453,564,611], direction: 'up-good' },
+  { label: 'Avg Order Value', value: 6624, previousValue: 6382, target: 7000,
+    prefix: '', suffix: ' kr', sparklineData: [6917,6667,6868,6932,6715,6913,6897,6861,6898,6887,6898,6891], direction: 'up-good' },
+  { label: 'Return Rate', value: 3.8, previousValue: 4.2, target: 3.0,
+    suffix: '%', decimals: 1, sparklineData: [4.2,4.0,4.5,3.9,4.1,3.7,3.8,3.5,3.6,3.9,3.4,3.8], direction: 'down-good' },
+  { label: 'Customer Satisfaction', value: 78, previousValue: 72, target: 80,
+    suffix: '%', sparklineData: [68,70,72,71,74,73,75,74,76,75,77,78], direction: 'up-good' },
+  { label: 'Conversion Rate', value: 4.1, previousValue: 3.6, target: 4.5,
+    suffix: '%', decimals: 1, sparklineData: CONVERSION, direction: 'up-good' }
+];
+
 // ═══ Public API ════════════════════════════════════════════════════
 
 const api = {
@@ -296,6 +441,91 @@ const api = {
         points: SCATTER_RISK
       }]
     });
+  },
+
+  // ── Funnel ──
+
+  async getFunnelEcommerce() {
+    return wait({
+      labels: FUNNEL_ECOMMERCE.labels,
+      datasets: [{ values: FUNNEL_ECOMMERCE.values }]
+    });
+  },
+
+  async getFunnelSignup() {
+    return wait({
+      labels: FUNNEL_SIGNUP.labels,
+      datasets: [{ values: FUNNEL_SIGNUP.values }]
+    });
+  },
+
+  // ── Waterfall ──
+
+  async getWaterfallRevenue() {
+    return wait({
+      labels: WATERFALL_REVENUE.labels,
+      datasets: [{ label: 'Revenue Breakdown', values: WATERFALL_REVENUE.values, types: WATERFALL_REVENUE.types }]
+    });
+  },
+
+  async getWaterfallMonthly() {
+    return wait({
+      labels: WATERFALL_MONTHLY.labels,
+      datasets: [{ label: 'Monthly Change', values: WATERFALL_MONTHLY.values, types: WATERFALL_MONTHLY.types }]
+    });
+  },
+
+  // ── Heatmap ──
+
+  async getHeatmapSales() {
+    return wait({
+      labels: HEATMAP_SALES_BY_HOUR.xLabels,
+      yLabels: HEATMAP_SALES_BY_HOUR.yLabels,
+      datasets: [{ values: HEATMAP_SALES_BY_HOUR.values }]
+    });
+  },
+
+  // ── Cohort ──
+
+  async getCohortRetention() {
+    return wait({
+      labels: COHORT_RETENTION.labels,
+      periodLabels: COHORT_RETENTION.periodLabels,
+      datasets: [{ values: COHORT_RETENTION.values }]
+    });
+  },
+
+  // ── Bullet ──
+
+  async getBulletKPIs() {
+    return wait(BULLET_KPIS);
+  },
+
+  // ── Sankey ──
+
+  async getSankeyTraffic() {
+    return wait(SANKEY_TRAFFIC);
+  },
+
+  // ── Treemap ──
+
+  async getTreemapCategories() {
+    return wait({
+      labels: TREEMAP_CATEGORIES.labels,
+      datasets: [{ values: TREEMAP_CATEGORIES.values, growth: TREEMAP_CATEGORIES.growth }]
+    });
+  },
+
+  // ── Range ──
+
+  async getRangeCampaigns() {
+    return wait(RANGE_CAMPAIGNS);
+  },
+
+  // ── KPI Comparison ──
+
+  async getKPIComparison() {
+    return wait(KPI_COMPARISON);
   },
 };
 

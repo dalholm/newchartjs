@@ -520,6 +520,191 @@ export const NETWORKBALL_DEFAULTS = {
 };
 
 /**
+ * Default configuration for Funnel charts
+ */
+export const FUNNEL_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'funnel',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    funnel: {
+      gap: 4,
+      minWidth: 0.15
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    legend: { enabled: false }
+  }
+};
+
+/**
+ * Default configuration for Waterfall charts
+ */
+export const WATERFALL_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'waterfall',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    bar: { borderRadius: 3 },
+    waterfall: {
+      increaseColor: '#0ca678',
+      decreaseColor: '#e03131',
+      totalColor: '#4c6ef5',
+      connectorColor: '#9ca3af'
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    axis: {
+      x: { enabled: true, label: '' },
+      y: { enabled: true, label: '' }
+    }
+  }
+};
+
+/**
+ * Default configuration for Heatmap charts
+ */
+export const HEATMAP_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'heatmap',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    heatmap: {
+      cellGap: 2,
+      cellRadius: 2,
+      colorLow: '#e8f5e9',
+      colorHigh: '#1b5e20',
+      colorMid: null,
+      showValues: true,
+      showScale: true
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    legend: { enabled: false },
+    valueDecimals: 0
+  }
+};
+
+/**
+ * Default configuration for Cohort charts
+ */
+export const COHORT_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'cohort',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    cohort: {
+      cellGap: 2,
+      cellRadius: 2,
+      colorLow: '#e3f2fd',
+      colorHigh: '#1565c0'
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    legend: { enabled: false }
+  }
+};
+
+/**
+ * Default configuration for Bullet charts
+ */
+export const BULLET_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'bullet',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    bullet: {
+      labelWidth: 120,
+      gap: 16,
+      maxHeight: 50,
+      rangePoor: '#f1f3f5',
+      rangeOk: '#dee2e6',
+      rangeGood: '#ced4da',
+      targetColor: '#1a1d23',
+      comparativeColor: '#6b7280'
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    legend: { enabled: false },
+    valueDecimals: 0
+  }
+};
+
+/**
+ * Default configuration for Sankey charts
+ */
+export const SANKEY_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'sankey',
+  data: {
+    nodes: [],
+    links: [],
+    datasets: []
+  },
+  style: {
+    ...DEFAULT_CONFIG.style,
+    sankey: {
+      nodeWidth: 16,
+      nodePadding: 12,
+      nodeRadius: 3,
+      linkOpacity: 0.3,
+      linkHoverOpacity: 0.6
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    legend: { enabled: false }
+  }
+};
+
+/**
+ * Default configuration for Treemap charts
+ */
+export const TREEMAP_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'treemap',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    treemap: {
+      gap: 3,
+      borderRadius: 4
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    legend: { enabled: false }
+  }
+};
+
+/**
+ * Default configuration for Range charts
+ */
+export const RANGE_DEFAULTS = {
+  ...DEFAULT_CONFIG,
+  type: 'range',
+  style: {
+    ...DEFAULT_CONFIG.style,
+    range: {
+      lineWidth: 2,
+      pointRadius: 3
+    }
+  },
+  options: {
+    ...DEFAULT_CONFIG.options,
+    showPoints: true,
+    axis: {
+      x: { enabled: true, label: '' },
+      y: { enabled: true, label: '' }
+    }
+  }
+};
+
+/**
  * Color palette
  */
 export const COLOR_PALETTE = PALETTE;
