@@ -396,6 +396,55 @@ export class SVGRenderer extends Renderer {
   }
 
   /**
+   * Create a diagonal stripe pattern for forecast/projected bars
+   * @param {string} color - Base color for the stripes
+   * @param {string} id - Unique pattern ID
+   * @param {number} stripeWidth - Width of each stripe in px (default 4)
+   * @param {number} opacity - Opacity of the stripe overlay (default 0.3)
+   * @returns {string} Pattern fill URL
+   */
+  createStripePattern(color, id, stripeWidth = 4, opacity = 0.3) {
+    let defs = this.svg.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      this.svg.insertBefore(defs, this.svg.firstChild);
+    }
+
+    // Reuse existing pattern if already created
+    if (defs.querySelector('#' + id)) {
+      return `url(#${id})`;
+    }
+
+    const size = stripeWidth * 2;
+    const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+    pattern.setAttribute('id', id);
+    pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+    pattern.setAttribute('width', size);
+    pattern.setAttribute('height', size);
+    pattern.setAttribute('patternTransform', 'rotate(-45)');
+
+    // Background fill with the bar color at reduced opacity
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('width', size);
+    bg.setAttribute('height', size);
+    bg.setAttribute('fill', color);
+    bg.setAttribute('opacity', opacity);
+
+    // White stripe
+    const stripe = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    stripe.setAttribute('width', stripeWidth * 0.8);
+    stripe.setAttribute('height', size);
+    stripe.setAttribute('fill', '#ffffff');
+    stripe.setAttribute('opacity', '0.5');
+
+    pattern.appendChild(bg);
+    pattern.appendChild(stripe);
+    defs.appendChild(pattern);
+
+    return `url(#${id})`;
+  }
+
+  /**
    * Ensure a drop-shadow SVG filter exists and return its url() reference
    * @param {string} shadow - CSS-like shadow string (e.g. '0 2px 6px rgba(0,0,0,0.15)')
    * @returns {string} SVG filter URL reference

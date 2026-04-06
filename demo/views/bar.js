@@ -33,6 +33,10 @@ export default function barView() {
           <div class="example-header"><h2>Budget vs Actual with Markers</h2><p>Per-bar budget markers show targets per month</p></div>
           <div class="example-body"><div class="chart-container" id="chart-markers"></div></div>
         </div>
+        <div class="example-card">
+          <div class="example-header"><h2>Weekly Sales with Today's Forecast</h2><p>7 historical days + today split into actual (solid) and forecast (striped). Hover "Today" to see the breakdown.</p></div>
+          <div class="example-body"><div class="chart-container" id="chart-forecast-bar"></div></div>
+        </div>
       </div>
     `,
     mount() {
@@ -77,6 +81,25 @@ export default function barView() {
           },
           options: {
             barMarkers: [{ label: 'Budget', values: rev.meta.budget, color: '#f08c00', strokeWidth: 2 }]
+          }
+        }));
+
+        // Weekly sales with today's forecast
+        charts.push(NewChart.create('#chart-forecast-bar', {
+          type: 'bar',
+          data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Today'],
+            datasets: [{
+              label: 'Sales (kr)',
+              values:   [45200, 38900, 52100, 41800, 49300, 31200, 28600, 37500],
+              forecast: [false, false, false, false, false, false, false, true],
+              actual:   [null, null, null, null, null, null, null, 22400]
+            }]
+          },
+          options: {
+            referenceLines: [
+              { value: 'average', label: 'Weekly avg', color: '#868e96', dash: '6 4' }
+            ]
           }
         }));
       });

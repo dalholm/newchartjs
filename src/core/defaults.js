@@ -98,6 +98,11 @@ export const BAR_DEFAULTS = {
       groupGap: 0.5, // Gap between groups as fraction of bar width
       gradient: false, // vertical gradient overlay on bars
       shadow: null // drop shadow string e.g. '0 2px 6px rgba(0,0,0,0.15)'
+    },
+    forecast: {
+      stripeWidth: 4, // diagonal stripe width in px
+      opacity: 0.35, // opacity of forecast bar overlay
+      borderDash: '3 2' // dashed border around forecast portion
     }
   },
   options: {
@@ -303,6 +308,11 @@ export const COMBO_DEFAULTS = {
       lineWidth: 2,
       pointRadius: 4,
       tension: 0.4
+    },
+    forecast: {
+      stripeWidth: 4,
+      opacity: 0.35,
+      borderDash: '3 2'
     }
   },
   options: {

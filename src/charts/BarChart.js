@@ -61,6 +61,13 @@ export class BarChart extends Chart {
         if (ds.values) {
           allValues = allValues.concat(ds.values);
         }
+        // When forecast split bars exist, ensure scale starts at 0
+        // so the actual portion is visible
+        if (ds.actual) {
+          let hasActual = false;
+          ds.actual.forEach(v => { if (v != null) hasActual = true; });
+          if (hasActual) allValues.push(0);
+        }
       });
 
       // Include reference line values in scale
@@ -267,6 +274,12 @@ export class BarChart extends Chart {
 
         const barW = isStacked ? availableWidth : datasetWidth;
 
+        // Forecast detection
+        const isForecast = dataset.forecast?.[labelIndex] === true;
+        const actualValue = dataset.actual?.[labelIndex];
+        const hasSplit = isForecast && actualValue != null && actualValue < rawValue;
+        const forecastStyle = style.forecast || {};
+
         // Bar gradient overlay (if enabled)
         const useGradient = style.bar?.gradient && this.renderer.createBarGradient;
         let gradientUrl = null;
@@ -275,24 +288,112 @@ export class BarChart extends Chart {
           gradientUrl = this.renderer.createBarGradient(color, gid);
         }
 
-        const barElement = this.renderer.rect(
-          x, y, barW, barHeight,
-          {
-            fill: color,
-            borderRadius: style.bar?.borderRadius || 0,
-            borderRadiusTop: isTopOfStack,
-            opacity: 1
-          }
-        );
+        let barElement;
+        let forecastElement = null;
+        let actualHeight = barHeight;
+        let forecastHeight = 0;
 
-        // Add gradient overlay as a second rect
-        if (gradientUrl && barHeight > 0) {
-          this.renderer.rect(x, y, barW, barHeight, {
-            fill: gradientUrl,
-            borderRadius: style.bar?.borderRadius || 0,
-            borderRadiusTop: isTopOfStack,
-            opacity: 1
+        if (hasSplit) {
+          // Split bar: solid actual portion + striped forecast portion
+          const actualNorm = Math.max(0, Math.min(barHeight, ((actualValue - minValue) / valueRange) * chartHeight));
+          forecastHeight = barHeight - actualNorm;
+          actualHeight = actualNorm;
+
+          // Solid actual bar (bottom)
+          barElement = this.renderer.rect(
+            x, y + forecastHeight, barW, actualHeight,
+            { fill: color, borderRadius: 0, opacity: 1 }
+          );
+
+          // Striped forecast bar (top)
+          const patternId = `fc-stripe-${labelIndex}-${visibleIndex}`;
+          const patternUrl = this.renderer.createStripePattern?.(
+            color, patternId, forecastStyle.stripeWidth || 4, forecastStyle.opacity || 0.35
+          );
+
+          forecastElement = this.renderer.rect(
+            x, y, barW, forecastHeight,
+            {
+              fill: patternUrl || color,
+              borderRadius: style.bar?.borderRadius || 0,
+              borderRadiusTop: isTopOfStack,
+              opacity: 1
+            }
+          );
+
+          // Dashed border on forecast portion
+          if (forecastElement && forecastStyle.borderDash) {
+            forecastElement.setAttribute('stroke', color);
+            forecastElement.setAttribute('stroke-width', '1');
+            forecastElement.setAttribute('stroke-dasharray', forecastStyle.borderDash);
+            forecastElement.setAttribute('stroke-opacity', '0.6');
+          }
+
+          // Divider line between actual and forecast
+          const splitY = y + forecastHeight;
+          this.renderer.line(x, splitY, x + barW, splitY, {
+            stroke: color,
+            strokeWidth: 1.5,
+            strokeDasharray: '4 2',
+            strokeLinecap: 'round'
           });
+
+          // Actual value label inside bar (if bar is wide enough)
+          if (barW > 28 && actualHeight > 16) {
+            this.renderer.text(formatNumber(actualValue, 0), x + barW / 2, splitY - 6, {
+              fill: '#ffffff',
+              fontSize: Math.min(10, barW / 5),
+              fontFamily: style.monoFamily || style.fontFamily,
+              fontWeight: 600,
+              textAnchor: 'middle',
+              dominantBaseline: 'auto'
+            });
+          }
+        } else if (isForecast) {
+          // Full forecast bar — entire bar is striped
+          const patternId = `fc-stripe-${labelIndex}-${visibleIndex}`;
+          const patternUrl = this.renderer.createStripePattern?.(
+            color, patternId, forecastStyle.stripeWidth || 4, forecastStyle.opacity || 0.35
+          );
+
+          barElement = this.renderer.rect(
+            x, y, barW, barHeight,
+            {
+              fill: patternUrl || color,
+              borderRadius: style.bar?.borderRadius || 0,
+              borderRadiusTop: isTopOfStack,
+              opacity: 1
+            }
+          );
+
+          // Dashed border
+          if (barElement && forecastStyle.borderDash) {
+            barElement.setAttribute('stroke', color);
+            barElement.setAttribute('stroke-width', '1');
+            barElement.setAttribute('stroke-dasharray', forecastStyle.borderDash);
+            barElement.setAttribute('stroke-opacity', '0.6');
+          }
+        } else {
+          // Normal solid bar
+          barElement = this.renderer.rect(
+            x, y, barW, barHeight,
+            {
+              fill: color,
+              borderRadius: style.bar?.borderRadius || 0,
+              borderRadiusTop: isTopOfStack,
+              opacity: 1
+            }
+          );
+
+          // Add gradient overlay as a second rect
+          if (gradientUrl && barHeight > 0) {
+            this.renderer.rect(x, y, barW, barHeight, {
+              fill: gradientUrl,
+              borderRadius: style.bar?.borderRadius || 0,
+              borderRadiusTop: isTopOfStack,
+              opacity: 1
+            });
+          }
         }
 
         // Bar shadow
@@ -306,11 +407,18 @@ export class BarChart extends Chart {
           barElement.style.cursor = 'pointer';
           barElement.style.transition = 'opacity 0.12s, filter 0.12s';
         }
+        if (forecastElement) {
+          forecastElement.style.cursor = 'pointer';
+          forecastElement.style.transition = 'opacity 0.12s, filter 0.12s';
+        }
 
         const barInfo = {
           element: barElement,
+          forecastElement,
           value: rawValue,
           displayValue,
+          actualValue: hasSplit ? actualValue : null,
+          isForecast,
           label: label,
           datasetLabel: dataset.label,
           color,
@@ -318,6 +426,8 @@ export class BarChart extends Chart {
           y,
           width: isStacked ? availableWidth : datasetWidth,
           height: barHeight,
+          actualHeight: hasSplit ? actualHeight : barHeight,
+          forecastHeight,
           labelIndex,
           datasetIndex: visibleIndex
         };
@@ -376,9 +486,17 @@ export class BarChart extends Chart {
             if (bar.labelIndex === group.labelIndex) {
               bar.element.setAttribute('opacity', '1');
               bar.element.style.filter = 'brightness(1.08)';
+              if (bar.forecastElement) {
+                bar.forecastElement.setAttribute('opacity', '1');
+                bar.forecastElement.style.filter = 'brightness(1.08)';
+              }
             } else {
               bar.element.setAttribute('opacity', '0.3');
               bar.element.style.filter = '';
+              if (bar.forecastElement) {
+                bar.forecastElement.setAttribute('opacity', '0.3');
+                bar.forecastElement.style.filter = '';
+              }
             }
           });
 
@@ -392,14 +510,34 @@ export class BarChart extends Chart {
             const dataset = visibleDatasets[bar.datasetIndex];
             const isDashed = dataset?.dash || dataset?.ref || false;
 
-            rows.push({
-              color: bar.color,
-              label: bar.datasetLabel || 'Value',
-              value: isPercent
-                ? `${formatNumber(bar.value, 0)} (${formatNumber(bar.displayValue, 1)}%)`
-                : formatNumber(bar.value, 0),
-              style: isDashed ? 'dashed' : 'solid'
-            });
+            if (bar.isForecast && bar.actualValue != null) {
+              // Split bar: show actual + forecast as separate rows
+              rows.push({
+                color: bar.color,
+                label: `${bar.datasetLabel || 'Value'} (actual)`,
+                value: isPercent
+                  ? `${formatNumber(bar.actualValue, 0)}`
+                  : formatNumber(bar.actualValue, 0),
+                style: 'solid'
+              });
+              rows.push({
+                color: bar.color,
+                label: `${bar.datasetLabel || 'Value'} (forecast)`,
+                value: isPercent
+                  ? `${formatNumber(bar.value, 0)} (${formatNumber(bar.displayValue, 1)}%)`
+                  : formatNumber(bar.value, 0),
+                style: 'dashed'
+              });
+            } else {
+              rows.push({
+                color: bar.color,
+                label: (bar.isForecast ? `${bar.datasetLabel || 'Value'} (forecast)` : bar.datasetLabel || 'Value'),
+                value: isPercent
+                  ? `${formatNumber(bar.value, 0)} (${formatNumber(bar.displayValue, 1)}%)`
+                  : formatNumber(bar.value, 0),
+                style: (isDashed || bar.isForecast) ? 'dashed' : 'solid'
+              });
+            }
 
             // Track first two datasets for YoY calculation
             if (bar.datasetIndex === 0) currentValue = bar.value;
@@ -496,9 +634,17 @@ export class BarChart extends Chart {
       if (bar.labelIndex === index) {
         bar.element.setAttribute('opacity', '1');
         bar.element.style.filter = 'brightness(1.08)';
+        if (bar.forecastElement) {
+          bar.forecastElement.setAttribute('opacity', '1');
+          bar.forecastElement.style.filter = 'brightness(1.08)';
+        }
       } else {
         bar.element.setAttribute('opacity', '0.3');
         bar.element.style.filter = '';
+        if (bar.forecastElement) {
+          bar.forecastElement.setAttribute('opacity', '0.3');
+          bar.forecastElement.style.filter = '';
+        }
       }
     });
   }
@@ -524,6 +670,10 @@ export class BarChart extends Chart {
         if (!bar.element) return;
         bar.element.setAttribute('opacity', '1');
         bar.element.style.filter = '';
+        if (bar.forecastElement) {
+          bar.forecastElement.setAttribute('opacity', '1');
+          bar.forecastElement.style.filter = '';
+        }
       });
     }
   }
@@ -550,7 +700,17 @@ export class BarChart extends Chart {
             const currentHeight = bar.height * progress;
             const y = bar.y + bar.height - currentHeight;
 
-            if (bar.element) {
+            if (bar.forecastElement) {
+              // Split bar: animate both actual (bottom) and forecast (top)
+              const fcH = bar.forecastHeight * progress;
+              const actH = bar.actualHeight * progress;
+              bar.forecastElement.setAttribute('height', fcH);
+              bar.forecastElement.setAttribute('y', bar.y + bar.height - currentHeight);
+              if (bar.element) {
+                bar.element.setAttribute('height', actH);
+                bar.element.setAttribute('y', bar.y + bar.height - actH);
+              }
+            } else if (bar.element) {
               bar.element.setAttribute('height', currentHeight);
               bar.element.setAttribute('y', y);
             }

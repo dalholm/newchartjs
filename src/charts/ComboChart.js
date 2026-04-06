@@ -37,6 +37,13 @@ export class ComboChart extends Chart {
     let allValues = [];
     visibleDatasets.forEach(ds => {
       if (ds.values) allValues = allValues.concat(ds.values);
+      // When forecast split bars exist, ensure scale starts at 0
+      // so the actual portion is visible
+      if (ds.actual) {
+        let hasActual = false;
+        ds.actual.forEach(v => { if (v != null) hasActual = true; });
+        if (hasActual) allValues.push(0);
+      }
     });
 
     // Include reference line values
@@ -188,27 +195,105 @@ export class ComboChart extends Chart {
         const x = baseX - availableWidth / 2 + barIndex * datasetWidth;
         const y = chartY + chartHeight - barHeight;
         const color = dataset.color || this.getPaletteColor(dataset._visibleIndex);
+        const borderRadius = style.combo?.barBorderRadius ?? style.bar?.borderRadius ?? 4;
 
-        const barElement = this.renderer.rect(x, y, datasetWidth, barHeight, {
-          fill: color,
-          borderRadius: style.combo?.barBorderRadius ?? style.bar?.borderRadius ?? 4,
-          opacity: 1
-        });
+        // Forecast detection
+        const isForecast = dataset.forecast?.[labelIndex] === true;
+        const actualValue = dataset.actual?.[labelIndex];
+        const hasSplit = isForecast && actualValue != null && actualValue < value;
+        const forecastStyle = style.forecast || {};
+
+        let barElement;
+        let forecastElement = null;
+        let actualHeight = barHeight;
+        let forecastHeight = 0;
+
+        if (hasSplit) {
+          const actualNorm = Math.max(0, Math.min(barHeight, ((actualValue - minValue) / valueRange) * chartHeight));
+          forecastHeight = barHeight - actualNorm;
+          actualHeight = actualNorm;
+
+          barElement = this.renderer.rect(x, y + forecastHeight, datasetWidth, actualHeight, {
+            fill: color, borderRadius: 0, opacity: 1
+          });
+
+          const patternId = `fc-stripe-c-${labelIndex}-${barIndex}`;
+          const patternUrl = this.renderer.createStripePattern?.(
+            color, patternId, forecastStyle.stripeWidth || 4, forecastStyle.opacity || 0.35
+          );
+          forecastElement = this.renderer.rect(x, y, datasetWidth, forecastHeight, {
+            fill: patternUrl || color, borderRadius, borderRadiusTop: true, opacity: 1
+          });
+          if (forecastElement && forecastStyle.borderDash) {
+            forecastElement.setAttribute('stroke', color);
+            forecastElement.setAttribute('stroke-width', '1');
+            forecastElement.setAttribute('stroke-dasharray', forecastStyle.borderDash);
+            forecastElement.setAttribute('stroke-opacity', '0.6');
+          }
+
+          // Divider line between actual and forecast
+          const splitY = y + forecastHeight;
+          this.renderer.line(x, splitY, x + datasetWidth, splitY, {
+            stroke: color,
+            strokeWidth: 1.5,
+            strokeDasharray: '4 2',
+            strokeLinecap: 'round'
+          });
+
+          // Actual value label inside bar (if bar is wide enough)
+          if (datasetWidth > 28 && actualHeight > 16) {
+            this.renderer.text(formatNumber(actualValue, 0), x + datasetWidth / 2, splitY - 6, {
+              fill: '#ffffff',
+              fontSize: Math.min(10, datasetWidth / 5),
+              fontFamily: style.monoFamily || style.fontFamily,
+              fontWeight: 600,
+              textAnchor: 'middle',
+              dominantBaseline: 'auto'
+            });
+          }
+        } else if (isForecast) {
+          const patternId = `fc-stripe-c-${labelIndex}-${barIndex}`;
+          const patternUrl = this.renderer.createStripePattern?.(
+            color, patternId, forecastStyle.stripeWidth || 4, forecastStyle.opacity || 0.35
+          );
+          barElement = this.renderer.rect(x, y, datasetWidth, barHeight, {
+            fill: patternUrl || color, borderRadius, borderRadiusTop: true, opacity: 1
+          });
+          if (barElement && forecastStyle.borderDash) {
+            barElement.setAttribute('stroke', color);
+            barElement.setAttribute('stroke-width', '1');
+            barElement.setAttribute('stroke-dasharray', forecastStyle.borderDash);
+            barElement.setAttribute('stroke-opacity', '0.6');
+          }
+        } else {
+          barElement = this.renderer.rect(x, y, datasetWidth, barHeight, {
+            fill: color, borderRadius, opacity: 1
+          });
+        }
 
         if (barElement) {
           barElement.style.cursor = 'pointer';
           barElement.style.transition = 'opacity 0.12s, filter 0.12s';
         }
+        if (forecastElement) {
+          forecastElement.style.cursor = 'pointer';
+          forecastElement.style.transition = 'opacity 0.12s, filter 0.12s';
+        }
 
         const barInfo = {
           element: barElement,
+          forecastElement,
           value,
+          actualValue: hasSplit ? actualValue : null,
+          isForecast,
           label,
           datasetLabel: dataset.label,
           color,
           x, y,
           width: datasetWidth,
           height: barHeight,
+          actualHeight: hasSplit ? actualHeight : barHeight,
+          forecastHeight,
           labelIndex,
           datasetIndex: dataset._visibleIndex
         };
@@ -325,9 +410,17 @@ export class ComboChart extends Chart {
             if (bar.labelIndex === i) {
               bar.element.setAttribute('opacity', '1');
               bar.element.style.filter = 'brightness(1.08)';
+              if (bar.forecastElement) {
+                bar.forecastElement.setAttribute('opacity', '1');
+                bar.forecastElement.style.filter = 'brightness(1.08)';
+              }
             } else {
               bar.element.setAttribute('opacity', '0.3');
               bar.element.style.filter = '';
+              if (bar.forecastElement) {
+                bar.forecastElement.setAttribute('opacity', '0.3');
+                bar.forecastElement.style.filter = '';
+              }
             }
           });
 
@@ -348,12 +441,27 @@ export class ComboChart extends Chart {
           // Bar rows
           if (group) {
             group.bars.forEach(bar => {
-              rows.push({
-                color: bar.color,
-                label: bar.datasetLabel || 'Value',
-                value: formatNumber(bar.value, 0),
-                style: 'solid'
-              });
+              if (bar.isForecast && bar.actualValue != null) {
+                rows.push({
+                  color: bar.color,
+                  label: `${bar.datasetLabel || 'Value'} (actual)`,
+                  value: formatNumber(bar.actualValue, 0),
+                  style: 'solid'
+                });
+                rows.push({
+                  color: bar.color,
+                  label: `${bar.datasetLabel || 'Value'} (forecast)`,
+                  value: formatNumber(bar.value, 0),
+                  style: 'dashed'
+                });
+              } else {
+                rows.push({
+                  color: bar.color,
+                  label: bar.isForecast ? `${bar.datasetLabel || 'Value'} (forecast)` : (bar.datasetLabel || 'Value'),
+                  value: formatNumber(bar.value, 0),
+                  style: bar.isForecast ? 'dashed' : 'solid'
+                });
+              }
             });
           }
           // Line rows
@@ -438,9 +546,17 @@ export class ComboChart extends Chart {
         if (bar.labelIndex === index) {
           bar.element.setAttribute('opacity', '1');
           bar.element.style.filter = 'brightness(1.08)';
+          if (bar.forecastElement) {
+            bar.forecastElement.setAttribute('opacity', '1');
+            bar.forecastElement.style.filter = 'brightness(1.08)';
+          }
         } else {
           bar.element.setAttribute('opacity', '0.3');
           bar.element.style.filter = '';
+          if (bar.forecastElement) {
+            bar.forecastElement.setAttribute('opacity', '0.3');
+            bar.forecastElement.style.filter = '';
+          }
         }
       });
     }
@@ -474,6 +590,10 @@ export class ComboChart extends Chart {
         if (!bar.element) return;
         bar.element.setAttribute('opacity', '1');
         bar.element.style.filter = '';
+        if (bar.forecastElement) {
+          bar.forecastElement.setAttribute('opacity', '1');
+          bar.forecastElement.style.filter = '';
+        }
       });
     }
     if (this._crosshairLine) {
@@ -505,8 +625,17 @@ export class ComboChart extends Chart {
             easing,
             onUpdate: (progress) => {
               const currentHeight = bar.height * progress;
-              const y = bar.y + bar.height - currentHeight;
-              if (bar.element) {
+              if (bar.forecastElement) {
+                const fcH = bar.forecastHeight * progress;
+                const actH = bar.actualHeight * progress;
+                bar.forecastElement.setAttribute('height', fcH);
+                bar.forecastElement.setAttribute('y', bar.y + bar.height - currentHeight);
+                if (bar.element) {
+                  bar.element.setAttribute('height', actH);
+                  bar.element.setAttribute('y', bar.y + bar.height - actH);
+                }
+              } else if (bar.element) {
+                const y = bar.y + bar.height - currentHeight;
                 bar.element.setAttribute('height', currentHeight);
                 bar.element.setAttribute('y', y);
               }

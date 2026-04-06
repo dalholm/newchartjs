@@ -33,6 +33,10 @@ export default function comboView() {
           <div class="example-header"><h2>Orders with Conversion & Return Rate</h2><p>One bar dataset with two line overlays</p></div>
           <div class="example-body"><div class="chart-container" id="chart-rates"></div></div>
         </div>
+        <div class="example-card">
+          <div class="example-header"><h2>Weekly Sales with Forecast Bars + Trend</h2><p>Bar forecast with today's split (actual vs projected) and a trend line overlay</p></div>
+          <div class="example-body"><div class="chart-container" id="chart-forecast-split"></div></div>
+        </div>
       </div>
     `,
     mount() {
@@ -102,6 +106,35 @@ export default function comboView() {
             { label: 'Orders', values: [1200,1350,1280,1500,1420,1600,1480,1700,1620,1800,1720,1900], type: 'bar' },
             { label: 'Conversion %', values: [3.2,3.5,3.3,3.8,3.6,4.0,3.7,4.2,3.9,4.4,4.1,4.6], type: 'line' },
             { label: 'Return %', values: [2.1,1.8,2.0,1.6,1.9,1.5,1.7,1.4,1.6,1.3,1.5,1.2], type: 'line' }
+          ]
+        }
+      }));
+
+      // 6. Weekly sales forecast bars + trend line
+      charts.push(NewChart.create('#chart-forecast-split', {
+        type: 'combo',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Today'],
+          datasets: [
+            {
+              label: 'Sales (kr)',
+              values:   [45200, 38900, 52100, 41800, 49300, 31200, 28600, 37500],
+              type: 'bar',
+              forecast: [false, false, false, false, false, false, false, true],
+              actual:   [null, null, null, null, null, null, null, 22400]
+            },
+            {
+              label: 'Trend',
+              values: [42000, 41500, 42800, 42200, 43100, 40800, 39500, 38000],
+              type: 'line',
+              dash: true,
+              dashPattern: '6 4'
+            }
+          ]
+        },
+        options: {
+          referenceLines: [
+            { value: 40000, label: 'Daily target', color: '#0ca678', dash: '4 4' }
           ]
         }
       }));
