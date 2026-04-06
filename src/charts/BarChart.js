@@ -6,11 +6,174 @@ import Chart from '../core/Chart.js';
 import { BAR_DEFAULTS } from '../core/defaults.js';
 import { getMinMax, generateScale, formatNumber, deepMerge } from '../core/utils.js';
 import { delay } from '../core/Animation.js';
+import { DrillDownManager } from '../core/DrillDownManager.js';
+import { Breadcrumb } from '../core/Breadcrumb.js';
 
 export class BarChart extends Chart {
   constructor(element, config = {}) {
     const mergedConfig = deepMerge(BAR_DEFAULTS, config);
     super(element, mergedConfig);
+    this._scrollWrapper = null;
+
+    // Drill-down state
+    this._drillManager = null;
+    this._breadcrumb = null;
+    if (mergedConfig.options.drillDown) {
+      this._drillManager = new DrillDownManager({
+        data: mergedConfig.data,
+        onDrillDown: mergedConfig.options.onDrillDown,
+        rootLabel: mergedConfig.options.drillDownRootLabel || 'All'
+      });
+    }
+  }
+
+  /**
+   * Determine label rotation and interval based on available space
+   * @param {number} barWidth - Width per bar group in px
+   * @param {number} numBars - Total number of bars
+   * @param {string[]} labels - Label strings
+   * @returns {{ rotation: number, interval: number, bottomSpace: number }}
+   */
+  calculateLabelStrategy(barWidth, numBars, labels) {
+    const opts = this.config.options.labels || {};
+    const fontSize = this.config.style.axis?.fontSize || 12;
+    const avgCharWidth = fontSize * 0.6;
+
+    // Find the widest label
+    const maxLabelWidth = labels.reduce((max, l) => Math.max(max, (l || '').length * avgCharWidth), 0);
+
+    // User-specified overrides
+    let rotation = opts.rotation ?? 'auto';
+    let interval = opts.interval ?? 'auto';
+
+    if (rotation === 'auto') {
+      if (maxLabelWidth <= barWidth * 0.9) {
+        rotation = 0;
+      } else if (maxLabelWidth <= barWidth * 1.8) {
+        rotation = -45;
+      } else {
+        rotation = -90;
+      }
+    }
+
+    if (interval === 'auto') {
+      // With rotation, labels take less horizontal space
+      const effectiveLabelWidth = rotation === 0
+        ? maxLabelWidth
+        : rotation === -45
+          ? maxLabelWidth * 0.7
+          : fontSize + 4; // vertical labels are ~fontSize wide
+
+      if (effectiveLabelWidth <= barWidth * 0.95) {
+        interval = 1;
+      } else {
+        interval = Math.ceil(effectiveLabelWidth / (barWidth * 0.95));
+      }
+    }
+
+    // Calculate extra bottom space needed for rotated labels
+    let bottomSpace = 40; // default
+    if (rotation === -45) {
+      bottomSpace = Math.min(80, 40 + maxLabelWidth * 0.5);
+    } else if (rotation === -90) {
+      bottomSpace = Math.min(100, 40 + maxLabelWidth * 0.6);
+    }
+
+    return { rotation, interval, bottomSpace };
+  }
+
+  /**
+   * Setup horizontal scroll container when maxVisibleBars is set
+   * @param {number} numBars - Total number of bars
+   * @returns {{ virtualWidth: number, scrollEnabled: boolean }}
+   */
+  setupScrollContainer(numBars) {
+    const maxVisible = this.config.options.maxVisibleBars;
+    if (!maxVisible || numBars <= maxVisible) {
+      // Remove scroll wrapper if it was previously created
+      if (this._scrollWrapper) {
+        if (this._scrollWrapper.parentNode) {
+          const rendererEl = this.renderer.svg || this.renderer.canvas;
+          if (rendererEl && this._scrollWrapper.contains(rendererEl)) {
+            this.container.appendChild(rendererEl);
+          }
+          this._scrollWrapper.remove();
+        }
+        this._scrollWrapper = null;
+      }
+      return { virtualWidth: this.width, scrollEnabled: false };
+    }
+
+    // Calculate virtual width: give each bar the same width it would have with maxVisible bars
+    const idealBarWidth = this.width / maxVisible;
+    const virtualWidth = Math.ceil(idealBarWidth * numBars);
+
+    // Reset if wrapper was detached (e.g. by renderer.init() clearing container)
+    if (this._scrollWrapper && !this._scrollWrapper.parentNode) {
+      this._scrollWrapper = null;
+    }
+
+    // Create scroll wrapper
+    if (!this._scrollWrapper) {
+      this._scrollWrapper = document.createElement('div');
+      this._scrollWrapper.style.overflowX = 'auto';
+      this._scrollWrapper.style.overflowY = 'hidden';
+      this._scrollWrapper.style.width = '100%';
+      this._scrollWrapper.style.height = '100%';
+      this._scrollWrapper.style.position = 'relative';
+
+      // Scroll fade hint on right edge
+      this._scrollWrapper.style.maskImage = 'linear-gradient(to right, black 92%, transparent 100%)';
+      this._scrollWrapper.style.webkitMaskImage = 'linear-gradient(to right, black 92%, transparent 100%)';
+
+      // Remove fade when scrolled to end
+      this._scrollWrapper.addEventListener('scroll', () => {
+        const { scrollLeft, scrollWidth, clientWidth } = this._scrollWrapper;
+        const atEnd = scrollLeft + clientWidth >= scrollWidth - 2;
+        const atStart = scrollLeft <= 2;
+        if (atEnd) {
+          this._scrollWrapper.style.maskImage = atStart ? 'none' : 'linear-gradient(to left, black 92%, transparent 100%)';
+          this._scrollWrapper.style.webkitMaskImage = atStart ? 'none' : 'linear-gradient(to left, black 92%, transparent 100%)';
+        } else if (atStart) {
+          this._scrollWrapper.style.maskImage = 'linear-gradient(to right, black 92%, transparent 100%)';
+          this._scrollWrapper.style.webkitMaskImage = 'linear-gradient(to right, black 92%, transparent 100%)';
+        } else {
+          this._scrollWrapper.style.maskImage = 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)';
+          this._scrollWrapper.style.webkitMaskImage = 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)';
+        }
+      });
+    }
+
+    // Move renderer element into scroll wrapper
+    const rendererEl = this.renderer.svg || this.renderer.canvas;
+    if (rendererEl) {
+      this.container.appendChild(this._scrollWrapper);
+      this._scrollWrapper.appendChild(rendererEl);
+
+      // Resize SVG to virtual width
+      if (this.renderer.svg) {
+        this.renderer.svg.setAttribute('width', virtualWidth);
+        this.renderer.svg.setAttribute('viewBox', `0 0 ${virtualWidth} ${this.height}`);
+        this.renderer.svg.style.maxWidth = 'none';
+        this.renderer.svg.style.width = `${virtualWidth}px`;
+      }
+    }
+
+    return { virtualWidth, scrollEnabled: true };
+  }
+
+  /**
+   * Override layout to account for rotated label space
+   */
+  calculateLayout() {
+    const base = super.calculateLayout();
+    const ls = this._labelStrategy;
+    if (ls && ls.bottomSpace > base.bottomSpace) {
+      const extra = ls.bottomSpace - base.bottomSpace;
+      base.bottomSpace = ls.bottomSpace;
+      base.chartHeight -= extra;
+    }
+    return base;
   }
 
   /**
@@ -27,7 +190,12 @@ export class BarChart extends Chart {
 
     if (numBars === 0) return [];
 
-    const barWidth = layout.chartWidth / numBars;
+    // Use virtual width for bar sizing when scroll is enabled
+    const effectiveChartWidth = this._virtualWidth && this._virtualWidth > this.width
+      ? this._virtualWidth - layout.leftSpace - layout.rightSpace
+      : layout.chartWidth;
+
+    const barWidth = effectiveChartWidth / numBars;
     const barGap = barWidth * (this.config.style.bar?.gap || 0.2);
     const availableWidth = barWidth - barGap;
 
@@ -110,12 +278,35 @@ export class BarChart extends Chart {
    */
   render() {
     const { style, data, options } = this.config;
+    const numBarsTotal = data.labels?.length || 0;
+
+    // Setup scroll container before calculating bars (may change virtual width)
+    const { virtualWidth, scrollEnabled } = this.setupScrollContainer(numBarsTotal);
+
+    // Calculate label strategy for rotation/thinning
+    const labelStrategy = this.calculateLabelStrategy(
+      (virtualWidth || this.width) / Math.max(numBarsTotal, 1),
+      numBarsTotal,
+      data.labels || []
+    );
+
+    // Store for use in calculateBars if needed
+    this._labelStrategy = labelStrategy;
+    this._virtualWidth = virtualWidth;
+
     const bars = this.calculateBars();
 
     if (bars.length === 0) return;
 
-    const { chartX, chartY, chartWidth, chartHeight, hasXAxis, hasYAxis } = bars.layout;
+    let { chartX, chartY, chartWidth, chartHeight, hasXAxis, hasYAxis } = bars.layout;
     const { barWidth, availableWidth, datasetWidth, numBars, numDatasets, visibleDatasets, minValue, maxValue, valueRange, scale, isStacked, isPercent, columnTotals } = bars;
+
+    // If scrolling, override chart width to use virtual width
+    if (scrollEnabled) {
+      const leftSpace = hasYAxis ? 60 : (options.padding || 20);
+      const rightSpace = options.padding || 20;
+      chartWidth = virtualWidth - leftSpace - rightSpace;
+    }
 
     // Draw grid
     if (style.grid?.color) {
@@ -454,15 +645,28 @@ export class BarChart extends Chart {
 
       barGroupData.push({ groupX, highlight, bars: groupBars, label, labelIndex });
 
-      // X axis labels
+      // X axis labels — with rotation and interval support
       if (hasXAxis) {
-        this.renderer.text(label, baseX, chartY + chartHeight + 15, {
-          fill: style.axis.color,
-          fontSize: style.axis.fontSize,
-          fontFamily: style.fontFamily,
-          textAnchor: 'middle',
-          dominantBaseline: 'top'
-        });
+        const ls = this._labelStrategy || { rotation: 0, interval: 1 };
+        const showLabel = (labelIndex % ls.interval) === 0;
+
+        if (showLabel) {
+          const labelOpts = {
+            fill: style.axis.color,
+            fontSize: style.axis.fontSize,
+            fontFamily: style.fontFamily,
+            dominantBaseline: 'top'
+          };
+
+          if (ls.rotation && ls.rotation !== 0) {
+            labelOpts.rotate = ls.rotation;
+            labelOpts.textAnchor = ls.rotation < 0 ? 'end' : 'start';
+            this.renderer.text(label, baseX, chartY + chartHeight + 8, labelOpts);
+          } else {
+            labelOpts.textAnchor = 'middle';
+            this.renderer.text(label, baseX, chartY + chartHeight + 15, labelOpts);
+          }
+        }
       }
     });
 
@@ -610,12 +814,28 @@ export class BarChart extends Chart {
             options.onHoverEnd();
           }
         });
+
+        // Drill-down click handler
+        if (this._drillManager) {
+          const canDrill = this._drillManager.canDrillDown(group.label);
+          if (canDrill) {
+            hitbox.style.cursor = 'pointer';
+            this.addElementListener(hitbox, 'click', () => {
+              this._handleDrillDown(group.label);
+            });
+          }
+        }
       }
     });
 
     // Store group data for programmatic highlight
     this._barGroups = barGroupData;
     this.bars = bars_;
+
+    // Setup breadcrumb after bars are rendered
+    if (this._drillManager) {
+      this._setupBreadcrumb();
+    }
   }
 
   /**
@@ -719,6 +939,112 @@ export class BarChart extends Chart {
       });
       this.animationCancels.push(cancelDelay);
     });
+  }
+
+  // ── Drill-down methods ─────────────────────────────────────────────
+
+  /**
+   * Handle drill-down into a bar label
+   * @param {string} label - The bar label to drill into
+   */
+  async _handleDrillDown(label) {
+    if (!this._drillManager || !this._drillManager.canDrillDown(label)) return;
+
+    this._setDrillLoading(true);
+    try {
+      const childData = await this._drillManager.drillDown(label);
+      this._applyDrillData(childData);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('Drill-down failed:', err.message);
+    } finally {
+      this._setDrillLoading(false);
+    }
+  }
+
+  /**
+   * Apply drill-down data and re-render the chart
+   * @param {Object} data - New chart data ({ labels, datasets, children? })
+   */
+  _applyDrillData(data) {
+    // Reset scroll position
+    if (this._scrollWrapper) {
+      this._scrollWrapper.scrollLeft = 0;
+    }
+
+    // Update chart with new data (triggers full draw lifecycle)
+    this.update({ data });
+  }
+
+  /**
+   * Create or update the breadcrumb navigation
+   */
+  _setupBreadcrumb() {
+    if (!this._drillManager) return;
+
+    const items = this._drillManager.breadcrumbItems;
+
+    if (!this._breadcrumb) {
+      const bcStyle = this.config.style.breadcrumb || {};
+      this._breadcrumb = new Breadcrumb(this.container, {
+        ...bcStyle,
+        dark: this._dark,
+        fontFamily: this.config.style.fontFamily,
+        onClick: (level) => {
+          this._drillManager.navigateTo(level);
+          this._applyDrillData(this._drillManager.currentData);
+        }
+      });
+      this._breadcrumb.mount();
+    }
+
+    this._breadcrumb.update(items);
+  }
+
+  /**
+   * Show or hide a loading state during async drill-down
+   * @param {boolean} loading
+   */
+  _setDrillLoading(loading) {
+    const rendererEl = this.renderer?.svg || this.renderer?.canvas;
+    if (rendererEl) {
+      rendererEl.style.opacity = loading ? '0.4' : '1';
+      rendererEl.style.transition = 'opacity 0.15s';
+    }
+  }
+
+  /**
+   * Navigate up one or more drill levels (public API)
+   * @param {number} [level] - Target level (0 = root). Omit to go up one level.
+   */
+  drillUp(level) {
+    if (!this._drillManager) return;
+    if (level !== undefined) {
+      this._drillManager.navigateTo(level);
+    } else {
+      this._drillManager.navigateTo(this._drillManager.currentLevel - 1);
+    }
+    this._applyDrillData(this._drillManager.currentData);
+  }
+
+  /**
+   * Navigate to a specific drill level (public API)
+   * @param {number} level - Target level (0 = root)
+   */
+  drillTo(level) {
+    this.drillUp(level);
+  }
+
+  /**
+   * Override destroy to clean up breadcrumb
+   */
+  destroy() {
+    if (this._breadcrumb) {
+      this._breadcrumb.destroy();
+      this._breadcrumb = null;
+    }
+    this._drillManager = null;
+    super.destroy();
   }
 }
 

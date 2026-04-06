@@ -22,6 +22,21 @@ Factory method that creates and returns a KPICard instance.
 - **config** `Object` - KPI card configuration
 - **Returns** `KPICard`
 
+### `NewChart.liveWidget(element, config)`
+
+Factory method that creates and returns a LiveWidget instance.
+
+- **element** `Element|string` - DOM element or CSS selector
+- **config** `Object` - Widget configuration (variant, data, theme, colors)
+- **Returns** `LiveWidget`
+
+### `NewChart.ecommerceSimulator(config)`
+
+Factory method that creates and returns an EcommerceSimulator instance.
+
+- **config** `Object` - Simulator configuration (baseVisitors, callbacks, etc.)
+- **Returns** `EcommerceSimulator`
+
 ### `NewChart.getSupportedTokens()`
 
 Returns an array of all supported CSS custom property names.
@@ -64,6 +79,8 @@ NewChart.TreemapChart
 NewChart.RangeChart
 NewChart.KPICard
 NewChart.KPIComparisonCard
+NewChart.LiveWidget
+NewChart.EcommerceSimulator
 NewChart.DataTable
 ```
 
@@ -85,7 +102,11 @@ Available named exports:
 | `AreaChart` | `createTrendBadge` | `DARK_STYLE` |
 | `GaugeChart` | `KPIComparisonCard` | `DARK_KPI_COLORS` |
 | `SparklineChart` | `createKPIComparisonCard` | `isDarkMode` |
-| `ComboChart` | `DataTable` | `getDarkPalette` |
+| `ComboChart` | `LiveWidget` | `getDarkPalette` |
+|  | `createLiveWidget` | |
+|  | `EcommerceSimulator` | |
+|  | `createEcommerceSimulator` | |
+|  | `DataTable` | |
 | `ScatterChart` | | `deepMerge` |
 | `NetworkBallChart` | | |
 | `FunnelChart` | | |
@@ -163,6 +184,38 @@ Called when mouse leaves a data point/column.
 ### `options.onClick({ index, label, value, percent, event })`
 
 PieChart only. Called when a slice is clicked.
+
+---
+
+## LiveWidget Instance Methods
+
+### `widget.update(data)`
+
+Merge partial data and re-render with smooth transitions. The data shape depends on the variant.
+
+```js
+widget.update({ visitors: 30, carts: 5, pages: [...] });
+```
+
+### `widget.destroy()`
+
+Remove all DOM elements, cancel animations, and clean up intervals.
+
+---
+
+## EcommerceSimulator Instance Methods
+
+### `sim.start()`
+
+Start the simulation tick loop.
+
+### `sim.stop()`
+
+Pause the simulation (resumable with `start()`).
+
+### `sim.destroy()`
+
+Stop and clean up all state.
 
 ---
 
@@ -259,3 +312,89 @@ Show or hide the legend element.
 ### `legend.destroy()`
 
 Remove the legend from DOM.
+
+---
+
+## Drill-Down
+
+Enable drill-down on bar charts by setting `options.drillDown: true`. Data can come from embedded `data.children` (client-side) or an async `onDrillDown` callback (server-side).
+
+### Config
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `options.drillDown` | `boolean` | `false` | Enable drill-down on bar click |
+| `options.onDrillDown` | `Function` | `null` | Async callback `({ label, level, path }) => Promise<data>` |
+| `options.drillDownRootLabel` | `string` | `'All'` | Label for the root breadcrumb item |
+| `data.children` | `Object` | – | Map of `{ [label]: { labels, datasets, children? } }` |
+| `style.breadcrumb.fontSize` | `number` | `12` | Breadcrumb font size |
+| `style.breadcrumb.color` | `string` | `'#6B7280'` | Current level text color |
+| `style.breadcrumb.activeColor` | `string` | `'#4c6ef5'` | Clickable crumb color |
+| `style.breadcrumb.separator` | `string` | `' › '` | Separator between crumbs |
+
+### Client-Side (embedded children)
+
+```js
+NewChart.create('#chart', {
+  type: 'bar',
+  data: {
+    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    datasets: [{ label: 'Revenue', values: [12000, 14000, 11000, 15000] }],
+    children: {
+      Q1: { labels: ['Jan', 'Feb', 'Mar'], datasets: [{ values: [3900, 4100, 4000] }] },
+      Q2: { labels: ['Apr', 'May', 'Jun'], datasets: [{ values: [4600, 4800, 4600] }] }
+    }
+  },
+  options: { drillDown: true, drillDownRootLabel: 'Revenue' }
+});
+```
+
+### Server-Side (async callback)
+
+```js
+NewChart.create('#chart', {
+  type: 'bar',
+  data: topLevelData,
+  options: {
+    drillDown: true,
+    onDrillDown: async ({ label, level, path }) => {
+      const res = await fetch(`/api/detail?path=${path.join(',')}`);
+      return res.json(); // must return { labels, datasets }
+    }
+  }
+});
+```
+
+The callback receives `{ label, level, path }` where `path` is the full trail from root. A loading state (reduced opacity) is shown during the async call.
+
+### Instance Methods
+
+#### `chart.drillUp(level?)`
+
+Navigate back. Omit `level` to go up one step, or pass `0` to return to root.
+
+#### `chart.drillTo(level)`
+
+Navigate to a specific drill level (0 = root).
+
+---
+
+## Breadcrumb Instance Methods
+
+The Breadcrumb component is created automatically by drill-down charts but can also be used standalone.
+
+### `new Breadcrumb(container, options)`
+
+Create a breadcrumb. Options: `fontSize`, `color`, `activeColor`, `separator`, `padding`, `dark`, `onClick`.
+
+### `breadcrumb.update(items)`
+
+Update items. Each item: `{ label: string, level: number }`. Hidden when only one item.
+
+### `breadcrumb.show()` / `breadcrumb.hide()`
+
+Toggle visibility.
+
+### `breadcrumb.destroy()`
+
+Remove from DOM.

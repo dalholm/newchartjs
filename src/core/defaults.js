@@ -103,6 +103,13 @@ export const BAR_DEFAULTS = {
       stripeWidth: 4, // diagonal stripe width in px
       opacity: 0.35, // opacity of forecast bar overlay
       borderDash: '3 2' // dashed border around forecast portion
+    },
+    breadcrumb: {
+      fontSize: 12,
+      color: '#6B7280',
+      activeColor: '#4c6ef5',
+      separator: ' › ',
+      padding: '6px 0'
     }
   },
   options: {
@@ -112,7 +119,16 @@ export const BAR_DEFAULTS = {
     axis: {
       x: { enabled: true, label: '' },
       y: { enabled: true, label: '' }
-    }
+    },
+    labels: {
+      rotation: 'auto', // 'auto', 0, 45, or 90
+      interval: 'auto', // 'auto' or number (show every Nth label)
+      minBarWidth: 20   // minimum bar width in px before scroll kicks in
+    },
+    maxVisibleBars: null, // null = show all, number = enable horizontal scroll
+    drillDown: false,          // enable drill-down on bar click
+    onDrillDown: null,         // async callback: ({ label, level, path }) => Promise<data>
+    drillDownRootLabel: 'All'  // label for the root breadcrumb item
   }
 };
 
@@ -387,6 +403,10 @@ export const DARK_STYLE = {
   },
   gauge: {
     trackColor: '#2d3139'
+  },
+  breadcrumb: {
+    color: '#9CA3AF',
+    activeColor: '#5c7cfa'
   }
 };
 

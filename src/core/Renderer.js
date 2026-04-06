@@ -245,6 +245,10 @@ export class SVGRenderer extends Renderer {
       attrs['font-weight'] = style.fontWeight;
     }
 
+    if (style.rotate) {
+      attrs.transform = `rotate(${style.rotate}, ${x}, ${y})`;
+    }
+
     const textEl = this.createElement('text', attrs);
     textEl.textContent = text;
     this.svg.appendChild(textEl);
@@ -784,10 +788,19 @@ export class CanvasRenderer extends Renderer {
    */
   text(text, x, y, style = {}) {
     this.ctx.fillStyle = style.fill || '#000';
-    this.ctx.font = `${style.fontSize || 12}px ${style.fontFamily || 'sans-serif'}`;
+    this.ctx.font = `${style.fontWeight ? style.fontWeight + ' ' : ''}${style.fontSize || 12}px ${style.fontFamily || 'sans-serif'}`;
     this.ctx.textAlign = style.textAlign || 'left';
     this.ctx.textBaseline = style.textBaseline || 'top';
-    this.ctx.fillText(text, x, y);
+
+    if (style.rotate) {
+      this.ctx.save();
+      this.ctx.translate(x, y);
+      this.ctx.rotate((style.rotate * Math.PI) / 180);
+      this.ctx.fillText(text, 0, 0);
+      this.ctx.restore();
+    } else {
+      this.ctx.fillText(text, x, y);
+    }
   }
 
   /**

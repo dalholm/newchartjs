@@ -487,6 +487,137 @@ options: {
 
 ---
 
+## LiveWidget
+
+Real-time dashboard widgets for e-commerce. Four built-in variants that update live with smooth animated transitions.
+
+```js
+const widget = NewChart.liveWidget('#el', {
+  variant: 'visitors',
+  data: {
+    visitors: 24,
+    carts: 3,
+    pages: [
+      { url: '/sv/products/volang-rosa-badlakan', count: 4 },
+      { url: '/sv/collections/sale', count: 2 }
+    ],
+    cartItems: [
+      { product: 'Volang Rosa Badlakan', qty: 1, value: 449 }
+    ]
+  }
+});
+
+// Update with smooth transitions
+widget.update({ visitors: 27, carts: 4, pages: [...] });
+
+// Clean up
+widget.destroy();
+```
+
+### Variants
+
+| Variant | Description |
+|---|---|
+| `'visitors'` | Online visitors + active carts with tabbed page/cart list |
+| `'revenue'` | Live revenue ticker with sparkline, order stats, and last order info |
+| `'activity'` | Order activity feed with animated entries (orders, cart adds, visits) |
+| `'pulse'` | Live conversion funnel with animated progress bars and drop-off rates |
+
+### LiveWidget config
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `variant` | `string` | `'visitors'` | Widget variant (see table above) |
+| `title` | `string` | `''` | Widget title |
+| `theme` | `string` | `'light'` | `'light'` or `'dark'` |
+| `data` | `object` | `{}` | Initial data (shape depends on variant) |
+| `colors` | `object` | auto | Color overrides (surface, border, text, primary, success, etc.) |
+
+### Data shapes by variant
+
+**visitors:**
+```js
+{ visitors: 24, carts: 3,
+  pages: [{ url: '/path', count: 4 }],
+  cartItems: [{ product: 'Name', qty: 1, value: 449 }] }
+```
+
+**revenue:**
+```js
+{ revenue: 45000, orders: 12, avgOrder: 3750, convRate: 2.5,
+  lastOrderValue: 890, lastOrderTime: 'just nu',
+  changePercent: 8.5, sparkline: [1000, 2000, 3000, ...] }
+```
+
+**activity:**
+```js
+{ events: [
+  { type: 'order', text: '<strong>Anna</strong> beställde 2 artiklar',
+    time: 'just nu', amount: 890 },
+  { type: 'cart', text: '<strong>Erik</strong> la till produkt',
+    time: '2 min sedan', amount: 449 }
+] }
+```
+
+**pulse:**
+```js
+{ conversionRate: 3.2, totalVisitors: 100, totalOrders: 3,
+  steps: [
+    { label: 'Besökare', count: 100 },
+    { label: 'Produktvisningar', count: 60 },
+    { label: 'Lagt i varukorg', count: 15 },
+    { label: 'Genomfört köp', count: 3 }
+  ] }
+```
+
+---
+
+## EcommerceSimulator
+
+Generates realistic, time-weighted e-commerce traffic data. Drives LiveWidgets with simulated visitors, carts, orders, and revenue.
+
+```js
+const sim = NewChart.ecommerceSimulator({
+  baseVisitors: 25,
+  avgOrderValue: 890,
+  conversionRate: 3.2,
+  tickInterval: 2000,
+  onVisitorsUpdate: (data) => visitorsWidget.update(data),
+  onRevenueUpdate: (data) => revenueWidget.update(data),
+  onActivityUpdate: (data) => activityWidget.update(data),
+  onPulseUpdate: (data) => pulseWidget.update(data)
+});
+
+sim.start();   // begin ticking
+sim.stop();    // pause
+sim.destroy(); // cleanup
+```
+
+### EcommerceSimulator config
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `baseVisitors` | `number` | `25` | Peak concurrent visitors |
+| `avgOrderValue` | `number` | `890` | Average order value (SEK) |
+| `conversionRate` | `number` | `2.8` | Conversion rate (%) |
+| `tickInterval` | `number` | `2000` | Update interval (ms) |
+| `onUpdate` | `function` | `null` | Combined callback with all data |
+| `onVisitorsUpdate` | `function` | `null` | Visitors data callback |
+| `onRevenueUpdate` | `function` | `null` | Revenue data callback |
+| `onActivityUpdate` | `function` | `null` | Activity feed callback |
+| `onPulseUpdate` | `function` | `null` | Conversion pulse callback |
+
+### Realism features
+
+- **Time-of-day traffic curve** — peak at lunch (12-13) and evening (19-21), low at night
+- **15 Swedish product catalog** — realistic product names, URLs, and prices
+- **Visitor lifecycle** — visitors arrive, browse pages, and leave after 30s–3.5min
+- **Cart behavior** — carts are created, items added, and occasionally abandoned
+- **Order generation** — orders complete from carts with customer name, city, and item count
+- **Revenue accumulation** — seeded with historical data based on current time of day
+
+---
+
 ## Legend
 
 Interactive legend rendered automatically when `options.legend.enabled: true`.
@@ -521,3 +652,35 @@ Mouse-tracking tooltip shown on chart hover. Supports simple key-value and rich 
 | `style.tooltip.shadow` | `string` | `'0 10px 15px...'` | Box shadow |
 
 Rich tooltips with header, color swatches, and YoY footer are built automatically for BarChart and LineChart when multiple datasets are present.
+
+---
+
+## Breadcrumb
+
+A navigation trail that appears automatically when using drill-down on bar charts. Shows the current path and allows clicking to navigate back to any level.
+
+```js
+NewChart.create('#chart', {
+  type: 'bar',
+  data: {
+    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    datasets: [{ values: [12000, 14000, 11000, 15000] }],
+    children: { Q1: { labels: ['Jan', 'Feb', 'Mar'], datasets: [{ values: [3900, 4100, 4000] }] } }
+  },
+  options: { drillDown: true, drillDownRootLabel: 'Revenue' }
+});
+```
+
+After clicking Q1, the breadcrumb displays: **Revenue** › **Q1**
+
+Clicking "Revenue" navigates back to the root level.
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `style.breadcrumb.fontSize` | `number` | `12` | Font size |
+| `style.breadcrumb.color` | `string` | `'#6B7280'` | Current (non-clickable) text color |
+| `style.breadcrumb.activeColor` | `string` | `'#4c6ef5'` | Clickable ancestor color |
+| `style.breadcrumb.separator` | `string` | `' › '` | Separator character |
+| `style.breadcrumb.padding` | `string` | `'6px 0'` | Container padding |
+
+The breadcrumb is hidden at the root level and appears automatically when drilling into sub-data.

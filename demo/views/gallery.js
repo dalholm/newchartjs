@@ -83,6 +83,9 @@ export default function galleryView() {
       <div class="grid">
         ${card('/dashboard', 'ERP Dashboard', 'Complete sales dashboard with KPI cards, drill-down, table, CSV export.', 'demo', 'Full demo', dashboardPreview())}
         ${card('/ecommerce', 'E-Commerce Dashboard', 'Webshop analytics: funnel, sankey, treemap, heatmap, cohort, waterfall, bullet.', 'demo new', 'Full demo', ecommercePreview())}
+        ${card('/largedata', 'Large Datasets', 'Auto label rotation, thinning, and horizontal scroll for 50–100+ bars.', 'demo new', '4 examples', largedataPreview())}
+        ${card('/livewidgets', 'Live Widgets', 'Real-time e-commerce widgets: visitors, revenue ticker, order feed, conversion pulse.', 'demo new', '4 widgets', livePreview())}
+        ${card('/drilldown', 'Drill-Down', 'Click bars to zoom into sub-data. Client-side children, server-side callbacks, breadcrumb nav.', 'demo new', '3 examples', drilldownPreview())}
       </div>
 
       <div class="footer">NewChart JS v0.1.0 &mdash; Zero-dependency charting for professional applications</div>
@@ -416,5 +419,45 @@ function dashboardPreview() {
       <circle cx="25" cy="25" r="18" fill="none" stroke="var(--success)" stroke-width="7" stroke-dasharray="75 38" stroke-dashoffset="0" transform="rotate(-90 25 25)"/>
       <circle cx="25" cy="25" r="18" fill="none" stroke="var(--warning)" stroke-width="7" stroke-dasharray="25 88" stroke-dashoffset="-75" transform="rotate(-90 25 25)"/>
     </svg>
+  </div>`;
+}
+
+function largedataPreview() {
+  const bars = [18,32,24,38,28,35,22,40,30,36,26,34,20,37,29,33,25,39,27,31];
+  return `<div style="display:flex;align-items:flex-end;gap:1px;height:50px;overflow:hidden;width:100px;">
+    ${bars.map(h => `<div style="height:${h}px;flex:1;min-width:3px;background:var(--primary);border-radius:1px 1px 0 0;opacity:0.8;"></div>`).join('')}
+  </div>`;
+}
+
+function livePreview() {
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+    <div style="display:flex;align-items:flex-end;gap:16px;">
+      <div style="text-align:center;">
+        <div style="font-size:7px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Online</div>
+        <div style="font-size:28px;font-weight:800;color:var(--text);line-height:1;">19</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:7px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Carts</div>
+        <div style="font-size:28px;font-weight:800;color:var(--success);line-height:1;">3</div>
+      </div>
+    </div>
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--success);animation:nc-lw-pulse 2s ease-in-out infinite;"></div>
+  </div>`;
+}
+
+function drilldownPreview() {
+  return `<div style="display:flex;align-items:center;gap:8px;">
+    <div style="display:flex;align-items:flex-end;gap:3px;height:40px;">
+      <div style="height:25px;width:14px;background:var(--primary);border-radius:2px 2px 0 0;opacity:0.3;"></div>
+      <div style="height:35px;width:14px;background:var(--primary);border-radius:2px 2px 0 0;opacity:0.3;"></div>
+      <div style="height:40px;width:14px;background:var(--primary);border-radius:2px 2px 0 0;border:2px solid var(--primary-dk);"></div>
+      <div style="height:28px;width:14px;background:var(--primary);border-radius:2px 2px 0 0;opacity:0.3;"></div>
+    </div>
+    <div style="font-size:16px;color:var(--primary);">&#x279C;</div>
+    <div style="display:flex;align-items:flex-end;gap:2px;height:40px;">
+      <div style="height:20px;width:10px;background:var(--success);border-radius:2px 2px 0 0;"></div>
+      <div style="height:32px;width:10px;background:var(--success);border-radius:2px 2px 0 0;"></div>
+      <div style="height:28px;width:10px;background:var(--success);border-radius:2px 2px 0 0;"></div>
+    </div>
   </div>`;
 }

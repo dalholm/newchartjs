@@ -27,6 +27,8 @@ import rangeView from './views/range.js';
 import kpicomparisonView from './views/kpicomparison.js';
 import ecommerceView from './views/ecommerce.js';
 import largedataView from './views/largedata.js';
+import livewidgetsView from './views/livewidgets.js';
+import drilldownView from './views/drilldown.js';
 
 // Register routes
 router.register('/', galleryView);
@@ -53,6 +55,8 @@ router.register('/range', rangeView);
 router.register('/kpicomparison', kpicomparisonView);
 router.register('/ecommerce', ecommerceView);
 router.register('/largedata', largedataView);
+router.register('/livewidgets', livewidgetsView);
+router.register('/drilldown', drilldownView);
 
 // Start
 router.start();

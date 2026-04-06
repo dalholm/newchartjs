@@ -19,7 +19,8 @@ Modern SVG and Canvas rendering, smooth animations, dark mode, and a declarative
 - **Responsive** -- adapts to any container size using `ResizeObserver`
 - **Dark mode** -- built-in light, dark, and auto themes (follows `prefers-color-scheme`)
 - **CSS custom properties** -- override colors, fonts, and spacing with `--nc-*` tokens
-- **Interactive** -- tooltips, legends with toggle, hover effects, crosshair, and drill-down
+- **Interactive** -- tooltips, legends with toggle, hover effects, crosshair, drill-down with breadcrumb navigation
+- **Large datasets** -- auto label rotation/thinning, horizontal scroll via `maxVisibleBars`
 - **Export** -- `toPNG()` and `toSVG()` for saving charts as images
 - **Accessible** -- ARIA attributes on chart containers
 - **Lightweight** -- small footprint with tree-shakeable ESM, CJS, and UMD builds
@@ -90,7 +91,7 @@ When using the UMD build via CDN, `NewChart` is available as a global:
 
 | Type | Description |
 |------|-------------|
-| **Bar** | Vertical and horizontal bars with grouped, stacked, and 100% stacked modes. Reference lines and budget markers. |
+| **Bar** | Vertical and horizontal bars with grouped, stacked, and 100% stacked modes. Reference lines, budget markers, drill-down with breadcrumb, and auto label rotation/scroll for large datasets. |
 | **Line** | Trend lines with monotone cubic interpolation, multi-series, dashed comparisons, crosshair, and optional area fill. |
 | **Area** | Gradient-filled area charts for cash flow, inventory, and cumulative data. Supports stacking. |
 | **Pie / Donut** | Distribution charts with hover-explode, center text for donut variant, and multiple label modes. |

@@ -365,4 +365,172 @@ describe('BarChart', () => {
       chart.destroy();
     });
   });
+
+  // ═══ DRILL-DOWN TESTS ═══
+
+  describe('drill-down', () => {
+    const drillData = {
+      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+      datasets: [{ label: 'Revenue', values: [100, 200, 150, 180] }],
+      children: {
+        Q1: {
+          labels: ['Jan', 'Feb', 'Mar'],
+          datasets: [{ label: 'Revenue', values: [30, 40, 30] }]
+        },
+        Q2: {
+          labels: ['Apr', 'May', 'Jun'],
+          datasets: [{ label: 'Revenue', values: [60, 70, 70] }]
+        }
+      }
+    };
+
+    it('drill-down disabled by default', () => {
+      const chart = createChart();
+      expect(chart._drillManager).toBeNull();
+      chart.destroy();
+    });
+
+    it('creates DrillDownManager when drillDown is enabled', () => {
+      const chart = createChart({
+        data: drillData,
+        options: { drillDown: true }
+      });
+      expect(chart._drillManager).not.toBeNull();
+      expect(chart._drillManager.currentLevel).toBe(0);
+      chart.destroy();
+    });
+
+    it('drillDown triggers re-render with child data', async () => {
+      const chart = createChart({
+        data: drillData,
+        options: { drillDown: true }
+      });
+
+      await chart._handleDrillDown('Q1');
+
+      const texts = Array.from(container.querySelectorAll('text')).map(t => t.textContent);
+      expect(texts).toContain('Jan');
+      expect(texts).toContain('Feb');
+      expect(texts).toContain('Mar');
+      expect(texts).not.toContain('Q3');
+      chart.destroy();
+    });
+
+    it('breadcrumb appears after drilling down', async () => {
+      const chart = createChart({
+        data: drillData,
+        options: { drillDown: true }
+      });
+
+      await chart._handleDrillDown('Q1');
+      const bc = container.querySelector('.newchart-breadcrumb');
+      expect(bc).not.toBeNull();
+      expect(bc.textContent).toContain('Q1');
+      chart.destroy();
+    });
+
+    it('breadcrumb is hidden at root level', () => {
+      const chart = createChart({
+        data: drillData,
+        options: { drillDown: true }
+      });
+
+      // Breadcrumb should be hidden at level 0
+      const bc = container.querySelector('.newchart-breadcrumb');
+      if (bc) {
+        expect(bc.style.display).toBe('none');
+      }
+      chart.destroy();
+    });
+
+    it('drillUp returns to root data', async () => {
+      const chart = createChart({
+        data: drillData,
+        options: { drillDown: true }
+      });
+
+      await chart._handleDrillDown('Q1');
+      chart.drillUp(0);
+
+      const texts = Array.from(container.querySelectorAll('text')).map(t => t.textContent);
+      expect(texts).toContain('Q1');
+      expect(texts).toContain('Q4');
+      chart.destroy();
+    });
+
+    it('does not drill when label has no children and no callback', async () => {
+      const chart = createChart({
+        data: drillData,
+        options: { drillDown: true }
+      });
+
+      const levelBefore = chart._drillManager.currentLevel;
+      await chart._handleDrillDown('Q3'); // Q3 has no children
+      expect(chart._drillManager.currentLevel).toBe(levelBefore);
+      chart.destroy();
+    });
+
+    it('async onDrillDown callback works', async () => {
+      const chart = createChart({
+        data: {
+          labels: ['A', 'B'],
+          datasets: [{ label: 'Val', values: [10, 20] }]
+        },
+        options: {
+          drillDown: true,
+          onDrillDown: async ({ label }) => ({
+            labels: [`${label}-1`, `${label}-2`],
+            datasets: [{ label: 'Detail', values: [5, 5] }]
+          })
+        }
+      });
+
+      await chart._handleDrillDown('A');
+      const texts = Array.from(container.querySelectorAll('text')).map(t => t.textContent);
+      expect(texts).toContain('A-1');
+      expect(texts).toContain('A-2');
+      chart.destroy();
+    });
+
+    it('async onDrillDown failure does not change level', async () => {
+      const chart = createChart({
+        data: {
+          labels: ['A', 'B'],
+          datasets: [{ label: 'Val', values: [10, 20] }]
+        },
+        options: {
+          drillDown: true,
+          onDrillDown: async () => { throw new Error('fail'); }
+        }
+      });
+
+      await chart._handleDrillDown('A');
+      expect(chart._drillManager.currentLevel).toBe(0);
+      chart.destroy();
+    });
+
+    it('destroy cleans up breadcrumb and manager', async () => {
+      const chart = createChart({
+        data: drillData,
+        options: { drillDown: true }
+      });
+
+      await chart._handleDrillDown('Q1');
+      chart.destroy();
+      expect(chart._drillManager).toBeNull();
+      expect(chart._breadcrumb).toBeNull();
+    });
+
+    it('custom rootLabel appears in breadcrumb', async () => {
+      const chart = createChart({
+        data: drillData,
+        options: { drillDown: true, drillDownRootLabel: 'Revenue' }
+      });
+
+      await chart._handleDrillDown('Q1');
+      const bc = container.querySelector('.newchart-breadcrumb');
+      expect(bc.textContent).toContain('Revenue');
+      chart.destroy();
+    });
+  });
 });

@@ -527,6 +527,159 @@ const api = {
   async getKPIComparison() {
     return wait(KPI_COMPARISON);
   },
+
+  // ── Large Datasets ──
+
+  /**
+   * Generate daily revenue data for N days
+   * @param {number} days - Number of days
+   * @returns {Promise<Object>} Chart data
+   */
+  async getDailyRevenue(days = 90) {
+    const labels = [];
+    const values = [];
+    const start = new Date(2025, 0, 1);
+    for (let i = 0; i < days; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      labels.push(`${d.getDate()} ${MONTHS[d.getMonth()]}`);
+      values.push(Math.round(800 + Math.random() * 600 + Math.sin(i / 7) * 200));
+    }
+    return wait({
+      labels,
+      datasets: [{ label: 'Daily Revenue (kr)', values }],
+      meta: { avg: Math.round(values.reduce((s, v) => s + v, 0) / values.length) }
+    });
+  },
+
+  /**
+   * Generate weekly revenue data for N weeks
+   * @param {number} weeks - Number of weeks
+   * @returns {Promise<Object>} Chart data
+   */
+  async getWeeklyRevenue(weeks = 52) {
+    const labels = [];
+    const values = [];
+    for (let i = 1; i <= weeks; i++) {
+      labels.push(`W${i}`);
+      values.push(Math.round(5500 + Math.random() * 3000 + Math.sin(i / 4) * 1000));
+    }
+    return wait({
+      labels,
+      datasets: [{ label: 'Weekly Revenue (kr)', values }],
+      meta: { avg: Math.round(values.reduce((s, v) => s + v, 0) / values.length) }
+    });
+  },
+
+  /**
+   * Generate product SKU-level data (many categories)
+   * @param {number} count - Number of SKUs
+   * @returns {Promise<Object>} Chart data
+   */
+  async getSkuRevenue(count = 50) {
+    const names = ['MX-Pro','PW-Soft','BF-Oak','BT-Lux','DV-Light','AC-Set','MX-Eco','PW-Firm','BF-Pine','BT-Spa'];
+    const labels = [];
+    const values = [];
+    for (let i = 0; i < count; i++) {
+      labels.push(`${names[i % names.length]}-${String(i + 1).padStart(3, '0')}`);
+      values.push(Math.round(200 + Math.random() * 2800));
+    }
+    // Sort descending for a nice pareto-style look
+    const sorted = labels.map((l, i) => ({ l, v: values[i] })).sort((a, b) => b.v - a.v);
+    return wait({
+      labels: sorted.map(s => s.l),
+      datasets: [{ label: 'Revenue (kr)', values: sorted.map(s => s.v) }]
+    });
+  },
+
+  // ── Drill-Down Data ──
+
+  /**
+   * Hierarchical revenue data: Quarters → Months → Weeks
+   * All data embedded in children for client-side drill-down
+   */
+  async getDrillDownRevenue() {
+    const weekLabels = (month) => ['W1', 'W2', 'W3', 'W4'].map(w => `${month} ${w}`);
+    const weekValues = () => [
+      Math.round(400 + Math.random() * 300),
+      Math.round(400 + Math.random() * 300),
+      Math.round(400 + Math.random() * 300),
+      Math.round(400 + Math.random() * 300)
+    ];
+
+    const monthChildren = {};
+    MONTHS.forEach(m => {
+      monthChildren[m] = {
+        labels: weekLabels(m),
+        datasets: [{ label: 'Revenue (kr)', values: weekValues() }]
+      };
+    });
+
+    return wait({
+      labels: QUARTERS,
+      datasets: [{ label: 'Revenue (kr)', values: [12800, 14200, 11600, 15400] }],
+      children: {
+        Q1: {
+          labels: ['Jan', 'Feb', 'Mar'],
+          datasets: [{ label: 'Revenue (kr)', values: [3900, 4100, 4800] }],
+          children: { Jan: monthChildren.Jan, Feb: monthChildren.Feb, Mar: monthChildren.Mar }
+        },
+        Q2: {
+          labels: ['Apr', 'May', 'Jun'],
+          datasets: [{ label: 'Revenue (kr)', values: [4600, 4800, 4800] }],
+          children: { Apr: monthChildren.Apr, May: monthChildren.May, Jun: monthChildren.Jun }
+        },
+        Q3: {
+          labels: ['Jul', 'Aug', 'Sep'],
+          datasets: [{ label: 'Revenue (kr)', values: [3600, 3800, 4200] }],
+          children: { Jul: monthChildren.Jul, Aug: monthChildren.Aug, Sep: monthChildren.Sep }
+        },
+        Q4: {
+          labels: ['Oct', 'Nov', 'Dec'],
+          datasets: [{ label: 'Revenue (kr)', values: [4800, 5200, 5400] }],
+          children: { Oct: monthChildren.Oct, Nov: monthChildren.Nov, Dec: monthChildren.Dec }
+        }
+      }
+    });
+  },
+
+  /**
+   * Simulate server-side drill-down with delay
+   * @param {{ label: string, level: number, path: string[] }} context
+   * @returns {Promise<Object>}
+   */
+  async simulateServerDrillDown({ label, level }) {
+    // Simulate 400ms network latency
+    await new Promise(r => setTimeout(r, 400));
+
+    if (level === 1) {
+      // Category → products
+      const products = {
+        Mattresses: ['MX-Pro 2000', 'MX-Eco 1500', 'MX-Cloud', 'MX-Firm Plus'],
+        Pillows: ['PW-Soft', 'PW-Firm', 'PW-Memory', 'PW-Bamboo'],
+        'Bed Frames': ['BF-Oak Classic', 'BF-Pine', 'BF-Metal', 'BF-Upholstered'],
+        Bath: ['BT-Towel Set', 'BT-Robe Lux', 'BT-Mat Organic'],
+        Accessories: ['AC-Sheet Set', 'AC-Protector', 'AC-Pillow Cases']
+      };
+      const items = products[label] || ['Item 1', 'Item 2', 'Item 3'];
+      return {
+        labels: items,
+        datasets: [{
+          label: `${label} Products (kr)`,
+          values: items.map(() => Math.round(500 + Math.random() * 2500))
+        }]
+      };
+    }
+
+    // Level 2+ — monthly breakdown
+    return {
+      labels: MONTHS,
+      datasets: [{
+        label: `${label} Monthly (kr)`,
+        values: MONTHS.map(() => Math.round(200 + Math.random() * 800))
+      }]
+    };
+  },
 };
 
 export default api;
