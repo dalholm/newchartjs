@@ -27,3 +27,21 @@
   });
 </script>
 ```
+
+### ES Module with tree-shaking
+
+Import only what you need to minimize bundle size:
+
+```js
+import { BarChart } from 'newchartjs';
+
+const chart = new BarChart('#chart', {
+  data: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+    datasets: [{
+      label: 'Revenue',
+      values: [12000, 19000, 15000, 22000]
+    }]
+  }
+});
+```

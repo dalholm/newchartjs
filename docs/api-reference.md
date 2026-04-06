@@ -42,7 +42,7 @@ Library version string: `'0.1.0'`.
 
 ### Direct class access
 
-All chart classes are also available directly:
+All chart classes are available as properties on the default export:
 
 ```js
 NewChart.BarChart
@@ -51,9 +51,51 @@ NewChart.PieChart
 NewChart.AreaChart
 NewChart.GaugeChart
 NewChart.SparklineChart
+NewChart.ComboChart
+NewChart.ScatterChart
+NewChart.NetworkBallChart
+NewChart.FunnelChart
+NewChart.WaterfallChart
+NewChart.HeatmapChart
+NewChart.CohortChart
+NewChart.BulletChart
+NewChart.SankeyChart
+NewChart.TreemapChart
+NewChart.RangeChart
 NewChart.KPICard
+NewChart.KPIComparisonCard
 NewChart.DataTable
 ```
+
+### Named exports (tree-shaking)
+
+All classes and utilities are also available as named exports, enabling bundlers to tree-shake unused code:
+
+```js
+import { BarChart, PieChart, KPICard } from 'newchartjs';
+```
+
+Available named exports:
+
+| Charts | Components | Utilities |
+|---|---|---|
+| `BarChart` | `KPICard` | `getSupportedTokens` |
+| `PieChart` | `createKPICard` | `COMPARE_COLOR` |
+| `LineChart` | `TrendBadge` | `COLOR_PALETTE` |
+| `AreaChart` | `createTrendBadge` | `DARK_STYLE` |
+| `GaugeChart` | `KPIComparisonCard` | `DARK_KPI_COLORS` |
+| `SparklineChart` | `createKPIComparisonCard` | `isDarkMode` |
+| `ComboChart` | `DataTable` | `getDarkPalette` |
+| `ScatterChart` | | `deepMerge` |
+| `NetworkBallChart` | | |
+| `FunnelChart` | | |
+| `WaterfallChart` | | |
+| `HeatmapChart` | | |
+| `CohortChart` | | |
+| `BulletChart` | | |
+| `SankeyChart` | | |
+| `TreemapChart` | | |
+| `RangeChart` | | |
 
 ---
 

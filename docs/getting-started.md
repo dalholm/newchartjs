@@ -11,8 +11,25 @@ Include the bundled script in your HTML:
 Or import as an ES module:
 
 ```js
-import NewChart from './dist/newchart.esm.js';
+import NewChart from 'newchartjs';
 ```
+
+### Tree-shaking
+
+To reduce bundle size, import only the chart types you need:
+
+```js
+import { BarChart, LineChart } from 'newchartjs';
+
+const chart = new BarChart('#chart', {
+  data: {
+    labels: ['Jan', 'Feb', 'Mar'],
+    datasets: [{ label: 'Sales', values: [100, 200, 150] }]
+  }
+});
+```
+
+This works with any bundler that supports ES modules (Vite, Webpack, Rollup, etc.). The library ships with `"sideEffects": false` so unused chart types are automatically eliminated.
 
 ## Creating a Chart
 
