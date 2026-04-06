@@ -71,6 +71,14 @@ const TOKEN_MAP = [
   { token: '--nc-pie-border-width', path: 'style.pie.borderWidth', type: 'number' },
   { token: '--nc-pie-border-color', path: 'style.pie.borderColor', type: 'string' },
   { token: '--nc-pie-inner-radius', path: 'style.pie.innerRadius', type: 'number' },
+
+  // Gauge
+  { token: '--nc-gauge-arc-width', path: 'style.gauge.arcWidth', type: 'number' },
+  { token: '--nc-gauge-track-color', path: 'style.gauge.trackColor', type: 'string' },
+  { token: '--nc-gauge-needle', path: 'style.gauge.needle', type: 'boolean' },
+  { token: '--nc-gauge-rounded-ends', path: 'style.gauge.roundedEnds', type: 'boolean' },
+  { token: '--nc-gauge-value-font-size', path: 'style.gauge.valueFontSize', type: 'number' },
+  { token: '--nc-gauge-tick-font-size', path: 'style.gauge.tickFontSize', type: 'number' },
 ];
 
 /** Number of palette slots to check */
@@ -109,6 +117,12 @@ function parseTokenValue(raw, type) {
   if (type === 'number') {
     const num = parseFloat(trimmed);
     return isNaN(num) ? null : num;
+  }
+
+  if (type === 'boolean') {
+    if (trimmed === '1' || trimmed === 'true') return true;
+    if (trimmed === '0' || trimmed === 'false') return false;
+    return null;
   }
 
   return trimmed;

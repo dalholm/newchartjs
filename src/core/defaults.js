@@ -209,6 +209,7 @@ export const GAUGE_DEFAULTS = {
       arcWidth: null, // auto-calculated from radius
       trackColor: '#f1f3f5',
       needle: true,
+      roundedEnds: false, // pill-shaped arc endcaps
       valueFontSize: 28,
       tickFontSize: 10,
       zones: [
@@ -229,7 +230,8 @@ export const GAUGE_DEFAULTS = {
     showMax: true,
     valueSuffix: '',
     valuePrefix: '',
-    valueDecimals: 0
+    valueDecimals: 0,
+    labelPosition: 'below' // 'below' or 'inside' (compact: center text inside arc)
   }
 };
 

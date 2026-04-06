@@ -86,6 +86,52 @@ export default function gaugeView() {
             <div class="example-body"><div class="chart-container compact" style="min-height: 160px;" id="compact-completion"></div></div>
           </div>
         </div>
+
+        <div class="page-header" style="margin-top: 48px;">
+          <h1>Design Presets</h1>
+          <p>Three distinct visual profiles showcasing the design system's flexibility — same data, completely different character.</p>
+        </div>
+
+        <div class="row">
+          <div class="example-card">
+            <div class="example-header"><h2>Soft — Battery</h2><p>Rounded pill-shape, label inside arc, single color. Apple Watch-inspired.</p></div>
+            <div class="example-body"><div class="chart-container compact" style="min-height: 180px;" id="preset-soft-1"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Soft — Score</h2><p>Rounded ring with zone colors, thick arc</p></div>
+            <div class="example-body"><div class="chart-container compact" style="min-height: 180px;" id="preset-soft-2"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Soft — Progress</h2><p>Rounded arc gauge, no needle, clean zones</p></div>
+            <div class="example-body"><div class="chart-container wide" style="min-height: 260px;" id="preset-soft-3"></div></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="example-card">
+            <div class="example-header"><h2>Technical — Engine RPM</h2><p>Needle, dense ticks, target marker, multi-zone. Industrial instrument panel.</p></div>
+            <div class="example-body"><div class="chart-container wide" style="min-height: 280px;" id="preset-tech-1"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Technical — Pressure</h2><p>Inverted zones, precise decimals, target threshold</p></div>
+            <div class="example-body"><div class="chart-container wide" style="min-height: 280px;" id="preset-tech-2"></div></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="example-card">
+            <div class="example-header"><h2>Minimal — Conversion</h2><p>Ultra-thin rounded line, large value, zero chrome. Modern SaaS dashboard.</p></div>
+            <div class="example-body"><div class="chart-container wide" style="min-height: 260px;" id="preset-min-1"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Minimal — Health</h2><p>Thin ring, single accent, large centered value</p></div>
+            <div class="example-body"><div class="chart-container compact" style="min-height: 180px;" id="preset-min-2"></div></div>
+          </div>
+          <div class="example-card">
+            <div class="example-header"><h2>Minimal — Uptime</h2><p>Compact thin arc, rounded, inside label</p></div>
+            <div class="example-body"><div class="chart-container compact" style="min-height: 180px;" id="preset-min-3"></div></div>
+          </div>
+        </div>
       </div>
     `,
     mount() {
@@ -281,6 +327,111 @@ export default function gaugeView() {
           zones: [{ from: 0, to: 1.0, color: '#4c6ef5' }]
         },
         style: { gauge: { valueFontSize: 22 } }
+      }));
+
+      // ── Design Preset 1: Soft ──────────────────────────
+      charts.push(NewChart.create('#preset-soft-1', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Battery', values: [72] }] },
+        options: {
+          variant: 'compact', min: 0, max: 100, valueSuffix: '%',
+          showMax: false, labelPosition: 'inside',
+          zones: [{ from: 0, to: 1, color: '#4c6ef5' }]
+        },
+        style: { gauge: { roundedEnds: true, arcWidth: 18, valueFontSize: 26 } }
+      }));
+
+      charts.push(NewChart.create('#preset-soft-2', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Score', values: [88] }] },
+        options: {
+          variant: 'ring', min: 0, max: 100,
+          zones: [
+            { from: 0, to: 0.5, color: '#e03131' },
+            { from: 0.5, to: 0.8, color: '#f08c00' },
+            { from: 0.8, to: 1.0, color: '#0ca678' }
+          ]
+        },
+        style: { gauge: { roundedEnds: true, arcWidth: 16, valueFontSize: 28 } }
+      }));
+
+      charts.push(NewChart.create('#preset-soft-3', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Revenue Target', values: [78] }] },
+        options: {
+          min: 0, max: 100, valueSuffix: '%', ticks: 0, showMax: false,
+          zones: [
+            { from: 0, to: 0.5, color: '#e03131' },
+            { from: 0.5, to: 0.8, color: '#f08c00' },
+            { from: 0.8, to: 1.0, color: '#0ca678' }
+          ]
+        },
+        style: { gauge: { roundedEnds: true, arcWidth: 22, needle: false, valueFontSize: 32 } }
+      }));
+
+      // ── Design Preset 2: Technical ─────────────────────
+      charts.push(NewChart.create('#preset-tech-1', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Engine RPM', values: [5200] }] },
+        options: {
+          min: 0, max: 8000, target: 6500, ticks: 8,
+          valueSuffix: ' rpm', targetLabel: 'Redline: 6500',
+          zones: [
+            { from: 0, to: 0.6, color: '#0ca678' },
+            { from: 0.6, to: 0.8, color: '#f08c00' },
+            { from: 0.8, to: 1.0, color: '#e03131' }
+          ]
+        },
+        style: { gauge: { arcWidth: 14, valueFontSize: 28 } }
+      }));
+
+      charts.push(NewChart.create('#preset-tech-2', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'System Pressure', values: [7.3] }] },
+        options: {
+          min: 0, max: 10, target: 8.5, ticks: 10,
+          valueDecimals: 1, valueSuffix: ' bar', targetLabel: 'Max: 8.5',
+          zones: [
+            { from: 0, to: 0.5, color: '#0ca678' },
+            { from: 0.5, to: 0.85, color: '#f08c00' },
+            { from: 0.85, to: 1.0, color: '#e03131' }
+          ]
+        },
+        style: { gauge: { arcWidth: 12, valueFontSize: 28 } }
+      }));
+
+      // ── Design Preset 3: Minimal ──────────────────────
+      charts.push(NewChart.create('#preset-min-1', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Conversion Rate', values: [3.2] }] },
+        options: {
+          min: 0, max: 5, ticks: 0, showMax: false,
+          valueDecimals: 1, valueSuffix: '%',
+          zones: [{ from: 0, to: 1, color: '#7048e8' }]
+        },
+        style: { gauge: { roundedEnds: true, arcWidth: 6, needle: false, valueFontSize: 36, trackColor: '#f3f0ff' } }
+      }));
+
+      charts.push(NewChart.create('#preset-min-2', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Health', values: [94] }] },
+        options: {
+          variant: 'ring', min: 0, max: 100, valueSuffix: '%',
+          zones: [{ from: 0, to: 1, color: '#0ca678' }]
+        },
+        style: { gauge: { roundedEnds: true, arcWidth: 5, valueFontSize: 30, trackColor: '#e6fcf5' } }
+      }));
+
+      charts.push(NewChart.create('#preset-min-3', {
+        type: 'gauge',
+        data: { datasets: [{ label: 'Uptime', values: [99.9] }] },
+        options: {
+          variant: 'compact', min: 99, max: 100,
+          valueDecimals: 1, valueSuffix: '%',
+          showMax: false, labelPosition: 'inside',
+          zones: [{ from: 0, to: 1, color: '#1098ad' }]
+        },
+        style: { gauge: { roundedEnds: true, arcWidth: 5, valueFontSize: 24, trackColor: '#e3fafc' } }
       }));
 
       return () => charts.forEach(c => c?.destroy());

@@ -96,6 +96,13 @@ const router = {
       this.navigate(path, false);
     });
 
+    // Re-mount current view when design theme changes
+    window.addEventListener('nc-design-change', () => {
+      if (this.current) {
+        this.navigate(this.current.path, false);
+      }
+    });
+
     // Render initial route
     const initial = location.pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
     this.navigate(initial || '/', false);

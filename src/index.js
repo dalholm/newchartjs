@@ -16,6 +16,7 @@ import { KPICard, createKPICard } from './core/KPICard.js';
 import { TrendBadge, createTrendBadge } from './core/TrendBadge.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
 import { COMPARE_COLOR, COLOR_PALETTE, DARK_STYLE, DARK_KPI_COLORS, isDarkMode, getDarkPalette } from './core/defaults.js';
+import { deepMerge } from './core/utils.js';
 import DataTable from './core/DataTable.js';
 
 /**
@@ -41,7 +42,19 @@ const NewChart = {
    *   }
    * });
    */
+  /**
+   * Global design override — merged into all charts (lower priority than user config)
+   * Set via NewChart.designOverride = { style: { ... }, options: { ... } }
+   * @type {Object|null}
+   */
+  designOverride: null,
+
   create(element, config = {}) {
+    // Merge design override: defaults < designOverride < user config < CSS tokens
+    if (NewChart.designOverride) {
+      config = deepMerge(NewChart.designOverride, config);
+    }
+
     const chartType = config.type || 'bar';
 
     let ChartClass;

@@ -6,6 +6,8 @@ Modern SVG and Canvas rendering, smooth animations, dark mode, and a declarative
 
 [Documentation](https://dalholm.github.io/newchartjs/) | [Live Demo](https://dalholm.github.io/newchartjs/demo)
 
+![Chart Types Overview](assets/chart-types-overview.png)
+
 ---
 
 ## Features

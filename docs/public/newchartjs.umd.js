@@ -1117,6 +1117,7 @@
         arcWidth: null, // auto-calculated from radius
         trackColor: '#f1f3f5',
         needle: true,
+        roundedEnds: false, // pill-shaped arc endcaps
         valueFontSize: 28,
         tickFontSize: 10,
         zones: [
@@ -1137,7 +1138,8 @@
       showMax: true,
       valueSuffix: '',
       valuePrefix: '',
-      valueDecimals: 0
+      valueDecimals: 0,
+      labelPosition: 'below' // 'below' or 'inside' (compact: center text inside arc)
     }
   };
 
@@ -1453,6 +1455,14 @@
     { token: '--nc-pie-border-width', path: 'style.pie.borderWidth', type: 'number' },
     { token: '--nc-pie-border-color', path: 'style.pie.borderColor', type: 'string' },
     { token: '--nc-pie-inner-radius', path: 'style.pie.innerRadius', type: 'number' },
+
+    // Gauge
+    { token: '--nc-gauge-arc-width', path: 'style.gauge.arcWidth', type: 'number' },
+    { token: '--nc-gauge-track-color', path: 'style.gauge.trackColor', type: 'string' },
+    { token: '--nc-gauge-needle', path: 'style.gauge.needle', type: 'boolean' },
+    { token: '--nc-gauge-rounded-ends', path: 'style.gauge.roundedEnds', type: 'boolean' },
+    { token: '--nc-gauge-value-font-size', path: 'style.gauge.valueFontSize', type: 'number' },
+    { token: '--nc-gauge-tick-font-size', path: 'style.gauge.tickFontSize', type: 'number' },
   ];
 
   /** Number of palette slots to check */
@@ -1491,6 +1501,12 @@
     if (type === 'number') {
       const num = parseFloat(trimmed);
       return isNaN(num) ? null : num;
+    }
+
+    if (type === 'boolean') {
+      if (trimmed === '1' || trimmed === 'true') return true;
+      if (trimmed === '0' || trimmed === 'false') return false;
+      return null;
     }
 
     return trimmed;
@@ -1861,12 +1877,16 @@
         position: 'top',
         enabled: true,
         fontSize: 11,
-        color: '#172b4d',
+        color: options.dark ? '#e0e4ef' : '#172b4d',
         marker: { size: 10, height: 3 },
         interactive: true,
         dark: false,
         ...options
       };
+      // Ensure color matches dark mode even if caller set dark but not color
+      if (options.dark && !options.color) {
+        this.options.color = '#e0e4ef';
+      }
 
       this.element = null;
       this._visibility = {};
@@ -1927,6 +1947,12 @@
         const vis = this._visibility[key] !== false;
 
         const dk = this.options.dark;
+        // Dark/light color tokens
+        const borderColor = vis ? (dk ? 'rgba(255,255,255,0.12)' : '#dfe1e6') : (dk ? 'rgba(255,255,255,0.06)' : '#ebecf0');
+        const bgColor = vis ? (dk ? 'rgba(255,255,255,0.06)' : '#ffffff') : (dk ? 'rgba(255,255,255,0.03)' : '#f8f9fb');
+        const textColor = vis ? this.options.color : (dk ? '#6b7394' : '#b3bac5');
+        const mutedColor = dk ? '#6b7394' : '#8993a4';
+
         const itemEl = createElement('div', {
           style: {
             display: 'flex',
@@ -1935,11 +1961,11 @@
             padding: '3px 8px',
             fontSize: this.options.fontSize + 'px',
             fontFamily: 'inherit',
-            border: `1px solid ${vis ? (dk ? '#2d3139' : '#dfe1e6') : (dk ? '#252830' : '#ebecf0')}`,
+            border: `1px solid ${borderColor}`,
             borderRadius: '3px',
             cursor: 'pointer',
-            background: vis ? (dk ? '#1a1d23' : '#ffffff') : (dk ? '#1e2028' : '#f8f9fb'),
-            color: vis ? this.options.color : (dk ? '#6b7280' : '#b3bac5'),
+            background: bgColor,
+            color: textColor,
             opacity: vis ? '1' : '0.5',
             transition: 'all 0.15s',
             whiteSpace: 'nowrap',
@@ -1947,13 +1973,13 @@
           }
         });
 
-        // Marker swatch — thin line style like prototype
+        // Marker swatch
         const marker = createElement('span', {
           style: {
             width: (this.options.marker.size || 10) + 'px',
             height: (this.options.marker.height || 3) + 'px',
             borderRadius: '2px',
-            backgroundColor: vis ? item.color : '#b3bac5',
+            backgroundColor: vis ? item.color : mutedColor,
             flexShrink: '0',
             transition: 'background-color 0.15s'
           }
@@ -1974,7 +2000,7 @@
             textContent: '(ref)',
             style: {
               fontSize: '9px',
-              color: dk ? '#6b7280' : '#8993a4',
+              color: mutedColor,
               marginLeft: '2px'
             }
           });
@@ -2581,27 +2607,24 @@
         this._themeMediaQuery.addEventListener('change', this._themeChangeHandler);
       }
 
-      // Watch for CSS class changes on <html> (e.g. dark mode toggle)
+      // Watch for class and style changes on <html> (dark toggle + palette tokens on :root)
+      // and style changes on the chart element (per-element token overrides)
       // Re-reads CSS tokens and re-renders when detected
-      this._htmlClassObserver = null;
+      this._htmlObserver = null;
+      this._elementStyleObserver = null;
       this._userConfig = config;
       if (typeof MutationObserver !== 'undefined' && this.config.options?.cssTokens !== false) {
-        this._htmlClassObserver = new MutationObserver(debounce(() => {
-          // Re-resolve CSS tokens and check if they changed
+        const reapplyFromCSS = debounce(() => {
           const newTokens = resolveCSSTokens(this.element);
           const newTheme = newTokens.options?.theme;
-          this._dark;
 
-          // Detect theme from CSS token or from dark class
           if (newTheme) {
             this._dark = isDarkMode(newTheme);
           } else if (typeof document !== 'undefined') {
-            // Check if html has 'dark' class (common pattern)
             const htmlDark = document.documentElement.classList.contains('dark');
             this._dark = htmlDark;
           }
 
-          // Re-apply theme and re-render if anything changed
           this._applyTheme(this._userConfig);
           if (this.legend) { this.legend.destroy(); this.legend = null; }
           if (this.dataTable) { this.dataTable.destroy(); this.dataTable = null; }
@@ -2610,10 +2633,20 @@
           if (this.renderer) { this.renderer.destroy(); }
           this.initRenderer();
           this.draw();
-        }, 100));
-        this._htmlClassObserver.observe(document.documentElement, {
+        }, 100);
+
+        // Watch both class (dark toggle) and style (palette tokens) on <html>
+        this._htmlObserver = new MutationObserver(reapplyFromCSS);
+        this._htmlObserver.observe(document.documentElement, {
           attributes: true,
-          attributeFilter: ['class']
+          attributeFilter: ['class', 'style']
+        });
+
+        // Also watch style on the chart element for per-element overrides
+        this._elementStyleObserver = new MutationObserver(reapplyFromCSS);
+        this._elementStyleObserver.observe(this.element, {
+          attributes: true,
+          attributeFilter: ['style']
         });
       }
 
@@ -3074,8 +3107,12 @@
         this._themeMediaQuery.removeEventListener('change', this._themeChangeHandler);
       }
 
-      if (this._htmlClassObserver) {
-        this._htmlClassObserver.disconnect();
+      if (this._htmlObserver) {
+        this._htmlObserver.disconnect();
+      }
+
+      if (this._elementStyleObserver) {
+        this._elementStyleObserver.disconnect();
       }
 
       if (this.tooltip) {
@@ -3367,7 +3404,7 @@
 
         // Column highlight background (hidden by default)
         const highlight = this.renderer.rect(groupX + 1, chartY, barWidth - 2, chartHeight, {
-          fill: '#4c6ef5',
+          fill: this.getPaletteColor(0),
           opacity: 0,
           borderRadius: 2
         });
@@ -3575,7 +3612,7 @@
               footer = {
                 label: footerLabel,
                 value: `${isPositive ? '+' : ''}${change.toFixed(1)}%`,
-                color: isPositive ? '#69db7c' : '#ff8787'
+                color: isPositive ? (this._dark ? '#69db7c' : '#0ca678') : (this._dark ? '#ff8787' : '#e03131')
               };
             }
 
@@ -3906,7 +3943,7 @@
         });
 
         this._centerTextLabel = this.renderer.text('total', cx, cy + 14, {
-          fill: '#8993a4',
+          fill: style.axis?.color || '#8993a4',
           fontSize: 9,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',
@@ -4763,7 +4800,7 @@
      * @param {number} endAngle - End angle (radians)
      * @returns {string} SVG path data
      */
-    arcPath(cx, cy, outerR, innerR, startAngle, endAngle) {
+    arcPath(cx, cy, outerR, innerR, startAngle, endAngle, { roundStart = false, roundEnd = false } = {}) {
       const cos = Math.cos;
       const sin = Math.sin;
 
@@ -4777,13 +4814,18 @@
       const y4 = cy + innerR * sin(startAngle);
 
       const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+      const capR = (outerR - innerR) / 2;
 
       return [
         `M ${x1} ${y1}`,
         `A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2} ${y2}`,
-        `L ${x3} ${y3}`,
+        roundEnd
+          ? `A ${capR} ${capR} 0 0 1 ${x3} ${y3}`
+          : `L ${x3} ${y3}`,
         `A ${innerR} ${innerR} 0 ${largeArc} 0 ${x4} ${y4}`,
-        'Z'
+        roundStart
+          ? `A ${capR} ${capR} 0 0 1 ${x1} ${y1}`
+          : 'Z'
       ].join(' ');
     }
 
@@ -4839,28 +4881,40 @@
         { from: 0.85, to: 1.0, color: '#0ca678' }
       ];
 
+      const roundedEnds = style.gauge?.roundedEnds === true;
+
       // Draw background track
       const trackColor = style.gauge?.trackColor || '#f1f3f5';
       this.renderer.path(
-        this.arcPath(cx, cy, outerR, innerR, startAngle, endAngle),
+        this.arcPath(cx, cy, outerR, innerR, startAngle, endAngle, {
+          roundStart: roundedEnds, roundEnd: roundedEnds
+        }),
         { fill: trackColor }
       );
 
       // Draw threshold zones
+      const valueAngle = this.valueToAngle(value, min, max, startAngle, sweep);
+      const visibleZones = [];
       zones.forEach(zone => {
         const zoneStart = startAngle + zone.from * sweep;
         const zoneEnd = startAngle + Math.min(zone.to, 1) * sweep;
-
-        // Only draw zone portion that is filled by the current value
-        const valueAngle = this.valueToAngle(value, min, max, startAngle, sweep);
         const drawEnd = Math.min(zoneEnd, valueAngle);
 
         if (drawEnd > zoneStart) {
-          this.renderer.path(
-            this.arcPath(cx, cy, outerR, innerR, zoneStart, drawEnd),
-            { fill: zone.color, opacity: 1 }
-          );
+          visibleZones.push({ start: zoneStart, end: drawEnd, color: zone.color });
         }
+      });
+
+      visibleZones.forEach((vz, idx) => {
+        const isFirst = idx === 0;
+        const isLast = idx === visibleZones.length - 1;
+        this.renderer.path(
+          this.arcPath(cx, cy, outerR, innerR, vz.start, vz.end, {
+            roundStart: roundedEnds && isFirst,
+            roundEnd: roundedEnds && isLast
+          }),
+          { fill: vz.color, opacity: 1 }
+        );
       });
 
       // Draw tick marks
@@ -4907,7 +4961,7 @@
           cx + markerOuterR * Math.cos(targetAngle), cy + markerOuterR * Math.sin(targetAngle),
           cx + markerInnerR * Math.cos(targetAngle), cy + markerInnerR * Math.sin(targetAngle),
           {
-            stroke: options.targetColor || '#1a1d23',
+            stroke: options.targetColor || style.fontColor || '#1a1d23',
             strokeWidth: 2.5,
             strokeLinecap: 'round'
           }
@@ -4947,12 +5001,12 @@
 
         this.renderer.path(
           `M ${nx} ${ny} L ${nlx} ${nly} L ${nrx} ${nry} Z`,
-          { fill: options.needleColor || '#1a1d23' }
+          { fill: options.needleColor || style.fontColor || '#1a1d23' }
         );
 
         // Center circle
         this.renderer.circle(cx, cy, 5, {
-          fill: options.needleColor || '#1a1d23'
+          fill: options.needleColor || style.fontColor || '#1a1d23'
         });
       }
 
@@ -4975,7 +5029,7 @@
       const label = dataset.label || data.labels?.[0] || '';
       if (label) {
         this.renderer.text(label, cx, cy + (style.gauge?.needle !== false ? 48 : 22), {
-          fill: '#8993a4',
+          fill: style.axis?.color || '#8993a4',
           fontSize: 11,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',
@@ -4989,7 +5043,7 @@
           `av ${formatNumber(max, 0)}`,
           cx, cy + (style.gauge?.needle !== false ? 62 : 36),
           {
-            fill: '#b3bac5',
+            fill: style.grid?.color || '#b3bac5',
             fontSize: 9,
             fontFamily: style.fontFamily,
             textAnchor: 'middle',
@@ -5030,10 +5084,11 @@
       ];
 
       const trackColor = style.gauge?.trackColor || '#f1f3f5';
+      const roundedEnds = style.gauge?.roundedEnds === true;
       const startAngle = -Math.PI / 2;
       const sweep = Math.PI * 2;
 
-      // Background track — full circle
+      // Background track — full circle (never rounded, it's a closed ring)
       this.renderer.path(
         this.arcPath(cx, cy, outerR, innerR, startAngle, startAngle + sweep - 0.001),
         { fill: trackColor }
@@ -5041,18 +5096,28 @@
 
       // Filled arc with zone colors
       if (ratio > 0) {
+        const valueEnd = startAngle + ratio * sweep;
+        const visibleZones = [];
         zones.forEach(zone => {
           const zoneStart = startAngle + zone.from * sweep;
           const zoneEnd = startAngle + Math.min(zone.to, 1) * sweep;
-          const valueEnd = startAngle + ratio * sweep;
           const drawEnd = Math.min(zoneEnd, valueEnd);
 
           if (drawEnd > zoneStart) {
-            this.renderer.path(
-              this.arcPath(cx, cy, outerR, innerR, zoneStart, drawEnd),
-              { fill: zone.color }
-            );
+            visibleZones.push({ start: zoneStart, end: drawEnd, color: zone.color });
           }
+        });
+
+        visibleZones.forEach((vz, idx) => {
+          const isFirst = idx === 0;
+          const isLast = idx === visibleZones.length - 1;
+          this.renderer.path(
+            this.arcPath(cx, cy, outerR, innerR, vz.start, vz.end, {
+              roundStart: roundedEnds && isFirst,
+              roundEnd: roundedEnds && isLast
+            }),
+            { fill: vz.color }
+          );
         });
       }
 
@@ -5074,7 +5139,7 @@
       const label = dataset.label || data.labels?.[0] || '';
       if (label) {
         this.renderer.text(label, cx, cy + 18, {
-          fill: '#8993a4',
+          fill: style.axis?.color || '#8993a4',
           fontSize: 11,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',
@@ -5157,7 +5222,7 @@
           targetX, barY - 4,
           targetX, barY + barHeight + 4,
           {
-            stroke: options.targetColor || '#1a1d23',
+            stroke: options.targetColor || style.fontColor || '#1a1d23',
             strokeWidth: 2,
             strokeLinecap: 'round'
           }
@@ -5194,7 +5259,7 @@
       const label = dataset.label || data.labels?.[0] || '';
       if (label) {
         this.renderer.text(label, this.width / 2, barY - 38, {
-          fill: '#8993a4',
+          fill: style.axis?.color || '#8993a4',
           fontSize: 11,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',
@@ -5204,14 +5269,14 @@
 
       // Min/max labels
       this.renderer.text(formatNumber(min, 0), barX, barY + barHeight + 14, {
-        fill: '#b3bac5',
+        fill: style.grid?.color || '#b3bac5',
         fontSize: 9,
         fontFamily: style.fontFamily,
         textAnchor: 'start',
         dominantBaseline: 'middle'
       });
       this.renderer.text(formatNumber(max, 0), barX + barWidth, barY + barHeight + 14, {
-        fill: '#b3bac5',
+        fill: style.grid?.color || '#b3bac5',
         fontSize: 9,
         fontFamily: style.fontFamily,
         textAnchor: 'end',
@@ -5242,6 +5307,8 @@
       ];
 
       const trackColor = style.gauge?.trackColor || '#f1f3f5';
+      const roundedEnds = style.gauge?.roundedEnds === true;
+      const labelPosition = options.labelPosition || 'below';
 
       // Arc geometry — 180 degree sweep (semicircle)
       const startAngle = Math.PI;
@@ -5260,30 +5327,45 @@
 
       // Background track
       this.renderer.path(
-        this.arcPath(cx, cy, outerR, innerR, startAngle, startAngle + sweep),
+        this.arcPath(cx, cy, outerR, innerR, startAngle, startAngle + sweep, {
+          roundStart: roundedEnds, roundEnd: roundedEnds
+        }),
         { fill: trackColor }
       );
 
       // Filled arc with zone colors
       const valueAngle = this.valueToAngle(value, min, max, startAngle, sweep);
+      const visibleZones = [];
       zones.forEach(zone => {
         const zoneStart = startAngle + zone.from * sweep;
         const zoneEnd = startAngle + Math.min(zone.to, 1) * sweep;
         const drawEnd = Math.min(zoneEnd, valueAngle);
 
         if (drawEnd > zoneStart) {
-          this.renderer.path(
-            this.arcPath(cx, cy, outerR, innerR, zoneStart, drawEnd),
-            { fill: zone.color }
-          );
+          visibleZones.push({ start: zoneStart, end: drawEnd, color: zone.color });
         }
       });
 
-      // Value text centered below arc
+      visibleZones.forEach((vz, idx) => {
+        const isFirst = idx === 0;
+        const isLast = idx === visibleZones.length - 1;
+        this.renderer.path(
+          this.arcPath(cx, cy, outerR, innerR, vz.start, vz.end, {
+            roundStart: roundedEnds && isFirst,
+            roundEnd: roundedEnds && isLast
+          }),
+          { fill: vz.color }
+        );
+      });
+
+      // Value and label positioning
       const valueColor = this.getValueColor(value, min, max, zones);
+      const isInside = labelPosition === 'inside';
+
+      // Value text
       this.renderer.text(
         this.formatValue(value),
-        cx, cy + 8,
+        cx, isInside ? cy - radius * 0.35 : cy + 8,
         {
           fill: valueColor,
           fontSize: style.gauge?.valueFontSize || 24,
@@ -5296,8 +5378,8 @@
       // Label
       const label = dataset.label || data.labels?.[0] || '';
       if (label) {
-        this.renderer.text(label, cx, cy + 28, {
-          fill: '#8993a4',
+        this.renderer.text(label, cx, isInside ? cy - radius * 0.35 + 20 : cy + 28, {
+          fill: style.axis?.color || '#8993a4',
           fontSize: 11,
           fontFamily: style.fontFamily,
           textAnchor: 'middle',
@@ -5723,7 +5805,7 @@
         const groupX = chartX + labelIndex * barWidth;
 
         const highlight = this.renderer.rect(groupX + 1, chartY, barWidth - 2, chartHeight, {
-          fill: '#4c6ef5',
+          fill: this.getPaletteColor(0),
           opacity: 0,
           borderRadius: 2
         });
@@ -7468,7 +7550,7 @@
           data: {
             datasets: [{
               values: sparkline.values,
-              color: sparkline.color || this.config.colors.value
+              color: sparkline.color
             }]
           },
           options: {
@@ -7868,7 +7950,19 @@
      *   }
      * });
      */
+    /**
+     * Global design override — merged into all charts (lower priority than user config)
+     * Set via NewChart.designOverride = { style: { ... }, options: { ... } }
+     * @type {Object|null}
+     */
+    designOverride: null,
+
     create(element, config = {}) {
+      // Merge design override: defaults < designOverride < user config < CSS tokens
+      if (NewChart.designOverride) {
+        config = deepMerge(NewChart.designOverride, config);
+      }
+
       const chartType = config.type || 'bar';
 
       let ChartClass;

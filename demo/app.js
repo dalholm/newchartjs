@@ -15,6 +15,7 @@ import scatterView from './views/scatter.js';
 import kpicardView from './views/kpicard.js';
 import networkballView from './views/networkball.js';
 import dashboardView from './views/dashboard.js';
+import trendbadgeView from './views/trendbadge.js';
 
 // Register routes
 router.register('/', galleryView);
@@ -28,6 +29,7 @@ router.register('/combo', comboView);
 router.register('/scatter', scatterView);
 router.register('/kpicard', kpicardView);
 router.register('/networkball', networkballView);
+router.register('/trendbadge', trendbadgeView);
 router.register('/dashboard', dashboardView);
 
 // Start

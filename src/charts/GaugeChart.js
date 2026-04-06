@@ -77,7 +77,7 @@ export class GaugeChart extends Chart {
    * @param {number} endAngle - End angle (radians)
    * @returns {string} SVG path data
    */
-  arcPath(cx, cy, outerR, innerR, startAngle, endAngle) {
+  arcPath(cx, cy, outerR, innerR, startAngle, endAngle, { roundStart = false, roundEnd = false } = {}) {
     const cos = Math.cos;
     const sin = Math.sin;
 
@@ -91,13 +91,18 @@ export class GaugeChart extends Chart {
     const y4 = cy + innerR * sin(startAngle);
 
     const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+    const capR = (outerR - innerR) / 2;
 
     return [
       `M ${x1} ${y1}`,
       `A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2} ${y2}`,
-      `L ${x3} ${y3}`,
+      roundEnd
+        ? `A ${capR} ${capR} 0 0 1 ${x3} ${y3}`
+        : `L ${x3} ${y3}`,
       `A ${innerR} ${innerR} 0 ${largeArc} 0 ${x4} ${y4}`,
-      'Z'
+      roundStart
+        ? `A ${capR} ${capR} 0 0 1 ${x1} ${y1}`
+        : 'Z'
     ].join(' ');
   }
 
@@ -153,28 +158,40 @@ export class GaugeChart extends Chart {
       { from: 0.85, to: 1.0, color: '#0ca678' }
     ];
 
+    const roundedEnds = style.gauge?.roundedEnds === true;
+
     // Draw background track
     const trackColor = style.gauge?.trackColor || '#f1f3f5';
     this.renderer.path(
-      this.arcPath(cx, cy, outerR, innerR, startAngle, endAngle),
+      this.arcPath(cx, cy, outerR, innerR, startAngle, endAngle, {
+        roundStart: roundedEnds, roundEnd: roundedEnds
+      }),
       { fill: trackColor }
     );
 
     // Draw threshold zones
+    const valueAngle = this.valueToAngle(value, min, max, startAngle, sweep);
+    const visibleZones = [];
     zones.forEach(zone => {
       const zoneStart = startAngle + zone.from * sweep;
       const zoneEnd = startAngle + Math.min(zone.to, 1) * sweep;
-
-      // Only draw zone portion that is filled by the current value
-      const valueAngle = this.valueToAngle(value, min, max, startAngle, sweep);
       const drawEnd = Math.min(zoneEnd, valueAngle);
 
       if (drawEnd > zoneStart) {
-        this.renderer.path(
-          this.arcPath(cx, cy, outerR, innerR, zoneStart, drawEnd),
-          { fill: zone.color, opacity: 1 }
-        );
+        visibleZones.push({ start: zoneStart, end: drawEnd, color: zone.color });
       }
+    });
+
+    visibleZones.forEach((vz, idx) => {
+      const isFirst = idx === 0;
+      const isLast = idx === visibleZones.length - 1;
+      this.renderer.path(
+        this.arcPath(cx, cy, outerR, innerR, vz.start, vz.end, {
+          roundStart: roundedEnds && isFirst,
+          roundEnd: roundedEnds && isLast
+        }),
+        { fill: vz.color, opacity: 1 }
+      );
     });
 
     // Draw tick marks
@@ -344,10 +361,11 @@ export class GaugeChart extends Chart {
     ];
 
     const trackColor = style.gauge?.trackColor || '#f1f3f5';
+    const roundedEnds = style.gauge?.roundedEnds === true;
     const startAngle = -Math.PI / 2;
     const sweep = Math.PI * 2;
 
-    // Background track — full circle
+    // Background track — full circle (never rounded, it's a closed ring)
     this.renderer.path(
       this.arcPath(cx, cy, outerR, innerR, startAngle, startAngle + sweep - 0.001),
       { fill: trackColor }
@@ -355,18 +373,28 @@ export class GaugeChart extends Chart {
 
     // Filled arc with zone colors
     if (ratio > 0) {
+      const valueEnd = startAngle + ratio * sweep;
+      const visibleZones = [];
       zones.forEach(zone => {
         const zoneStart = startAngle + zone.from * sweep;
         const zoneEnd = startAngle + Math.min(zone.to, 1) * sweep;
-        const valueEnd = startAngle + ratio * sweep;
         const drawEnd = Math.min(zoneEnd, valueEnd);
 
         if (drawEnd > zoneStart) {
-          this.renderer.path(
-            this.arcPath(cx, cy, outerR, innerR, zoneStart, drawEnd),
-            { fill: zone.color }
-          );
+          visibleZones.push({ start: zoneStart, end: drawEnd, color: zone.color });
         }
+      });
+
+      visibleZones.forEach((vz, idx) => {
+        const isFirst = idx === 0;
+        const isLast = idx === visibleZones.length - 1;
+        this.renderer.path(
+          this.arcPath(cx, cy, outerR, innerR, vz.start, vz.end, {
+            roundStart: roundedEnds && isFirst,
+            roundEnd: roundedEnds && isLast
+          }),
+          { fill: vz.color }
+        );
       });
     }
 
@@ -556,6 +584,8 @@ export class GaugeChart extends Chart {
     ];
 
     const trackColor = style.gauge?.trackColor || '#f1f3f5';
+    const roundedEnds = style.gauge?.roundedEnds === true;
+    const labelPosition = options.labelPosition || 'below';
 
     // Arc geometry — 180 degree sweep (semicircle)
     const startAngle = Math.PI;
@@ -574,30 +604,45 @@ export class GaugeChart extends Chart {
 
     // Background track
     this.renderer.path(
-      this.arcPath(cx, cy, outerR, innerR, startAngle, startAngle + sweep),
+      this.arcPath(cx, cy, outerR, innerR, startAngle, startAngle + sweep, {
+        roundStart: roundedEnds, roundEnd: roundedEnds
+      }),
       { fill: trackColor }
     );
 
     // Filled arc with zone colors
     const valueAngle = this.valueToAngle(value, min, max, startAngle, sweep);
+    const visibleZones = [];
     zones.forEach(zone => {
       const zoneStart = startAngle + zone.from * sweep;
       const zoneEnd = startAngle + Math.min(zone.to, 1) * sweep;
       const drawEnd = Math.min(zoneEnd, valueAngle);
 
       if (drawEnd > zoneStart) {
-        this.renderer.path(
-          this.arcPath(cx, cy, outerR, innerR, zoneStart, drawEnd),
-          { fill: zone.color }
-        );
+        visibleZones.push({ start: zoneStart, end: drawEnd, color: zone.color });
       }
     });
 
-    // Value text centered below arc
+    visibleZones.forEach((vz, idx) => {
+      const isFirst = idx === 0;
+      const isLast = idx === visibleZones.length - 1;
+      this.renderer.path(
+        this.arcPath(cx, cy, outerR, innerR, vz.start, vz.end, {
+          roundStart: roundedEnds && isFirst,
+          roundEnd: roundedEnds && isLast
+        }),
+        { fill: vz.color }
+      );
+    });
+
+    // Value and label positioning
     const valueColor = this.getValueColor(value, min, max, zones);
+    const isInside = labelPosition === 'inside';
+
+    // Value text
     this.renderer.text(
       this.formatValue(value),
-      cx, cy + 8,
+      cx, isInside ? cy - radius * 0.35 : cy + 8,
       {
         fill: valueColor,
         fontSize: style.gauge?.valueFontSize || 24,
@@ -610,7 +655,7 @@ export class GaugeChart extends Chart {
     // Label
     const label = dataset.label || data.labels?.[0] || '';
     if (label) {
-      this.renderer.text(label, cx, cy + 28, {
+      this.renderer.text(label, cx, isInside ? cy - radius * 0.35 + 20 : cy + 28, {
         fill: style.axis?.color || '#8993a4',
         fontSize: 11,
         fontFamily: style.fontFamily,

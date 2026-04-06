@@ -132,6 +132,98 @@
   `;
   document.head.appendChild(darkCSS);
 
+  // ── Design presets ───────────────────────────────────────────────────
+  // Each design sets CSS tokens + a JS config override (for booleans & complex values).
+  // Priority: design tokens < palette tokens < user chart config
+  var DESIGNS = {
+    none: {
+      label: 'Default',
+      desc: 'Library defaults',
+      tokens: {},
+      config: {}
+    },
+    erp: {
+      label: 'ERP',
+      desc: 'Dense, precise, data-heavy',
+      tokens: {
+        '--nc-bar-border-radius': '2',
+        '--nc-line-width': '1.5',
+        '--nc-line-tension': '0.3',
+        '--nc-line-point-radius': '3',
+        '--nc-line-point-border-width': '1.5',
+        '--nc-tooltip-border-radius': '4',
+        '--nc-tooltip-padding': '6',
+        '--nc-gauge-needle': '1',
+        '--nc-gauge-rounded-ends': '0',
+        '--nc-gauge-value-font-size': '24',
+        '--nc-gauge-tick-font-size': '10'
+      },
+      config: {
+        style: {
+          bar: { borderRadius: 2 },
+          gauge: { needle: true, roundedEnds: false },
+          tooltip: { borderRadius: 4 }
+        }
+      }
+    },
+    modern: {
+      label: 'Modern',
+      desc: 'Rounded, soft, spacious',
+      tokens: {
+        '--nc-bar-border-radius': '8',
+        '--nc-line-width': '2.5',
+        '--nc-line-tension': '0.4',
+        '--nc-line-point-radius': '5',
+        '--nc-line-point-border-width': '2.5',
+        '--nc-tooltip-border-radius': '12',
+        '--nc-tooltip-padding': '10',
+        '--nc-gauge-needle': '0',
+        '--nc-gauge-rounded-ends': '1',
+        '--nc-gauge-value-font-size': '32',
+        '--nc-gauge-tick-font-size': '10'
+      },
+      config: {
+        style: {
+          bar: { borderRadius: 8 },
+          gauge: { needle: false, roundedEnds: true },
+          tooltip: { borderRadius: 12 }
+        }
+      }
+    },
+    classic: {
+      label: 'Classic',
+      desc: 'Sharp, angular, traditional',
+      tokens: {
+        '--nc-bar-border-radius': '0',
+        '--nc-line-width': '1.5',
+        '--nc-line-tension': '0',
+        '--nc-line-point-radius': '3.5',
+        '--nc-line-point-border-width': '1.5',
+        '--nc-tooltip-border-radius': '0',
+        '--nc-tooltip-padding': '8',
+        '--nc-gauge-needle': '1',
+        '--nc-gauge-rounded-ends': '0',
+        '--nc-gauge-value-font-size': '26',
+        '--nc-gauge-tick-font-size': '10'
+      },
+      config: {
+        style: {
+          bar: { borderRadius: 0 },
+          gauge: { needle: true, roundedEnds: false },
+          tooltip: { borderRadius: 0 }
+        }
+      }
+    }
+  };
+
+  var DESIGN_KEYS = Object.keys(DESIGNS);
+  var DESIGN_TOKENS_KEYS = []; // filled from first non-default design
+  DESIGN_KEYS.forEach(function (k) {
+    Object.keys(DESIGNS[k].tokens).forEach(function (t) {
+      if (DESIGN_TOKENS_KEYS.indexOf(t) === -1) DESIGN_TOKENS_KEYS.push(t);
+    });
+  });
+
   // ── Palette presets ──────────────────────────────────────────────────
   var PALETTES = {
     default: {
@@ -183,7 +275,7 @@
       var saved = localStorage.getItem('newchart-theme-state');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return { dark: false, palette: 'default' };
+    return { dark: false, palette: 'default', design: 'none' };
   }
 
   function saveState() {
@@ -193,7 +285,7 @@
   }
 
   // ── Theme application ────────────────────────────────────────────────
-  function applyTheme() {
+  function applyTheme(triggerRemount) {
     var root = document.documentElement;
 
     // Toggle dark class
@@ -208,6 +300,20 @@
       root.style.removeProperty('--nc-palette-' + i);
     }
     UI_TOKENS.forEach(function (t) { root.style.removeProperty(t); });
+
+    // Clear previous design tokens
+    DESIGN_TOKENS_KEYS.forEach(function (t) { root.style.removeProperty(t); });
+
+    // Apply design tokens
+    var design = DESIGNS[state.design] || DESIGNS.none;
+    Object.keys(design.tokens).forEach(function (t) {
+      root.style.setProperty(t, design.tokens[t]);
+    });
+
+    // Set NewChart.designOverride for non-CSS properties (booleans, complex objects)
+    if (typeof NewChart !== 'undefined') {
+      NewChart.designOverride = (state.design !== 'none' && design.config) ? design.config : null;
+    }
 
     if (colors) {
       // Set chart palette tokens on :root — cascades to all chart containers
@@ -228,6 +334,11 @@
 
     updateUI();
     saveState();
+
+    // Trigger view re-mount so charts pick up new design tokens
+    if (triggerRemount) {
+      window.dispatchEvent(new CustomEvent('nc-design-change'));
+    }
   }
 
   // ── UI ───────────────────────────────────────────────────────────────
@@ -293,6 +404,17 @@
       .nc-palette-label {
         font-size: 12px; font-weight: 500; color: var(--text, #172b4d);
       }
+
+      .nc-design-grid { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+      .nc-design-item {
+        display: flex; align-items: center; gap: 10px; padding: 7px 10px;
+        border-radius: 8px; border: 1.5px solid transparent;
+        cursor: pointer; transition: all 0.15s;
+      }
+      .nc-design-item:hover { background: var(--primary-lt, #edf2ff); }
+      .nc-design-item.active { border-color: var(--primary, #4c6ef5); background: var(--primary-lt, #edf2ff); }
+      .nc-design-label { font-size: 12px; font-weight: 600; color: var(--text, #172b4d); }
+      .nc-design-desc { font-size: 10px; color: var(--text-muted, #8993a4); margin-left: auto; }
     `;
     document.head.appendChild(css);
 
@@ -321,17 +443,26 @@
     });
 
     panel.querySelector('[data-mode="light"]').addEventListener('click', function () {
-      state.dark = false; applyTheme();
+      state.dark = false; applyTheme(true);
     });
     panel.querySelector('[data-mode="dark"]').addEventListener('click', function () {
-      state.dark = true; applyTheme();
+      state.dark = true; applyTheme(true);
+    });
+
+    DESIGN_KEYS.forEach(function (key) {
+      var item = panel.querySelector('[data-design="' + key + '"]');
+      if (item) {
+        item.addEventListener('click', function () {
+          state.design = key; applyTheme(true);
+        });
+      }
     });
 
     Object.keys(PALETTES).forEach(function (key) {
       var item = panel.querySelector('[data-palette="' + key + '"]');
       if (item) {
         item.addEventListener('click', function () {
-          state.palette = key; applyTheme();
+          state.palette = key; applyTheme(true);
         });
       }
     });
@@ -342,6 +473,17 @@
     html += '<div class="nc-mode-row">';
     html += '<button class="nc-mode-btn" data-mode="light">&#9788; Light</button>';
     html += '<button class="nc-mode-btn" data-mode="dark">&#9790; Dark</button>';
+    html += '</div>';
+
+    html += '<h3>Design</h3>';
+    html += '<div class="nc-design-grid">';
+    DESIGN_KEYS.forEach(function (key) {
+      var d = DESIGNS[key];
+      html += '<div class="nc-design-item" data-design="' + key + '">';
+      html += '<span class="nc-design-label">' + d.label + '</span>';
+      html += '<span class="nc-design-desc">' + d.desc + '</span>';
+      html += '</div>';
+    });
     html += '</div>';
 
     html += '<h3>Palette</h3>';
@@ -373,6 +515,10 @@
     var darkBtn = panel.querySelector('[data-mode="dark"]');
     lightBtn.classList.toggle('active', !state.dark);
     darkBtn.classList.toggle('active', state.dark);
+
+    panel.querySelectorAll('.nc-design-item').forEach(function (item) {
+      item.classList.toggle('active', item.getAttribute('data-design') === state.design);
+    });
 
     panel.querySelectorAll('.nc-palette-item').forEach(function (item) {
       var key = item.getAttribute('data-palette');
