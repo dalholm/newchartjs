@@ -142,229 +142,261 @@
       tokens: {},
       config: {}
     },
+    // ─────────────────────────────────────────────────────────
+    // ERP — "The CFO's Dashboard"
+    // Target: Finance controllers, supply chain, warehouse ops
+    // Signature: Square data points, tight bars, visible grid,
+    //            no decoration — pure data density.
+    // ─────────────────────────────────────────────────────────
     erp: {
       label: 'ERP',
       desc: 'Dense, precise, data-heavy',
       tokens: {
-        // Animation
-        '--nc-animation-duration': '400',
-        '--nc-animation-easing': 'easeOutCubic',
-        // Grid
+        '--nc-font-weight': '500',
+        '--nc-animation-duration': '300',
+        '--nc-animation-easing': 'easeOutQuad',
+        '--nc-grid-width': '1',
         '--nc-grid-dash': '',
-        '--nc-grid-opacity': '0.4',
-        // Bar
+        '--nc-grid-opacity': '0.5',
+        '--nc-axis-font-size': '10',
+        '--nc-axis-x-line': '1',
+        '--nc-axis-y-line': '1',
         '--nc-bar-border-radius': '2',
-        '--nc-bar-gap': '0.15',
-        // Line
+        '--nc-bar-gap': '0.12',
+        '--nc-bar-group-gap': '0.3',
+        '--nc-bar-gradient': '0',
         '--nc-line-width': '1.5',
-        '--nc-line-tension': '0.3',
+        '--nc-line-tension': '0.25',
         '--nc-line-point-radius': '3',
         '--nc-line-point-border-width': '1.5',
         '--nc-line-point-fill': 'solid',
-        // Area
-        '--nc-area-fill-opacity': '0.2',
-        // Tooltip
-        '--nc-tooltip-border-radius': '4',
-        '--nc-tooltip-padding': '6',
-        '--nc-tooltip-shadow': '0 2px 8px rgba(0,0,0,0.15)',
-        // Legend
-        '--nc-legend-font-size': '11',
+        '--nc-line-point-shape': 'square',
+        '--nc-area-fill-opacity': '0.1',
+        '--nc-tooltip-font-size': '10',
+        '--nc-tooltip-border-radius': '3',
+        '--nc-tooltip-padding': '5',
+        '--nc-tooltip-shadow': '0 1px 4px rgba(0,0,0,0.2)',
+        '--nc-legend-font-size': '10',
         '--nc-legend-marker-shape': 'bar',
         '--nc-legend-marker-size': '8',
-        '--nc-legend-marker-height': '3',
-        // Pie
+        '--nc-legend-marker-height': '2',
         '--nc-pie-border-width': '1',
         '--nc-pie-padding': '0',
-        // Gauge
         '--nc-gauge-needle': '1',
         '--nc-gauge-rounded-ends': '0',
-        '--nc-gauge-value-font-size': '24',
-        '--nc-gauge-tick-font-size': '10',
-        // Scatter
-        '--nc-scatter-point-radius': '4',
-        '--nc-scatter-point-opacity': '0.8',
-        // Combo
+        '--nc-gauge-value-font-size': '22',
+        '--nc-gauge-tick-font-size': '9',
+        '--nc-scatter-point-radius': '3',
+        '--nc-scatter-point-opacity': '0.7',
+        '--nc-scatter-point-border-width': '1',
         '--nc-combo-bar-border-radius': '2',
         '--nc-combo-line-width': '1.5',
-        '--nc-combo-point-radius': '3'
+        '--nc-combo-point-radius': '3',
+        '--nc-combo-tension': '0.25'
       },
       config: {
         style: {
-          bar: { borderRadius: 2 },
+          fontWeight: 500,
+          bar: { borderRadius: 2, gradient: false },
           gauge: { needle: true, roundedEnds: false },
-          tooltip: { borderRadius: 4 },
-          line: { pointFill: 'solid' },
-          legend: { marker: { shape: 'bar', size: 8, height: 3 } }
+          tooltip: { borderRadius: 3 },
+          line: { pointFill: 'solid', pointShape: 'square' },
+          legend: { marker: { shape: 'bar', size: 8, height: 2 } }
         }
       }
     },
+    // ─────────────────────────────────────────────────────────
+    // Modern — "The SaaS Dashboard"
+    // Target: Product managers, startup founders, marketing
+    // Signature: No axis lines, invisible grid, circle points,
+    //            generous radius, gradient bars — data floats.
+    // ─────────────────────────────────────────────────────────
     modern: {
       label: 'Modern',
       desc: 'Rounded, soft, spacious',
       tokens: {
-        // Animation
+        '--nc-font-weight': '400',
         '--nc-animation-duration': '700',
         '--nc-animation-easing': 'easeOutQuart',
-        // Grid
+        '--nc-grid-width': '1',
         '--nc-grid-dash': '',
-        '--nc-grid-opacity': '0.35',
-        // Bar
-        '--nc-bar-border-radius': '8',
+        '--nc-grid-opacity': '0.2',
+        '--nc-axis-font-size': '11',
+        '--nc-axis-x-line': '0',
+        '--nc-axis-y-line': '0',
+        '--nc-bar-border-radius': '10',
         '--nc-bar-gap': '0.25',
-        // Line
+        '--nc-bar-group-gap': '0.5',
+        '--nc-bar-gradient': '1',
         '--nc-line-width': '2.5',
         '--nc-line-tension': '0.4',
         '--nc-line-point-radius': '5',
         '--nc-line-point-border-width': '2.5',
         '--nc-line-point-fill': 'solid',
-        // Area
-        '--nc-area-fill-opacity': '0.18',
-        // Tooltip
-        '--nc-tooltip-border-radius': '12',
+        '--nc-line-point-shape': 'circle',
+        '--nc-area-fill-opacity': '0.15',
+        '--nc-tooltip-font-size': '12',
+        '--nc-tooltip-border-radius': '14',
         '--nc-tooltip-padding': '10',
-        '--nc-tooltip-shadow': '0 12px 32px rgba(0,0,0,0.12)',
-        // Legend
+        '--nc-tooltip-shadow': '0 8px 30px rgba(0,0,0,0.08)',
         '--nc-legend-font-size': '12',
         '--nc-legend-marker-shape': 'circle',
         '--nc-legend-marker-size': '8',
-        // Pie
         '--nc-pie-border-width': '3',
-        '--nc-pie-padding': '0.02',
-        // Gauge
+        '--nc-pie-padding': '0.025',
         '--nc-gauge-needle': '0',
         '--nc-gauge-rounded-ends': '1',
-        '--nc-gauge-value-font-size': '32',
+        '--nc-gauge-value-font-size': '30',
         '--nc-gauge-tick-font-size': '10',
-        // Scatter
-        '--nc-scatter-point-radius': '6',
-        '--nc-scatter-point-opacity': '0.75',
-        // Combo
-        '--nc-combo-bar-border-radius': '8',
+        '--nc-scatter-point-radius': '5.5',
+        '--nc-scatter-point-opacity': '0.6',
+        '--nc-scatter-point-border-width': '2',
+        '--nc-combo-bar-border-radius': '10',
         '--nc-combo-line-width': '2.5',
-        '--nc-combo-point-radius': '5'
+        '--nc-combo-point-radius': '5',
+        '--nc-combo-tension': '0.4'
       },
       config: {
         style: {
-          bar: { borderRadius: 8 },
+          fontWeight: 400,
+          axis: { xLine: false, yLine: false },
+          bar: { borderRadius: 10, gradient: true },
           gauge: { needle: false, roundedEnds: true },
-          tooltip: { borderRadius: 12 },
-          pie: { padAngle: 0.02 },
-          line: { pointFill: 'solid' },
+          tooltip: { borderRadius: 14 },
+          pie: { padAngle: 0.025 },
+          line: { pointFill: 'solid', pointShape: 'circle' },
           legend: { marker: { shape: 'circle', size: 8 } }
         }
       }
     },
+    // ─────────────────────────────────────────────────────────
+    // Classic — "The Boardroom Report"
+    // Target: Accountants, auditors, institutional analysts
+    // Signature: Dashed grid, hollow diamond points, sharp bars,
+    //            strong axis frame, square legend — print-ready.
+    // ─────────────────────────────────────────────────────────
     classic: {
       label: 'Classic',
       desc: 'Sharp, angular, traditional',
       tokens: {
-        // Animation
-        '--nc-animation-duration': '500',
+        '--nc-font-weight': '400',
+        '--nc-animation-duration': '400',
         '--nc-animation-easing': 'easeOutCubic',
-        // Grid
-        '--nc-grid-dash': '4 3',
-        '--nc-grid-opacity': '0.45',
-        // Bar
+        '--nc-grid-width': '1',
+        '--nc-grid-dash': '3 3',
+        '--nc-grid-opacity': '0.5',
+        '--nc-axis-font-size': '11',
+        '--nc-axis-width': '1.5',
+        '--nc-axis-x-line': '1',
+        '--nc-axis-y-line': '1',
         '--nc-bar-border-radius': '0',
-        '--nc-bar-gap': '0.2',
-        // Line
+        '--nc-bar-gap': '0.18',
+        '--nc-bar-group-gap': '0.4',
+        '--nc-bar-gradient': '0',
         '--nc-line-width': '1.5',
         '--nc-line-tension': '0',
-        '--nc-line-point-radius': '3.5',
-        '--nc-line-point-border-width': '1.5',
+        '--nc-line-point-radius': '4',
+        '--nc-line-point-border-width': '2',
         '--nc-line-point-fill': 'hollow',
-        // Area
-        '--nc-area-fill-opacity': '0.15',
-        // Tooltip
+        '--nc-line-point-shape': 'diamond',
+        '--nc-area-fill-opacity': '0.08',
+        '--nc-tooltip-font-size': '11',
         '--nc-tooltip-border-radius': '0',
-        '--nc-tooltip-padding': '8',
-        '--nc-tooltip-shadow': '0 2px 6px rgba(0,0,0,0.2)',
-        // Legend
+        '--nc-tooltip-padding': '7',
+        '--nc-tooltip-shadow': '0 1px 3px rgba(0,0,0,0.25)',
+        '--nc-tooltip-border': '1px solid rgba(255,255,255,0.12)',
         '--nc-legend-font-size': '11',
         '--nc-legend-marker-shape': 'square',
-        '--nc-legend-marker-size': '8',
-        // Pie
+        '--nc-legend-marker-size': '9',
         '--nc-pie-border-width': '2',
         '--nc-pie-padding': '0',
-        // Gauge
         '--nc-gauge-needle': '1',
         '--nc-gauge-rounded-ends': '0',
-        '--nc-gauge-value-font-size': '26',
+        '--nc-gauge-value-font-size': '24',
         '--nc-gauge-tick-font-size': '10',
-        // Scatter
         '--nc-scatter-point-radius': '4',
         '--nc-scatter-point-opacity': '0.9',
-        // Combo
+        '--nc-scatter-point-border-width': '1.5',
         '--nc-combo-bar-border-radius': '0',
         '--nc-combo-line-width': '1.5',
-        '--nc-combo-point-radius': '3.5'
+        '--nc-combo-point-radius': '4',
+        '--nc-combo-tension': '0'
       },
       config: {
         style: {
-          bar: { borderRadius: 0 },
+          fontWeight: 400,
+          axis: { width: 1.5 },
+          bar: { borderRadius: 0, gradient: false },
           gauge: { needle: true, roundedEnds: false },
-          tooltip: { borderRadius: 0 },
+          tooltip: { borderRadius: 0, border: '1px solid rgba(255,255,255,0.12)' },
           pie: { padAngle: 0 },
-          line: { pointFill: 'hollow' },
-          legend: { marker: { shape: 'square', size: 8 } }
+          line: { pointFill: 'hollow', pointShape: 'diamond' },
+          legend: { marker: { shape: 'square', size: 9 } }
         }
       }
     },
+    // ─────────────────────────────────────────────────────────
+    // Vivid — "The Keynote Slide"
+    // Target: Designers, presenters, creatives, marketing
+    // Signature: Gradient bars with shadows, huge pills, no axis
+    //            lines, bold circles, exploded pie — pure drama.
+    // ─────────────────────────────────────────────────────────
     vivid: {
       label: 'Vivid',
       desc: 'Bold, punchy, high-impact',
       tokens: {
-        // Animation
-        '--nc-animation-duration': '800',
+        '--nc-font-weight': '600',
+        '--nc-animation-duration': '900',
         '--nc-animation-easing': 'easeOutBack',
-        // Grid
+        '--nc-grid-width': '1',
         '--nc-grid-dash': '',
-        '--nc-grid-opacity': '0.25',
-        // Bar
-        '--nc-bar-border-radius': '12',
+        '--nc-grid-opacity': '0.12',
+        '--nc-axis-font-size': '12',
+        '--nc-axis-x-line': '0',
+        '--nc-axis-y-line': '0',
+        '--nc-bar-border-radius': '14',
         '--nc-bar-gap': '0.3',
-        // Line
-        '--nc-line-width': '3',
+        '--nc-bar-group-gap': '0.6',
+        '--nc-bar-gradient': '1',
+        '--nc-bar-shadow': '0 4px 12px rgba(0,0,0,0.15)',
+        '--nc-line-width': '3.5',
         '--nc-line-tension': '0.45',
-        '--nc-line-point-radius': '6',
-        '--nc-line-point-border-width': '3',
+        '--nc-line-point-radius': '7',
+        '--nc-line-point-border-width': '3.5',
         '--nc-line-point-fill': 'solid',
-        // Area
-        '--nc-area-fill-opacity': '0.35',
-        // Tooltip
+        '--nc-line-point-shape': 'circle',
+        '--nc-area-fill-opacity': '0.4',
+        '--nc-tooltip-font-size': '13',
         '--nc-tooltip-border-radius': '16',
         '--nc-tooltip-padding': '12',
-        '--nc-tooltip-shadow': '0 16px 48px rgba(0,0,0,0.2)',
-        // Legend
+        '--nc-tooltip-shadow': '0 20px 60px rgba(0,0,0,0.25)',
         '--nc-legend-font-size': '13',
         '--nc-legend-marker-shape': 'circle',
-        '--nc-legend-marker-size': '10',
-        // Pie
-        '--nc-pie-border-width': '3',
-        '--nc-pie-padding': '0.03',
-        // Gauge
+        '--nc-legend-marker-size': '12',
+        '--nc-pie-border-width': '4',
+        '--nc-pie-padding': '0.04',
         '--nc-gauge-needle': '0',
         '--nc-gauge-rounded-ends': '1',
-        '--nc-gauge-value-font-size': '36',
+        '--nc-gauge-value-font-size': '38',
         '--nc-gauge-tick-font-size': '11',
-        // Scatter
-        '--nc-scatter-point-radius': '7',
+        '--nc-scatter-point-radius': '8',
         '--nc-scatter-point-opacity': '0.85',
         '--nc-scatter-point-border-width': '3',
-        // Combo
-        '--nc-combo-bar-border-radius': '12',
-        '--nc-combo-line-width': '3',
-        '--nc-combo-point-radius': '6',
+        '--nc-combo-bar-border-radius': '14',
+        '--nc-combo-line-width': '3.5',
+        '--nc-combo-point-radius': '7',
         '--nc-combo-tension': '0.45'
       },
       config: {
         style: {
-          bar: { borderRadius: 12 },
+          fontWeight: 600,
+          axis: { xLine: false, yLine: false },
+          bar: { borderRadius: 14, gradient: true, shadow: '0 4px 12px rgba(0,0,0,0.15)' },
           gauge: { needle: false, roundedEnds: true },
           tooltip: { borderRadius: 16 },
-          pie: { padAngle: 0.03 },
-          line: { pointFill: 'solid' },
-          legend: { marker: { shape: 'circle', size: 10 } }
+          pie: { padAngle: 0.04 },
+          line: { pointFill: 'solid', pointShape: 'circle' },
+          legend: { marker: { shape: 'circle', size: 12 } }
         }
       }
     }

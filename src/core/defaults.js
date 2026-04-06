@@ -35,6 +35,7 @@ export const DEFAULT_CONFIG = {
     monoFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
     fontSize: 12,
     fontColor: '#374151',
+    fontWeight: 400,
     grid: {
       color: '#E5E7EB',
       width: 1,
@@ -44,7 +45,9 @@ export const DEFAULT_CONFIG = {
     axis: {
       color: '#374151',
       width: 1,
-      fontSize: 12
+      fontSize: 12,
+      xLine: true,  // show X axis line
+      yLine: true   // show Y axis line
     },
     animation: {
       duration: 600,
@@ -92,7 +95,9 @@ export const BAR_DEFAULTS = {
     bar: {
       borderRadius: 4,
       gap: 0.2, // Gap between bars as fraction of bar width
-      groupGap: 0.5 // Gap between groups as fraction of bar width
+      groupGap: 0.5, // Gap between groups as fraction of bar width
+      gradient: false, // vertical gradient overlay on bars
+      shadow: null // drop shadow string e.g. '0 2px 6px rgba(0,0,0,0.15)'
     }
   },
   options: {
@@ -151,7 +156,8 @@ export const LINE_DEFAULTS = {
       pointRadius: 4,
       pointBorderWidth: 2,
       pointBorderColor: '#ffffff',
-      pointFill: 'solid' // 'solid' or 'hollow'
+      pointFill: 'solid', // 'solid' or 'hollow'
+      pointShape: 'circle' // 'circle', 'diamond', 'triangle', 'square', 'cross'
     }
   },
   options: {
@@ -180,7 +186,8 @@ export const AREA_DEFAULTS = {
       pointRadius: 4,
       pointBorderWidth: 2,
       pointBorderColor: '#ffffff',
-      pointFill: 'solid'
+      pointFill: 'solid',
+      pointShape: 'circle'
     },
     area: {
       fillOpacity: 0.25

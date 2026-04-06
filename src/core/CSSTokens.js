@@ -29,6 +29,7 @@ const TOKEN_MAP = [
   { token: '--nc-font-family', path: 'style.fontFamily', type: 'string' },
   { token: '--nc-font-size', path: 'style.fontSize', type: 'number' },
   { token: '--nc-font-color', path: 'style.fontColor', type: 'string' },
+  { token: '--nc-font-weight', path: 'style.fontWeight', type: 'number' },
 
   // Grid
   { token: '--nc-grid-color', path: 'style.grid.color', type: 'string' },
@@ -40,6 +41,8 @@ const TOKEN_MAP = [
   { token: '--nc-axis-color', path: 'style.axis.color', type: 'string' },
   { token: '--nc-axis-width', path: 'style.axis.width', type: 'number' },
   { token: '--nc-axis-font-size', path: 'style.axis.fontSize', type: 'number' },
+  { token: '--nc-axis-x-line', path: 'style.axis.xLine', type: 'boolean' },
+  { token: '--nc-axis-y-line', path: 'style.axis.yLine', type: 'boolean' },
 
   // Animation
   { token: '--nc-animation-duration', path: 'style.animation.duration', type: 'number' },
@@ -65,6 +68,8 @@ const TOKEN_MAP = [
   { token: '--nc-bar-border-radius', path: 'style.bar.borderRadius', type: 'number' },
   { token: '--nc-bar-gap', path: 'style.bar.gap', type: 'number' },
   { token: '--nc-bar-group-gap', path: 'style.bar.groupGap', type: 'number' },
+  { token: '--nc-bar-gradient', path: 'style.bar.gradient', type: 'boolean' },
+  { token: '--nc-bar-shadow', path: 'style.bar.shadow', type: 'string' },
 
   // Line
   { token: '--nc-line-width', path: 'style.line.width', type: 'number' },
@@ -73,6 +78,7 @@ const TOKEN_MAP = [
   { token: '--nc-line-point-border-width', path: 'style.line.pointBorderWidth', type: 'number' },
   { token: '--nc-line-point-border-color', path: 'style.line.pointBorderColor', type: 'string' },
   { token: '--nc-line-point-fill', path: 'style.line.pointFill', type: 'string' },
+  { token: '--nc-line-point-shape', path: 'style.line.pointShape', type: 'string' },
 
   // Area
   { token: '--nc-area-fill-opacity', path: 'style.area.fillOpacity', type: 'number' },

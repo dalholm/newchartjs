@@ -127,6 +127,7 @@ export class BarChart extends Chart {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
+            fontWeight: style.fontWeight || 400,
             textAnchor: 'end',
             dominantBaseline: 'middle'
           });
@@ -134,15 +135,15 @@ export class BarChart extends Chart {
       });
     }
 
-    // Draw axes
-    if (hasYAxis) {
+    // Draw axes (respect xLine/yLine visibility)
+    if (hasYAxis && style.axis.yLine !== false) {
       this.renderer.line(chartX, chartY, chartX, chartY + chartHeight, {
         stroke: style.axis.color,
         strokeWidth: style.axis.width
       });
     }
 
-    if (hasXAxis) {
+    if (hasXAxis && style.axis.xLine !== false) {
       this.renderer.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight, {
         stroke: style.axis.color,
         strokeWidth: style.axis.width
@@ -264,10 +265,18 @@ export class BarChart extends Chart {
           ? visibleIndex === visibleDatasets.length - 1
           : true;
 
+        const barW = isStacked ? availableWidth : datasetWidth;
+
+        // Bar gradient overlay (if enabled)
+        const useGradient = style.bar?.gradient && this.renderer.createBarGradient;
+        let gradientUrl = null;
+        if (useGradient) {
+          const gid = `bar-grad-${labelIndex}-${visibleIndex}`;
+          gradientUrl = this.renderer.createBarGradient(color, gid);
+        }
+
         const barElement = this.renderer.rect(
-          x, y,
-          isStacked ? availableWidth : datasetWidth,
-          barHeight,
+          x, y, barW, barHeight,
           {
             fill: color,
             borderRadius: style.bar?.borderRadius || 0,
@@ -275,6 +284,23 @@ export class BarChart extends Chart {
             opacity: 1
           }
         );
+
+        // Add gradient overlay as a second rect
+        if (gradientUrl && barHeight > 0) {
+          this.renderer.rect(x, y, barW, barHeight, {
+            fill: gradientUrl,
+            borderRadius: style.bar?.borderRadius || 0,
+            borderRadiusTop: isTopOfStack,
+            opacity: 1
+          });
+        }
+
+        // Bar shadow
+        const barShadow = style.bar?.shadow;
+        if (barElement && barShadow && this.renderer.ensureShadowFilter) {
+          const filterUrl = this.renderer.ensureShadowFilter(barShadow);
+          barElement.setAttribute('filter', filterUrl);
+        }
 
         if (barElement) {
           barElement.style.cursor = 'pointer';

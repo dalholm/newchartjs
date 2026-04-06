@@ -287,6 +287,39 @@ export class SVGRenderer extends Renderer {
   }
 
   /**
+   * Draw a data point marker (circle, diamond, triangle, square, cross)
+   * @param {number} x - Center X
+   * @param {number} y - Center Y
+   * @param {number} r - Radius
+   * @param {string} shape - Shape: 'circle', 'diamond', 'triangle', 'square', 'cross'
+   * @param {Object} style - Style object
+   * @returns {Element} SVG element
+   */
+  marker(x, y, r, shape = 'circle', style = {}) {
+    if (shape === 'circle' || !shape) {
+      return this.circle(x, y, r, style);
+    }
+
+    let d;
+    if (shape === 'diamond') {
+      d = `M ${x} ${y - r} L ${x + r} ${y} L ${x} ${y + r} L ${x - r} ${y} Z`;
+    } else if (shape === 'triangle') {
+      const h = r * 1.15;
+      d = `M ${x} ${y - h} L ${x + r} ${y + h * 0.58} L ${x - r} ${y + h * 0.58} Z`;
+    } else if (shape === 'square') {
+      const s = r * 0.85;
+      d = `M ${x - s} ${y - s} L ${x + s} ${y - s} L ${x + s} ${y + s} L ${x - s} ${y + s} Z`;
+    } else if (shape === 'cross') {
+      const t = r * 0.3;
+      d = `M ${x - t} ${y - r} L ${x + t} ${y - r} L ${x + t} ${y - t} L ${x + r} ${y - t} L ${x + r} ${y + t} L ${x + t} ${y + t} L ${x + t} ${y + r} L ${x - t} ${y + r} L ${x - t} ${y + t} L ${x - r} ${y + t} L ${x - r} ${y - t} L ${x - t} ${y - t} Z`;
+    } else {
+      return this.circle(x, y, r, style);
+    }
+
+    return this.path(d, { ...style, stroke: style.stroke || 'none' });
+  }
+
+  /**
    * Create a linear gradient definition for area fills
    * @param {string} color - Base color
    * @param {string} id - Gradient ID
@@ -323,6 +356,82 @@ export class SVGRenderer extends Renderer {
     defs.appendChild(gradient);
 
     return `url(#${id})`;
+  }
+
+  /**
+   * Create a vertical gradient for bar fills (lighter top → solid bottom)
+   * @param {string} color - Base color
+   * @param {string} id - Unique gradient ID
+   * @returns {string} Gradient fill URL
+   */
+  createBarGradient(color, id) {
+    let defs = this.svg.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      this.svg.insertBefore(defs, this.svg.firstChild);
+    }
+
+    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    gradient.setAttribute('id', id);
+    gradient.setAttribute('x1', '0');
+    gradient.setAttribute('y1', '0');
+    gradient.setAttribute('x2', '0');
+    gradient.setAttribute('y2', '1');
+
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', '#ffffff');
+    stop1.setAttribute('stop-opacity', '0.3');
+
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', '#000000');
+    stop2.setAttribute('stop-opacity', '0.05');
+
+    gradient.appendChild(stop1);
+    gradient.appendChild(stop2);
+    defs.appendChild(gradient);
+
+    return `url(#${id})`;
+  }
+
+  /**
+   * Ensure a drop-shadow SVG filter exists and return its url() reference
+   * @param {string} shadow - CSS-like shadow string (e.g. '0 2px 6px rgba(0,0,0,0.15)')
+   * @returns {string} SVG filter URL reference
+   */
+  ensureShadowFilter(shadow) {
+    let defs = this.svg.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      this.svg.insertBefore(defs, this.svg.firstChild);
+    }
+
+    const filterId = 'nc-bar-shadow';
+    if (defs.querySelector('#' + filterId)) {
+      return `url(#${filterId})`;
+    }
+
+    // Parse a simple shadow string: "0 2px 8px rgba(...)"
+    const parts = shadow.match(/([\d.]+)\w*\s+([\d.]+)\w*\s+([\d.]+)\w*\s+(.*)/);
+    const dx = parts ? parseFloat(parts[1]) : 0;
+    const dy = parts ? parseFloat(parts[2]) : 2;
+    const blur = parts ? parseFloat(parts[3]) : 6;
+    const color = parts ? parts[4].trim() : 'rgba(0,0,0,0.15)';
+
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    filter.setAttribute('id', filterId);
+    filter.setAttribute('x', '-20%');
+    filter.setAttribute('y', '-20%');
+    filter.setAttribute('width', '140%');
+    filter.setAttribute('height', '140%');
+
+    filter.innerHTML = `
+      <feDropShadow dx="${dx}" dy="${dy}" stdDeviation="${blur / 2}" flood-color="${color}" />
+    `;
+    defs.appendChild(filter);
+
+    return `url(#${filterId})`;
   }
 
   /**
@@ -407,6 +516,72 @@ export class CanvasRenderer extends Renderer {
       this.ctx.fill();
     }
 
+    if (style.stroke) {
+      this.ctx.strokeStyle = style.stroke;
+      this.ctx.lineWidth = style.strokeWidth || 1;
+      this.ctx.stroke();
+    }
+
+    this.ctx.globalAlpha = prevAlpha;
+  }
+
+  /**
+   * Draw a data point marker on canvas
+   * @param {number} x - Center X
+   * @param {number} y - Center Y
+   * @param {number} r - Radius
+   * @param {string} shape - Shape
+   * @param {Object} style - Style object
+   */
+  marker(x, y, r, shape = 'circle', style = {}) {
+    if (shape === 'circle' || !shape) {
+      return this.circle(x, y, r, style);
+    }
+
+    const prevAlpha = this.ctx.globalAlpha;
+    if (style.opacity !== undefined) this.ctx.globalAlpha = style.opacity;
+
+    this.ctx.beginPath();
+    if (shape === 'diamond') {
+      this.ctx.moveTo(x, y - r);
+      this.ctx.lineTo(x + r, y);
+      this.ctx.lineTo(x, y + r);
+      this.ctx.lineTo(x - r, y);
+    } else if (shape === 'triangle') {
+      const h = r * 1.15;
+      this.ctx.moveTo(x, y - h);
+      this.ctx.lineTo(x + r, y + h * 0.58);
+      this.ctx.lineTo(x - r, y + h * 0.58);
+    } else if (shape === 'square') {
+      const s = r * 0.85;
+      this.ctx.moveTo(x - s, y - s);
+      this.ctx.lineTo(x + s, y - s);
+      this.ctx.lineTo(x + s, y + s);
+      this.ctx.lineTo(x - s, y + s);
+    } else if (shape === 'cross') {
+      const t = r * 0.3;
+      this.ctx.moveTo(x - t, y - r);
+      this.ctx.lineTo(x + t, y - r);
+      this.ctx.lineTo(x + t, y - t);
+      this.ctx.lineTo(x + r, y - t);
+      this.ctx.lineTo(x + r, y + t);
+      this.ctx.lineTo(x + t, y + t);
+      this.ctx.lineTo(x + t, y + r);
+      this.ctx.lineTo(x - t, y + r);
+      this.ctx.lineTo(x - t, y + t);
+      this.ctx.lineTo(x - r, y + t);
+      this.ctx.lineTo(x - r, y - t);
+      this.ctx.lineTo(x - t, y - t);
+    } else {
+      this.ctx.globalAlpha = prevAlpha;
+      return this.circle(x, y, r, style);
+    }
+    this.ctx.closePath();
+
+    if (style.fill) {
+      this.ctx.fillStyle = style.fill;
+      this.ctx.fill();
+    }
     if (style.stroke) {
       this.ctx.strokeStyle = style.stroke;
       this.ctx.lineWidth = style.strokeWidth || 1;

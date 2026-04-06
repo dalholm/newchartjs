@@ -15,7 +15,9 @@ const EASING_FUNCTIONS = {
   easeInOutQuart: (t) => t < 0.5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t,
   easeInQuint: (t) => t * t * t * t * t,
   easeOutQuint: (t) => 1 + (--t) * t * t * t * t,
-  easeInOutQuint: (t) => t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t
+  easeInOutQuint: (t) => t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t,
+  easeOutBack: (t) => { const c = 1.70158; return 1 + (--t) * t * ((c + 1) * t + c); },
+  easeOutElastic: (t) => t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1
 };
 
 /**

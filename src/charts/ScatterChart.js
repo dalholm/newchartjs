@@ -145,6 +145,7 @@ export class ScatterChart extends Chart {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
+            fontWeight: style.fontWeight || 400,
             textAnchor: 'end',
             dominantBaseline: 'middle'
           });
@@ -165,6 +166,7 @@ export class ScatterChart extends Chart {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
+            fontWeight: style.fontWeight || 400,
             textAnchor: 'middle',
             dominantBaseline: 'top'
           });
@@ -172,14 +174,14 @@ export class ScatterChart extends Chart {
       });
     }
 
-    // Draw axes
-    if (hasYAxis) {
+    // Draw axes (respect xLine/yLine visibility)
+    if (hasYAxis && style.axis.yLine !== false) {
       this.renderer.line(chartX, chartY, chartX, chartY + chartHeight, {
         stroke: style.axis.color,
         strokeWidth: style.axis.width
       });
     }
-    if (hasXAxis) {
+    if (hasXAxis && style.axis.xLine !== false) {
       this.renderer.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight, {
         stroke: style.axis.color,
         strokeWidth: style.axis.width

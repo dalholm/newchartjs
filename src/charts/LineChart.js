@@ -79,6 +79,7 @@ export class LineChart extends Chart {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
+            fontWeight: style.fontWeight || 400,
             textAnchor: 'end',
             dominantBaseline: 'middle'
           });
@@ -86,15 +87,15 @@ export class LineChart extends Chart {
       });
     }
 
-    // Draw axes
-    if (hasYAxis) {
+    // Draw axes (respect xLine/yLine visibility)
+    if (hasYAxis && style.axis.yLine !== false) {
       this.renderer.line(chartX, chartY, chartX, chartY + chartHeight, {
         stroke: style.axis.color,
         strokeWidth: style.axis.width
       });
     }
 
-    if (hasXAxis) {
+    if (hasXAxis && style.axis.xLine !== false) {
       this.renderer.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight, {
         stroke: style.axis.color,
         strokeWidth: style.axis.width
@@ -105,6 +106,8 @@ export class LineChart extends Chart {
     this.lines = [];
     this._allPoints = [];
     this._crosshairLine = null;
+
+    const pointShape = style.line?.pointShape || 'circle';
 
     visibleDatasets.forEach((dataset, datasetIndex) => {
       if (!dataset.values) return;
@@ -176,7 +179,7 @@ export class LineChart extends Chart {
       points.forEach((point, pointIndex) => {
         if (pointRadius > 0) {
           const isHollow = style.line?.pointFill === 'hollow';
-          const pointEl = this.renderer.circle(point[0], point[1], pointRadius, {
+          const pointEl = this.renderer.marker(point[0], point[1], pointRadius, pointShape, {
             fill: isHollow ? (style.background || '#ffffff') : color,
             stroke: isHollow ? color : (style.line?.pointBorderColor || '#ffffff'),
             strokeWidth: style.line?.pointBorderWidth || 2,
