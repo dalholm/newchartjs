@@ -132,6 +132,284 @@
   `;
   document.head.appendChild(darkCSS);
 
+  // ── Design presets ───────────────────────────────────────────────────
+  // Each design sets CSS tokens + a JS config override (for booleans & complex values).
+  // Priority: design tokens < palette tokens < user chart config
+  var DESIGNS = {
+    none: {
+      label: 'Default',
+      desc: 'Library defaults',
+      tokens: {},
+      config: {}
+    },
+    // ─────────────────────────────────────────────────────────
+    // ERP — "The CFO's Dashboard"
+    // Target: Finance controllers, supply chain, warehouse ops
+    // Signature: Square data points, tight bars, visible grid,
+    //            no decoration — pure data density.
+    // ─────────────────────────────────────────────────────────
+    erp: {
+      label: 'ERP',
+      desc: 'Dense, precise, data-heavy',
+      tokens: {
+        '--nc-font-weight': '500',
+        '--nc-animation-duration': '300',
+        '--nc-animation-easing': 'easeOutQuad',
+        '--nc-grid-width': '1',
+        '--nc-grid-dash': '',
+        '--nc-grid-opacity': '0.5',
+        '--nc-axis-font-size': '10',
+        '--nc-axis-x-line': '1',
+        '--nc-axis-y-line': '1',
+        '--nc-bar-border-radius': '2',
+        '--nc-bar-gap': '0.12',
+        '--nc-bar-group-gap': '0.3',
+        '--nc-bar-gradient': '0',
+        '--nc-line-width': '1.5',
+        '--nc-line-tension': '0.25',
+        '--nc-line-point-radius': '3',
+        '--nc-line-point-border-width': '1.5',
+        '--nc-line-point-fill': 'solid',
+        '--nc-line-point-shape': 'square',
+        '--nc-area-fill-opacity': '0.1',
+        '--nc-tooltip-font-size': '10',
+        '--nc-tooltip-border-radius': '3',
+        '--nc-tooltip-padding': '5',
+        '--nc-tooltip-shadow': '0 1px 4px rgba(0,0,0,0.2)',
+        '--nc-legend-font-size': '10',
+        '--nc-legend-marker-shape': 'bar',
+        '--nc-legend-marker-size': '8',
+        '--nc-legend-marker-height': '2',
+        '--nc-pie-border-width': '1',
+        '--nc-pie-padding': '0',
+        '--nc-gauge-needle': '1',
+        '--nc-gauge-rounded-ends': '0',
+        '--nc-gauge-value-font-size': '22',
+        '--nc-gauge-tick-font-size': '9',
+        '--nc-scatter-point-radius': '3',
+        '--nc-scatter-point-opacity': '0.7',
+        '--nc-scatter-point-border-width': '1',
+        '--nc-combo-bar-border-radius': '2',
+        '--nc-combo-line-width': '1.5',
+        '--nc-combo-point-radius': '3',
+        '--nc-combo-tension': '0.25'
+      },
+      config: {
+        style: {
+          fontWeight: 500,
+          bar: { borderRadius: 2, gradient: false },
+          gauge: { needle: true, roundedEnds: false },
+          tooltip: { borderRadius: 3 },
+          line: { pointFill: 'solid', pointShape: 'square' },
+          legend: { marker: { shape: 'bar', size: 8, height: 2 } }
+        }
+      }
+    },
+    // ─────────────────────────────────────────────────────────
+    // Modern — "The SaaS Dashboard"
+    // Target: Product managers, startup founders, marketing
+    // Signature: No axis lines, invisible grid, circle points,
+    //            generous radius, gradient bars — data floats.
+    // ─────────────────────────────────────────────────────────
+    modern: {
+      label: 'Modern',
+      desc: 'Rounded, soft, spacious',
+      tokens: {
+        '--nc-font-weight': '400',
+        '--nc-animation-duration': '700',
+        '--nc-animation-easing': 'easeOutQuart',
+        '--nc-grid-width': '1',
+        '--nc-grid-dash': '',
+        '--nc-grid-opacity': '0.2',
+        '--nc-axis-font-size': '11',
+        '--nc-axis-x-line': '0',
+        '--nc-axis-y-line': '0',
+        '--nc-bar-border-radius': '10',
+        '--nc-bar-gap': '0.25',
+        '--nc-bar-group-gap': '0.5',
+        '--nc-bar-gradient': '1',
+        '--nc-line-width': '2.5',
+        '--nc-line-tension': '0.4',
+        '--nc-line-point-radius': '5',
+        '--nc-line-point-border-width': '2.5',
+        '--nc-line-point-fill': 'solid',
+        '--nc-line-point-shape': 'circle',
+        '--nc-area-fill-opacity': '0.15',
+        '--nc-tooltip-font-size': '12',
+        '--nc-tooltip-border-radius': '14',
+        '--nc-tooltip-padding': '10',
+        '--nc-tooltip-shadow': '0 8px 30px rgba(0,0,0,0.08)',
+        '--nc-legend-font-size': '12',
+        '--nc-legend-marker-shape': 'circle',
+        '--nc-legend-marker-size': '8',
+        '--nc-pie-border-width': '3',
+        '--nc-pie-padding': '0.025',
+        '--nc-gauge-needle': '0',
+        '--nc-gauge-rounded-ends': '1',
+        '--nc-gauge-value-font-size': '30',
+        '--nc-gauge-tick-font-size': '10',
+        '--nc-scatter-point-radius': '5.5',
+        '--nc-scatter-point-opacity': '0.6',
+        '--nc-scatter-point-border-width': '2',
+        '--nc-combo-bar-border-radius': '10',
+        '--nc-combo-line-width': '2.5',
+        '--nc-combo-point-radius': '5',
+        '--nc-combo-tension': '0.4'
+      },
+      config: {
+        style: {
+          fontWeight: 400,
+          axis: { xLine: false, yLine: false },
+          bar: { borderRadius: 10, gradient: true },
+          gauge: { needle: false, roundedEnds: true },
+          tooltip: { borderRadius: 14 },
+          pie: { padAngle: 0.025 },
+          line: { pointFill: 'solid', pointShape: 'circle' },
+          legend: { marker: { shape: 'circle', size: 8 } }
+        }
+      }
+    },
+    // ─────────────────────────────────────────────────────────
+    // Classic — "The Boardroom Report"
+    // Target: Accountants, auditors, institutional analysts
+    // Signature: Dashed grid, hollow diamond points, sharp bars,
+    //            strong axis frame, square legend — print-ready.
+    // ─────────────────────────────────────────────────────────
+    classic: {
+      label: 'Classic',
+      desc: 'Sharp, angular, traditional',
+      tokens: {
+        '--nc-font-weight': '400',
+        '--nc-animation-duration': '400',
+        '--nc-animation-easing': 'easeOutCubic',
+        '--nc-grid-width': '1',
+        '--nc-grid-dash': '3 3',
+        '--nc-grid-opacity': '0.5',
+        '--nc-axis-font-size': '11',
+        '--nc-axis-width': '1.5',
+        '--nc-axis-x-line': '1',
+        '--nc-axis-y-line': '1',
+        '--nc-bar-border-radius': '0',
+        '--nc-bar-gap': '0.18',
+        '--nc-bar-group-gap': '0.4',
+        '--nc-bar-gradient': '0',
+        '--nc-line-width': '1.5',
+        '--nc-line-tension': '0',
+        '--nc-line-point-radius': '4',
+        '--nc-line-point-border-width': '2',
+        '--nc-line-point-fill': 'hollow',
+        '--nc-line-point-shape': 'diamond',
+        '--nc-area-fill-opacity': '0.08',
+        '--nc-tooltip-font-size': '11',
+        '--nc-tooltip-border-radius': '0',
+        '--nc-tooltip-padding': '7',
+        '--nc-tooltip-shadow': '0 1px 3px rgba(0,0,0,0.25)',
+        '--nc-tooltip-border': '1px solid rgba(255,255,255,0.12)',
+        '--nc-legend-font-size': '11',
+        '--nc-legend-marker-shape': 'square',
+        '--nc-legend-marker-size': '9',
+        '--nc-pie-border-width': '2',
+        '--nc-pie-padding': '0',
+        '--nc-gauge-needle': '1',
+        '--nc-gauge-rounded-ends': '0',
+        '--nc-gauge-value-font-size': '24',
+        '--nc-gauge-tick-font-size': '10',
+        '--nc-scatter-point-radius': '4',
+        '--nc-scatter-point-opacity': '0.9',
+        '--nc-scatter-point-border-width': '1.5',
+        '--nc-combo-bar-border-radius': '0',
+        '--nc-combo-line-width': '1.5',
+        '--nc-combo-point-radius': '4',
+        '--nc-combo-tension': '0'
+      },
+      config: {
+        style: {
+          fontWeight: 400,
+          axis: { width: 1.5 },
+          bar: { borderRadius: 0, gradient: false },
+          gauge: { needle: true, roundedEnds: false },
+          tooltip: { borderRadius: 0, border: '1px solid rgba(255,255,255,0.12)' },
+          pie: { padAngle: 0 },
+          line: { pointFill: 'hollow', pointShape: 'diamond' },
+          legend: { marker: { shape: 'square', size: 9 } }
+        }
+      }
+    },
+    // ─────────────────────────────────────────────────────────
+    // Vivid — "The Keynote Slide"
+    // Target: Designers, presenters, creatives, marketing
+    // Signature: Gradient bars with shadows, huge pills, no axis
+    //            lines, bold circles, exploded pie — pure drama.
+    // ─────────────────────────────────────────────────────────
+    vivid: {
+      label: 'Vivid',
+      desc: 'Bold, punchy, high-impact',
+      tokens: {
+        '--nc-font-weight': '600',
+        '--nc-animation-duration': '900',
+        '--nc-animation-easing': 'easeOutBack',
+        '--nc-grid-width': '1',
+        '--nc-grid-dash': '',
+        '--nc-grid-opacity': '0.12',
+        '--nc-axis-font-size': '12',
+        '--nc-axis-x-line': '0',
+        '--nc-axis-y-line': '0',
+        '--nc-bar-border-radius': '14',
+        '--nc-bar-gap': '0.3',
+        '--nc-bar-group-gap': '0.6',
+        '--nc-bar-gradient': '1',
+        '--nc-bar-shadow': '0 4px 12px rgba(0,0,0,0.15)',
+        '--nc-line-width': '3.5',
+        '--nc-line-tension': '0.45',
+        '--nc-line-point-radius': '7',
+        '--nc-line-point-border-width': '3.5',
+        '--nc-line-point-fill': 'solid',
+        '--nc-line-point-shape': 'circle',
+        '--nc-area-fill-opacity': '0.4',
+        '--nc-tooltip-font-size': '13',
+        '--nc-tooltip-border-radius': '16',
+        '--nc-tooltip-padding': '12',
+        '--nc-tooltip-shadow': '0 20px 60px rgba(0,0,0,0.25)',
+        '--nc-legend-font-size': '13',
+        '--nc-legend-marker-shape': 'circle',
+        '--nc-legend-marker-size': '12',
+        '--nc-pie-border-width': '4',
+        '--nc-pie-padding': '0.04',
+        '--nc-gauge-needle': '0',
+        '--nc-gauge-rounded-ends': '1',
+        '--nc-gauge-value-font-size': '38',
+        '--nc-gauge-tick-font-size': '11',
+        '--nc-scatter-point-radius': '8',
+        '--nc-scatter-point-opacity': '0.85',
+        '--nc-scatter-point-border-width': '3',
+        '--nc-combo-bar-border-radius': '14',
+        '--nc-combo-line-width': '3.5',
+        '--nc-combo-point-radius': '7',
+        '--nc-combo-tension': '0.45'
+      },
+      config: {
+        style: {
+          fontWeight: 600,
+          axis: { xLine: false, yLine: false },
+          bar: { borderRadius: 14, gradient: true, shadow: '0 4px 12px rgba(0,0,0,0.15)' },
+          gauge: { needle: false, roundedEnds: true },
+          tooltip: { borderRadius: 16 },
+          pie: { padAngle: 0.04 },
+          line: { pointFill: 'solid', pointShape: 'circle' },
+          legend: { marker: { shape: 'circle', size: 12 } }
+        }
+      }
+    }
+  };
+
+  var DESIGN_KEYS = Object.keys(DESIGNS);
+  var DESIGN_TOKENS_KEYS = []; // filled from first non-default design
+  DESIGN_KEYS.forEach(function (k) {
+    Object.keys(DESIGNS[k].tokens).forEach(function (t) {
+      if (DESIGN_TOKENS_KEYS.indexOf(t) === -1) DESIGN_TOKENS_KEYS.push(t);
+    });
+  });
+
   // ── Palette presets ──────────────────────────────────────────────────
   var PALETTES = {
     default: {
@@ -168,6 +446,11 @@
       label: 'Mono',
       light: ['#212529','#495057','#6c757d','#868e96','#adb5bd','#ced4da','#343a40','#5a6370','#798490','#a1aab4'],
       dark:  ['#e9ecef','#ced4da','#adb5bd','#868e96','#6c757d','#495057','#dee2e6','#b0b8c2','#8c95a0','#6d767e']
+    },
+    vivid: {
+      label: 'Vivid',
+      light: ['#6c2bd9','#e8155f','#ff6d00','#00b85e','#0090ff','#d4175b','#00a6a6','#f5a623','#8338ec','#06d6a0'],
+      dark:  ['#a855f7','#fb7185','#ff9e40','#34d399','#60a5fa','#f472b6','#2dd4bf','#fbbf24','#a78bfa','#6ee7b7']
     }
   };
 
@@ -183,7 +466,7 @@
       var saved = localStorage.getItem('newchart-theme-state');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return { dark: false, palette: 'default' };
+    return { dark: false, palette: 'default', design: 'none' };
   }
 
   function saveState() {
@@ -193,7 +476,7 @@
   }
 
   // ── Theme application ────────────────────────────────────────────────
-  function applyTheme() {
+  function applyTheme(triggerRemount) {
     var root = document.documentElement;
 
     // Toggle dark class
@@ -208,6 +491,20 @@
       root.style.removeProperty('--nc-palette-' + i);
     }
     UI_TOKENS.forEach(function (t) { root.style.removeProperty(t); });
+
+    // Clear previous design tokens
+    DESIGN_TOKENS_KEYS.forEach(function (t) { root.style.removeProperty(t); });
+
+    // Apply design tokens
+    var design = DESIGNS[state.design] || DESIGNS.none;
+    Object.keys(design.tokens).forEach(function (t) {
+      root.style.setProperty(t, design.tokens[t]);
+    });
+
+    // Set NewChart.designOverride for non-CSS properties (booleans, complex objects)
+    if (typeof NewChart !== 'undefined') {
+      NewChart.designOverride = (state.design !== 'none' && design.config) ? design.config : null;
+    }
 
     if (colors) {
       // Set chart palette tokens on :root — cascades to all chart containers
@@ -228,6 +525,11 @@
 
     updateUI();
     saveState();
+
+    // Trigger view re-mount so charts pick up new design tokens
+    if (triggerRemount) {
+      window.dispatchEvent(new CustomEvent('nc-design-change'));
+    }
   }
 
   // ── UI ───────────────────────────────────────────────────────────────
@@ -293,6 +595,17 @@
       .nc-palette-label {
         font-size: 12px; font-weight: 500; color: var(--text, #172b4d);
       }
+
+      .nc-design-grid { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+      .nc-design-item {
+        display: flex; align-items: center; gap: 10px; padding: 7px 10px;
+        border-radius: 8px; border: 1.5px solid transparent;
+        cursor: pointer; transition: all 0.15s;
+      }
+      .nc-design-item:hover { background: var(--primary-lt, #edf2ff); }
+      .nc-design-item.active { border-color: var(--primary, #4c6ef5); background: var(--primary-lt, #edf2ff); }
+      .nc-design-label { font-size: 12px; font-weight: 600; color: var(--text, #172b4d); }
+      .nc-design-desc { font-size: 10px; color: var(--text-muted, #8993a4); margin-left: auto; }
     `;
     document.head.appendChild(css);
 
@@ -321,17 +634,26 @@
     });
 
     panel.querySelector('[data-mode="light"]').addEventListener('click', function () {
-      state.dark = false; applyTheme();
+      state.dark = false; applyTheme(true);
     });
     panel.querySelector('[data-mode="dark"]').addEventListener('click', function () {
-      state.dark = true; applyTheme();
+      state.dark = true; applyTheme(true);
+    });
+
+    DESIGN_KEYS.forEach(function (key) {
+      var item = panel.querySelector('[data-design="' + key + '"]');
+      if (item) {
+        item.addEventListener('click', function () {
+          state.design = key; applyTheme(true);
+        });
+      }
     });
 
     Object.keys(PALETTES).forEach(function (key) {
       var item = panel.querySelector('[data-palette="' + key + '"]');
       if (item) {
         item.addEventListener('click', function () {
-          state.palette = key; applyTheme();
+          state.palette = key; applyTheme(true);
         });
       }
     });
@@ -342,6 +664,17 @@
     html += '<div class="nc-mode-row">';
     html += '<button class="nc-mode-btn" data-mode="light">&#9788; Light</button>';
     html += '<button class="nc-mode-btn" data-mode="dark">&#9790; Dark</button>';
+    html += '</div>';
+
+    html += '<h3>Design</h3>';
+    html += '<div class="nc-design-grid">';
+    DESIGN_KEYS.forEach(function (key) {
+      var d = DESIGNS[key];
+      html += '<div class="nc-design-item" data-design="' + key + '">';
+      html += '<span class="nc-design-label">' + d.label + '</span>';
+      html += '<span class="nc-design-desc">' + d.desc + '</span>';
+      html += '</div>';
+    });
     html += '</div>';
 
     html += '<h3>Palette</h3>';
@@ -373,6 +706,10 @@
     var darkBtn = panel.querySelector('[data-mode="dark"]');
     lightBtn.classList.toggle('active', !state.dark);
     darkBtn.classList.toggle('active', state.dark);
+
+    panel.querySelectorAll('.nc-design-item').forEach(function (item) {
+      item.classList.toggle('active', item.getAttribute('data-design') === state.design);
+    });
 
     panel.querySelectorAll('.nc-palette-item').forEach(function (item) {
       var key = item.getAttribute('data-palette');
