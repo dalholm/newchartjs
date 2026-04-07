@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   deepMerge,
   formatNumber,
+  estimateTextWidth,
   parseColor,
   rgbToHex,
   lightenColor,
@@ -72,6 +73,51 @@ describe('formatNumber', () => {
   it('handles negative numbers', () => {
     const result = formatNumber(-1500, 0);
     expect(result).toContain('1,500');
+  });
+
+  it('formats large numbers (millions) without losing leading digits', () => {
+    const result = formatNumber(1500000, 0);
+    expect(result).toMatch(/1[\s,.]?500[\s,.]?000/);
+  });
+
+  it('formats with explicit locale', () => {
+    const result = formatNumber(1000000, 0, 'en-US');
+    expect(result).toBe('1,000,000');
+  });
+
+  it('all digits are present for 7-digit numbers', () => {
+    const result = formatNumber(2345678, 0);
+    // Regardless of locale, all digits must be present
+    const digitsOnly = result.replace(/\D/g, '');
+    expect(digitsOnly).toBe('2345678');
+  });
+});
+
+describe('estimateTextWidth', () => {
+  it('returns a positive number for non-empty strings', () => {
+    expect(estimateTextWidth('1,000,000', 12)).toBeGreaterThan(0);
+  });
+
+  it('returns wider estimate for longer strings', () => {
+    const short = estimateTextWidth('100', 12);
+    const long = estimateTextWidth('1,000,000', 12);
+    expect(long).toBeGreaterThan(short);
+  });
+
+  it('scales with font size', () => {
+    const small = estimateTextWidth('1000', 10);
+    const large = estimateTextWidth('1000', 20);
+    expect(large).toBeGreaterThan(small);
+  });
+
+  it('accounts for narrow separator characters', () => {
+    const withCommas = estimateTextWidth('1,000,000', 12);
+    const withoutCommas = estimateTextWidth('1000000', 12);
+    // "1,000,000" has 9 chars (7 digits + 2 commas) vs "1000000" has 7 digits
+    // More chars = wider, but commas are narrower than digits
+    expect(withCommas).toBeGreaterThan(withoutCommas);
+    // But the difference should be less than adding 2 full-width digits
+    expect(withCommas - withoutCommas).toBeLessThan(2 * 12 * 0.6);
   });
 });
 

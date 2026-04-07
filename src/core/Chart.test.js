@@ -74,6 +74,41 @@ describe('Chart base class', () => {
     chart.destroy();
   });
 
+  describe('dynamic Y-axis width', () => {
+    it('allocates more leftSpace for large values (millions)', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A', 'B'], datasets: [{ values: [1500000, 2000000] }] },
+        style: { animation: { duration: 0 } }
+      });
+      const layout = chart.calculateLayout();
+      // For million-scale values like "2,000,000", leftSpace should be > 60px
+      expect(layout.leftSpace).toBeGreaterThan(60);
+      chart.destroy();
+    });
+
+    it('keeps minimum 60px leftSpace for small values', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A', 'B'], datasets: [{ values: [10, 20] }] },
+        style: { animation: { duration: 0 } }
+      });
+      const layout = chart.calculateLayout();
+      expect(layout.leftSpace).toBeGreaterThanOrEqual(60);
+      chart.destroy();
+    });
+
+    it('Y-axis labels are not clipped for 7-digit numbers', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A', 'B', 'C'], datasets: [{ values: [1000000, 2500000, 3000000] }] },
+        style: { animation: { duration: 0 } }
+      });
+      const layout = chart.calculateLayout();
+      // chartX must be large enough that text ending at chartX-10 doesn't go past x=0
+      // For "3,000,000" at 12px font, ~65px wide, so chartX should be >= 75
+      expect(layout.chartX).toBeGreaterThanOrEqual(70);
+      chart.destroy();
+    });
+  });
+
   describe('tooltip positioning', () => {
     it('tooltip element is inside the positioned container, not the outer element', () => {
       const chart = new BarChart(container, {

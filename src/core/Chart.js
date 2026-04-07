@@ -3,7 +3,7 @@
  */
 
 import { SVGRenderer, CanvasRenderer } from './Renderer.js';
-import { deepMerge, debounce, formatNumber } from './utils.js';
+import { deepMerge, debounce, formatNumber, estimateTextWidth, generateScale } from './utils.js';
 import { DEFAULT_CONFIG, DARK_STYLE, isDarkMode, getDarkPalette } from './defaults.js';
 import { resolveCSSTokens } from './CSSTokens.js';
 import Tooltip from './Tooltip.js';
@@ -338,8 +338,15 @@ export class Chart {
 
     const topSpace = this.config.options.legend?.enabled ? 40 : 0;
     const bottomSpace = hasXAxis ? 40 : padding;
-    const leftSpace = hasYAxis ? 60 : padding;
     const rightSpace = padding;
+
+    // Dynamically compute leftSpace based on the widest Y-axis label
+    let leftSpace = padding;
+    if (hasYAxis) {
+      const fontSize = this.config.style?.axis?.fontSize || 12;
+      leftSpace = this._estimateYAxisWidth(fontSize) + 15; // 15px gap
+      leftSpace = Math.max(leftSpace, 60); // minimum 60px
+    }
 
     const chartWidth = this.width - leftSpace - rightSpace;
     const chartHeight = this.height - topSpace - bottomSpace - padding;
@@ -357,6 +364,37 @@ export class Chart {
       hasXAxis,
       hasYAxis
     };
+  }
+
+  /**
+   * Estimate the pixel width needed for Y-axis labels based on data values
+   * @param {number} fontSize - Font size in pixels
+   * @returns {number} Estimated width in pixels
+   */
+  _estimateYAxisWidth(fontSize) {
+    // Extract all numeric values from the dataset
+    const data = this.config.data;
+    let maxValue = 0;
+    if (data?.datasets) {
+      for (const ds of data.datasets) {
+        const vals = ds.data || ds.values || [];
+        for (const v of vals) {
+          const num = typeof v === 'number' ? Math.abs(v) : (typeof v === 'object' && v !== null ? Math.abs(v.y || v.value || 0) : 0);
+          if (num > maxValue) maxValue = num;
+        }
+      }
+    } else if (Array.isArray(data?.values)) {
+      for (const v of data.values) {
+        const num = Math.abs(typeof v === 'number' ? v : 0);
+        if (num > maxValue) maxValue = num;
+      }
+    }
+
+    // Format the largest scale value to measure its width
+    const scale = generateScale(0, maxValue);
+    const maxScaleValue = scale[scale.length - 1] || maxValue;
+    const formatted = formatNumber(maxScaleValue, 0);
+    return estimateTextWidth(formatted, fontSize);
   }
 
   /**

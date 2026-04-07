@@ -35,9 +35,30 @@ export function deepMerge(target, source) {
  * @param {number} decimals - Number of decimal places
  * @returns {string} Formatted number
  */
-export function formatNumber(num, decimals = 0) {
+export function formatNumber(num, decimals = 0, locale) {
   if (typeof num !== 'number') return String(num);
-  return Number(num.toFixed(decimals)).toLocaleString();
+  return Number(num.toFixed(decimals)).toLocaleString(locale || undefined);
+}
+
+/**
+ * Estimate the pixel width of a formatted number string
+ * @param {string} text - Formatted text
+ * @param {number} fontSize - Font size in pixels
+ * @returns {number} Estimated width in pixels
+ */
+export function estimateTextWidth(text, fontSize = 12) {
+  // Average character width is ~0.6 of font size for monospace-like digits
+  // Commas/dots/spaces are narrower (~0.35)
+  let width = 0;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === ',' || ch === '.' || ch === ' ' || ch === '\u00A0') {
+      width += fontSize * 0.35;
+    } else {
+      width += fontSize * 0.6;
+    }
+  }
+  return Math.ceil(width);
 }
 
 /**
