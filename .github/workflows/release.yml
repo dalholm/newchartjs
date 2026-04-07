@@ -16,17 +16,17 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           registry-url: https://registry.npmjs.org
 
       - run: npm ci
 
-      - name: Run tests
-        run: npm test
-
       - name: Build production bundle
         run: NODE_ENV=production npx rollup -c
+
+      - name: Run tests
+        run: npm test
 
       - name: Publish to npm (OIDC trusted publisher)
         run: npm publish --access public --provenance
