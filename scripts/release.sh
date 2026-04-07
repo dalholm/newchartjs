@@ -16,7 +16,6 @@ error() { echo -e "${RED}✗${NC} $1"; exit 1; }
 # --- Pre-flight checks ---
 [[ -z "$(git status --porcelain)" ]] || error "Working directory is dirty. Commit or stash changes first."
 [[ "$(git branch --show-current)" == "main" ]] || error "Must be on main branch."
-npm whoami &>/dev/null || error "Not logged in to npm. Run: npm login"
 
 CURRENT_VERSION=$(node -p "require('./package.json').version")
 info "Current version: ${CURRENT_VERSION}"
@@ -85,22 +84,18 @@ node -e "
 info "Version bumped to ${NEW_VERSION}"
 
 # --- Step 5: Commit + tag ---
-git add package.json dist/ docs/public/newchartjs.umd.js
+git add package.json docs/public/newchartjs.umd.js
 git commit -m "Release v${NEW_VERSION}"
 git tag -a "v${NEW_VERSION}" -m "v${NEW_VERSION}"
 info "Committed and tagged v${NEW_VERSION}"
 
-# --- Step 6: Push to GitHub ---
+# --- Step 6: Push to GitHub (triggers GitHub Actions → npm publish) ---
 echo "Pushing to GitHub..."
 git push origin main --follow-tags
 info "Pushed to GitHub"
 
-# --- Step 7: Publish to npm ---
-echo "Publishing to npm..."
-npm publish --access public
-info "Published to npm"
-
 echo ""
 echo -e "${GREEN}=== Released newchartjs v${NEW_VERSION} ===${NC}"
+echo "  GitHub Actions will now: run tests → build → publish to npm"
+echo "  Track progress: https://github.com/dalholm/newchartjs/actions"
 echo "  npm: https://www.npmjs.com/package/newchartjs"
-echo "  tag: v${NEW_VERSION}"
