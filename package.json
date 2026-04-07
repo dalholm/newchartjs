@@ -7,9 +7,17 @@
   "module": "dist/newchartjs.esm.js",
   "browser": "dist/newchartjs.umd.js",
   "types": "dist/newchartjs.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/newchartjs.esm.js",
+      "require": "./dist/newchartjs.cjs.js",
+      "default": "./dist/newchartjs.umd.js"
+    }
+  },
   "files": [
-    "dist",
-    "src"
+    "dist/*.js",
+    "src/**/*.js",
+    "!src/**/*.test.js"
   ],
   "scripts": {
     "build": "rollup -c",
@@ -37,6 +45,8 @@
   ],
   "author": "Nyehandel",
   "license": "MIT",
+  "homepage": "https://dalholm.github.io/newchartjs/",
+  "bugs": "https://github.com/dalholm/newchartjs/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/dalholm/newchartjs.git"
