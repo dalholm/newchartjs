@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "newchartjs",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A modern, lightweight charting library with SVG and Canvas rendering",
   "main": "dist/newchartjs.cjs.js",
   "module": "dist/newchartjs.esm.js",
