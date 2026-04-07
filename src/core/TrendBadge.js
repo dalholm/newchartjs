@@ -19,7 +19,7 @@
  */
 
 import SparklineChart from '../charts/SparklineChart.js';
-import { formatNumber } from './utils.js';
+import { formatNumber, formatCompact } from './utils.js';
 import { isDarkMode, DARK_KPI_COLORS } from './defaults.js';
 
 /**
@@ -123,16 +123,10 @@ export class TrendBadge {
     if (typeof n !== 'number') return String(n);
 
     let formatted;
-    if (this.config.decimals > 0) {
+    if (this.config.numberFormat === 'full') {
       formatted = formatNumber(n, this.config.decimals);
-    } else if (Math.abs(n) >= 1e6) {
-      formatted = (n / 1e6).toFixed(1) + 'M';
-    } else if (Math.abs(n) >= 1e4) {
-      formatted = Math.round(n / 1e3) + 'k';
-    } else if (Math.abs(n) >= 1e3) {
-      formatted = (n / 1e3).toFixed(1) + 'k';
     } else {
-      formatted = formatNumber(n, this.config.decimals);
+      formatted = formatCompact(n, this.config.decimals > 0 ? this.config.decimals : 1);
     }
 
     return this.config.prefix + formatted + this.config.suffix;

@@ -5,7 +5,7 @@
 
 import Chart from '../core/Chart.js';
 import { FUNNEL_DEFAULTS } from '../core/defaults.js';
-import { formatNumber, deepMerge } from '../core/utils.js';
+import { deepMerge } from '../core/utils.js';
 
 export class FunnelChart extends Chart {
   constructor(element, config = {}) {
@@ -113,12 +113,12 @@ export class FunnelChart extends Chart {
           el.style.filter = 'brightness(1.08)';
 
           const tooltipData = {
-            [stage.label]: formatNumber(stage.value, 0)
+            [stage.label]: this.formatValue(stage.value, 0)
           };
           if (stage.index > 0) {
-            tooltipData['Drop-off'] = formatNumber(stage.dropOff, 1) + '%';
+            tooltipData['Drop-off'] = this.formatValue(stage.dropOff, 1) + '%';
           }
-          tooltipData['Conversion'] = formatNumber(stage.conversionRate, 1) + '%';
+          tooltipData['Conversion'] = this.formatValue(stage.conversionRate, 1) + '%';
 
           this.showTooltip(e, tooltipData);
 
@@ -162,9 +162,9 @@ export class FunnelChart extends Chart {
       });
 
       // Right value + conversion
-      const valueText = formatNumber(stage.value, 0);
+      const valueText = this.formatValue(stage.value, 0);
       const convText = stage.index > 0
-        ? ` (${formatNumber(stage.conversionRate, 1)}%)`
+        ? ` (${this.formatValue(stage.conversionRate, 1)}%)`
         : '';
 
       this.renderer.text(valueText + convText, stage.topX + stage.topWidth + 10, stage.centerY, {
@@ -182,7 +182,7 @@ export class FunnelChart extends Chart {
         const arrowX = stage.topX + stage.topWidth + 10;
 
         this.renderer.text(
-          `▾ −${formatNumber(stage.dropOff, 1)}%`,
+          `▾ −${this.formatValue(stage.dropOff, 1)}%`,
           stage.centerX + stage.topWidth / 2 + 50,
           prevStage.y + prevStage.height + 1,
           {

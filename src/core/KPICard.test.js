@@ -298,7 +298,7 @@ describe('KPICard', () => {
     it('formats large thousands correctly', () => {
       const card = createCard({ value: 38900, previous: null, suffix: '' });
       const value = container.querySelector('.nc-kpi-value');
-      expect(value.textContent).toBe('39k');
+      expect(value.textContent).toBe('38.9k');
       card.destroy();
     });
 

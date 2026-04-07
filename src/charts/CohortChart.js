@@ -5,7 +5,7 @@
 
 import Chart from '../core/Chart.js';
 import { COHORT_DEFAULTS } from '../core/defaults.js';
-import { formatNumber, deepMerge, parseColor } from '../core/utils.js';
+import { deepMerge, parseColor } from '../core/utils.js';
 
 export class CohortChart extends Chart {
   constructor(element, config = {}) {
@@ -109,8 +109,8 @@ export class CohortChart extends Chart {
 
         // Value text
         const displayValue = isSize
-          ? formatNumber(value, 0)
-          : formatNumber(value, 1) + '%';
+          ? this.formatValue(value, 0)
+          : this.formatValue(value, 1) + '%';
 
         const textColor = (!isSize && t > 0.5) ? '#ffffff' : style.fontColor;
 

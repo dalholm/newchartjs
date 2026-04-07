@@ -80,7 +80,8 @@ export const DEFAULT_CONFIG = {
     padding: 20,
     theme: 'light', // 'light', 'dark', or 'auto' (follows prefers-color-scheme)
     renderer: 'auto', // 'svg', 'canvas', or 'auto'
-    cssTokens: true // Enable CSS custom property theming (--nc-*)
+    cssTokens: true, // Enable CSS custom property theming (--nc-*)
+    numberFormat: 'compact' // 'compact' (1.5k, 2.3M) or 'full' (1,500, 2,300,000)
   }
 };
 

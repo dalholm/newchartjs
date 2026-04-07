@@ -4,7 +4,7 @@
 
 import Chart from '../core/Chart.js';
 import { PIE_DEFAULTS } from '../core/defaults.js';
-import { formatNumber, deepMerge } from '../core/utils.js';
+import { deepMerge } from '../core/utils.js';
 
 export class PieChart extends Chart {
   constructor(element, config = {}) {
@@ -136,13 +136,13 @@ export class PieChart extends Chart {
 
           // Update center text if donut
           if (isDonut && this._centerTextValue && this._centerTextLabel) {
-            this._centerTextValue.textContent = formatNumber(slice.percent, 1) + '%';
+            this._centerTextValue.textContent = this.formatValue(slice.percent, 1) + '%';
             this._centerTextLabel.textContent = slice.label;
           }
 
           this.showTooltip(e, {
-            [slice.label]: formatNumber(slice.value, 0),
-            'Share': formatNumber(slice.percent, 1) + '%'
+            [slice.label]: this.formatValue(slice.value, 0),
+            'Share': this.formatValue(slice.percent, 1) + '%'
           });
 
           if (typeof options.onHover === 'function') {
@@ -186,14 +186,14 @@ export class PieChart extends Chart {
 
         switch (labelFormat) {
           case 'value':
-            labelText = formatNumber(slice.value, 0);
+            labelText = this.formatValue(slice.value, 0);
             break;
           case 'label':
             labelText = slice.label;
             break;
           case 'percent':
           default:
-            labelText = formatNumber(slice.percent, 1) + '%';
+            labelText = this.formatValue(slice.percent, 1) + '%';
         }
 
         this.renderer.text(labelText, labelX, labelY, {
@@ -212,7 +212,7 @@ export class PieChart extends Chart {
         fill: style.background || '#ffffff'
       });
 
-      this._centerTextValue = this.renderer.text(formatNumber(total, 0), cx, cy - 3, {
+      this._centerTextValue = this.renderer.text(this.formatValue(total, 0), cx, cy - 3, {
         fill: style.fontColor || '#172b4d',
         fontSize: 16,
         fontFamily: style.monoFamily || style.fontFamily,
@@ -264,7 +264,7 @@ export class PieChart extends Chart {
 
     // Update center text
     if (isDonut && this._centerTextValue && this._centerTextLabel) {
-      this._centerTextValue.textContent = formatNumber(slice.percent, 1) + '%';
+      this._centerTextValue.textContent = this.formatValue(slice.percent, 1) + '%';
       this._centerTextLabel.textContent = slice.label;
     }
   }
@@ -293,7 +293,7 @@ export class PieChart extends Chart {
     }
 
     if (isDonut && this._centerTextValue && this._centerTextLabel) {
-      this._centerTextValue.textContent = formatNumber(total, 0);
+      this._centerTextValue.textContent = this.formatValue(total, 0);
       this._centerTextLabel.textContent = 'total';
     }
   }

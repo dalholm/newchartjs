@@ -57,7 +57,7 @@ describe('WaterfallChart', () => {
     const chart = createChart();
     const texts = Array.from(container.querySelectorAll('text')).map(t => t.textContent);
     // Should contain formatted values
-    expect(texts.some(t => t.includes('5,000') || t.includes('5000'))).toBe(true);
+    expect(texts.some(t => t.includes('5k') || t.includes('5,000') || t.includes('5000'))).toBe(true);
     chart.destroy();
   });
 

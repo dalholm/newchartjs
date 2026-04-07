@@ -5,7 +5,7 @@
 
 import Chart from '../core/Chart.js';
 import { AREA_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
+import { getMinMax, generateScale, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
 
 export class AreaChart extends Chart {
   constructor(element, config = {}) {
@@ -64,7 +64,7 @@ export class AreaChart extends Chart {
         });
 
         if (hasYAxis) {
-          this.renderer.text(formatNumber(value, 0), chartX - 10, y, {
+          this.renderer.text(this.formatValue(value, 0), chartX - 10, y, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
@@ -230,7 +230,7 @@ export class AreaChart extends Chart {
             this._allPoints.forEach(pt => {
               if (pt.labelIndex === i) {
                 if (pt.element) pt.element.setAttribute('opacity', '1');
-                tooltipData[pt.datasetLabel || 'Value'] = formatNumber(pt.value, 0);
+                tooltipData[pt.datasetLabel || 'Value'] = this.formatValue(pt.value, 0);
               }
             });
             this.showTooltip(e, tooltipData);

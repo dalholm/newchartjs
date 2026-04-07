@@ -4,7 +4,7 @@
 
 import Chart from '../core/Chart.js';
 import { COMBO_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
+import { getMinMax, generateScale, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
 
 export class ComboChart extends Chart {
   constructor(element, config = {}) {
@@ -107,7 +107,7 @@ export class ComboChart extends Chart {
         });
 
         if (hasYAxis) {
-          this.renderer.text(formatNumber(value, 0), chartX - 10, y, {
+          this.renderer.text(this.formatValue(value, 0), chartX - 10, y, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
@@ -242,7 +242,7 @@ export class ComboChart extends Chart {
 
           // Actual value label inside bar (if bar is wide enough)
           if (datasetWidth > 28 && actualHeight > 16) {
-            this.renderer.text(formatNumber(actualValue, 0), x + datasetWidth / 2, splitY - 6, {
+            this.renderer.text(this.formatValue(actualValue, 0), x + datasetWidth / 2, splitY - 6, {
               fill: '#ffffff',
               fontSize: Math.min(10, datasetWidth / 5),
               fontFamily: style.monoFamily || style.fontFamily,
@@ -445,20 +445,20 @@ export class ComboChart extends Chart {
                 rows.push({
                   color: bar.color,
                   label: `${bar.datasetLabel || 'Value'} (actual)`,
-                  value: formatNumber(bar.actualValue, 0),
+                  value: this.formatValue(bar.actualValue, 0),
                   style: 'solid'
                 });
                 rows.push({
                   color: bar.color,
                   label: `${bar.datasetLabel || 'Value'} (forecast)`,
-                  value: formatNumber(bar.value, 0),
+                  value: this.formatValue(bar.value, 0),
                   style: 'dashed'
                 });
               } else {
                 rows.push({
                   color: bar.color,
                   label: bar.isForecast ? `${bar.datasetLabel || 'Value'} (forecast)` : (bar.datasetLabel || 'Value'),
-                  value: formatNumber(bar.value, 0),
+                  value: this.formatValue(bar.value, 0),
                   style: bar.isForecast ? 'dashed' : 'solid'
                 });
               }
@@ -471,7 +471,7 @@ export class ComboChart extends Chart {
               rows.push({
                 color: pt.color,
                 label: pt.datasetLabel || 'Value',
-                value: formatNumber(pt.value, 0),
+                value: this.formatValue(pt.value, 0),
                 style: ds?.dash ? 'dashed' : 'solid'
               });
             }
@@ -490,7 +490,7 @@ export class ComboChart extends Chart {
             rows.push({
               color: ref.color || '#868e96',
               label: ref.label || 'Ref',
-              value: formatNumber(refValue, 0),
+              value: this.formatValue(refValue, 0),
               style: 'dashed'
             });
           });

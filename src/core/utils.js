@@ -33,11 +33,42 @@ export function deepMerge(target, source) {
  * Format a number with optional decimal places
  * @param {number} num - Number to format
  * @param {number} decimals - Number of decimal places
+ * @param {string} [locale] - Locale for toLocaleString
  * @returns {string} Formatted number
  */
 export function formatNumber(num, decimals = 0, locale) {
   if (typeof num !== 'number') return String(num);
   return Number(num.toFixed(decimals)).toLocaleString(locale || undefined);
+}
+
+/**
+ * Format a number in compact notation (1.5k, 2.3M, etc.)
+ * Falls through to regular formatting for numbers < 1000.
+ * @param {number} num - Number to format
+ * @param {number} [decimals=1] - Decimal places for the abbreviated value
+ * @param {string} [locale] - Locale for fallback formatting
+ * @returns {string} Compact formatted string
+ */
+export function formatCompact(num, decimals = 1, locale) {
+  if (typeof num !== 'number') return String(num);
+
+  const abs = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+
+  if (abs >= 1e12) {
+    return sign + +(abs / 1e12).toFixed(decimals) + 'T';
+  }
+  if (abs >= 1e9) {
+    return sign + +(abs / 1e9).toFixed(decimals) + 'B';
+  }
+  if (abs >= 1e6) {
+    return sign + +(abs / 1e6).toFixed(decimals) + 'M';
+  }
+  if (abs >= 1e3) {
+    return sign + +(abs / 1e3).toFixed(decimals) + 'k';
+  }
+
+  return formatNumber(num, decimals > 0 ? decimals : 0, locale);
 }
 
 /**

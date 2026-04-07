@@ -3,7 +3,7 @@
  */
 
 import { SVGRenderer, CanvasRenderer } from './Renderer.js';
-import { deepMerge, debounce, formatNumber, estimateTextWidth, generateScale } from './utils.js';
+import { deepMerge, debounce, formatNumber, formatCompact, estimateTextWidth, generateScale } from './utils.js';
 import { DEFAULT_CONFIG, DARK_STYLE, isDarkMode, getDarkPalette } from './defaults.js';
 import { resolveCSSTokens } from './CSSTokens.js';
 import Tooltip from './Tooltip.js';
@@ -393,7 +393,7 @@ export class Chart {
     // Format the largest scale value to measure its width
     const scale = generateScale(0, maxValue);
     const maxScaleValue = scale[scale.length - 1] || maxValue;
-    const formatted = formatNumber(maxScaleValue, 0);
+    const formatted = this.formatValue(maxScaleValue, 0);
     return estimateTextWidth(formatted, fontSize);
   }
 
@@ -546,6 +546,21 @@ export class Chart {
       '#1098ad', '#d6336c', '#5c7cfa', '#20c997', '#fcc419'
     ];
     return colors[index % colors.length];
+  }
+
+  /**
+   * Format a number respecting the chart's numberFormat option.
+   * Uses compact notation (1.5k, 2.3M) when numberFormat is 'compact' (default),
+   * or full locale-formatted numbers when 'full'.
+   * @param {number} num - Number to format
+   * @param {number} [decimals=0] - Decimal places
+   * @returns {string} Formatted number string
+   */
+  formatValue(num, decimals = 0) {
+    if (this.config.options?.numberFormat === 'full') {
+      return formatNumber(num, decimals);
+    }
+    return formatCompact(num, decimals);
   }
 
   /**

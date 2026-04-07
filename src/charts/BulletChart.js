@@ -5,7 +5,7 @@
 
 import Chart from '../core/Chart.js';
 import { BULLET_DEFAULTS } from '../core/defaults.js';
-import { formatNumber, deepMerge } from '../core/utils.js';
+import { deepMerge } from '../core/utils.js';
 
 export class BulletChart extends Chart {
   constructor(element, config = {}) {
@@ -128,7 +128,7 @@ export class BulletChart extends Chart {
       }
 
       // Value text on right
-      this.renderer.text(formatNumber(actual, options.valueDecimals || 0), chartX + chartWidth + 10, y + bulletHeight / 2, {
+      this.renderer.text(this.formatValue(actual, options.valueDecimals || 0), chartX + chartWidth + 10, y + bulletHeight / 2, {
         fill: style.fontColor,
         fontSize: 12,
         fontFamily: style.monoFamily || style.fontFamily,
@@ -146,12 +146,12 @@ export class BulletChart extends Chart {
           barEl.style.filter = 'brightness(1.1)';
 
           const tooltipData = {
-            [label]: formatNumber(actual, 0),
-            'Target': formatNumber(target, 0),
-            'Achievement': formatNumber((actual / target) * 100, 1) + '%'
+            [label]: this.formatValue(actual, 0),
+            'Target': this.formatValue(target, 0),
+            'Achievement': this.formatValue((actual / target) * 100, 1) + '%'
           };
           if (dataset.comparative !== undefined) {
-            tooltipData['Previous'] = formatNumber(dataset.comparative, 0);
+            tooltipData['Previous'] = this.formatValue(dataset.comparative, 0);
           }
           this.showTooltip(e, tooltipData);
         });

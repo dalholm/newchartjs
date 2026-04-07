@@ -81,7 +81,19 @@ describe('Chart base class', () => {
         style: { animation: { duration: 0 } }
       });
       const layout = chart.calculateLayout();
-      // For million-scale values like "2,000,000", leftSpace should be > 60px
+      // With compact format "2M" is short; leftSpace should be at minimum 60px
+      expect(layout.leftSpace).toBeGreaterThanOrEqual(60);
+      chart.destroy();
+    });
+
+    it('allocates wider leftSpace for large values in full numberFormat', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A', 'B'], datasets: [{ values: [1500000, 2000000] }] },
+        style: { animation: { duration: 0 } },
+        options: { numberFormat: 'full' }
+      });
+      const layout = chart.calculateLayout();
+      // For full-format values like "2,000,000", leftSpace should be > 60px
       expect(layout.leftSpace).toBeGreaterThan(60);
       chart.destroy();
     });
@@ -96,10 +108,11 @@ describe('Chart base class', () => {
       chart.destroy();
     });
 
-    it('Y-axis labels are not clipped for 7-digit numbers', () => {
+    it('Y-axis labels are not clipped for 7-digit numbers in full format', () => {
       const chart = new BarChart(container, {
         data: { labels: ['A', 'B', 'C'], datasets: [{ values: [1000000, 2500000, 3000000] }] },
-        style: { animation: { duration: 0 } }
+        style: { animation: { duration: 0 } },
+        options: { numberFormat: 'full' }
       });
       const layout = chart.calculateLayout();
       // chartX must be large enough that text ending at chartX-10 doesn't go past x=0

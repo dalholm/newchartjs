@@ -27,7 +27,7 @@ import { LiveWidget, createLiveWidget } from './core/LiveWidget.js';
 import { EcommerceSimulator, createEcommerceSimulator } from './core/EcommerceSimulator.js';
 import { getSupportedTokens } from './core/CSSTokens.js';
 import { COMPARE_COLOR, COLOR_PALETTE, DARK_STYLE, DARK_KPI_COLORS, isDarkMode, getDarkPalette } from './core/defaults.js';
-import { deepMerge } from './core/utils.js';
+import { deepMerge, formatCompact, formatNumber } from './core/utils.js';
 import DataTable from './core/DataTable.js';
 import { Breadcrumb } from './core/Breadcrumb.js';
 import { DrillDownManager } from './core/DrillDownManager.js';
@@ -261,6 +261,8 @@ const NewChart = {
 NewChart.DataTable = DataTable;
 NewChart.Breadcrumb = Breadcrumb;
 NewChart.DrillDownManager = DrillDownManager;
+NewChart.formatCompact = formatCompact;
+NewChart.formatNumber = formatNumber;
 
 // Named exports for tree-shaking
 export {
@@ -301,7 +303,9 @@ export {
   DARK_KPI_COLORS,
   isDarkMode,
   getDarkPalette,
-  deepMerge
+  deepMerge,
+  formatCompact,
+  formatNumber
 };
 
 // Default export for backwards compatibility

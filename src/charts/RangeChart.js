@@ -5,7 +5,7 @@
 
 import Chart from '../core/Chart.js';
 import { RANGE_DEFAULTS } from '../core/defaults.js';
-import { formatNumber, deepMerge } from '../core/utils.js';
+import { deepMerge } from '../core/utils.js';
 
 export class RangeChart extends Chart {
   constructor(element, config = {}) {
@@ -54,7 +54,7 @@ export class RangeChart extends Chart {
       });
 
       if (hasYAxis) {
-        this.renderer.text(formatNumber(val, 0), chartX - 8, y, {
+        this.renderer.text(this.formatValue(val, 0), chartX - 8, y, {
           fill: style.axis?.color || style.fontColor,
           fontSize: style.axis?.fontSize || 11,
           fontFamily: style.fontFamily,
@@ -159,7 +159,7 @@ export class RangeChart extends Chart {
               const tooltipData = {};
               data.datasets.forEach((ds, dsi) => {
                 if (ds.values?.[i] !== null && ds.values?.[i] !== undefined) {
-                  tooltipData[ds.label || `Series ${dsi + 1}`] = formatNumber(ds.values[i], 0);
+                  tooltipData[ds.label || `Series ${dsi + 1}`] = this.formatValue(ds.values[i], 0);
                 }
               });
 

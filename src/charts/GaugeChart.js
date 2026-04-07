@@ -6,7 +6,7 @@
 
 import Chart from '../core/Chart.js';
 import { GAUGE_DEFAULTS } from '../core/defaults.js';
-import { formatNumber, deepMerge } from '../core/utils.js';
+import { deepMerge } from '../core/utils.js';
 
 export class GaugeChart extends Chart {
   constructor(element, config = {}) {
@@ -214,7 +214,7 @@ export class GaugeChart extends Chart {
         // Tick label
         const labelR = outerR + 22;
         this.renderer.text(
-          formatNumber(tickValue, 0),
+          this.formatValue(tickValue, 0),
           cx + labelR * Math.cos(angle),
           cy + labelR * Math.sin(angle),
           {
@@ -248,7 +248,7 @@ export class GaugeChart extends Chart {
       if (options.targetLabel !== false) {
         const targetLabelR = outerR + 32;
         this.renderer.text(
-          options.targetLabel || `Mal: ${formatNumber(target, 0)}`,
+          options.targetLabel || `Mal: ${this.formatValue(target, 0)}`,
           cx + targetLabelR * Math.cos(targetAngle),
           cy + targetLabelR * Math.sin(targetAngle),
           {
@@ -317,7 +317,7 @@ export class GaugeChart extends Chart {
     // Sub-label (e.g., "av 100")
     if (options.showMax !== false) {
       this.renderer.text(
-        `av ${formatNumber(max, 0)}`,
+        `av ${this.formatValue(max, 0)}`,
         cx, cy + (style.gauge?.needle !== false ? 62 : 36),
         {
           fill: style.grid?.color || '#b3bac5',
@@ -506,7 +506,7 @@ export class GaugeChart extends Chart {
       );
       // Target label below bar
       this.renderer.text(
-        options.targetLabel || formatNumber(target, 0),
+        options.targetLabel || this.formatValue(target, 0),
         targetX, barY + barHeight + 18,
         {
           fill: style.fontColor || '#5e6c84',
@@ -545,14 +545,14 @@ export class GaugeChart extends Chart {
     }
 
     // Min/max labels
-    this.renderer.text(formatNumber(min, 0), barX, barY + barHeight + 14, {
+    this.renderer.text(this.formatValue(min, 0), barX, barY + barHeight + 14, {
       fill: style.grid?.color || '#b3bac5',
       fontSize: 9,
       fontFamily: style.fontFamily,
       textAnchor: 'start',
       dominantBaseline: 'middle'
     });
-    this.renderer.text(formatNumber(max, 0), barX + barWidth, barY + barHeight + 14, {
+    this.renderer.text(this.formatValue(max, 0), barX + barWidth, barY + barHeight + 14, {
       fill: style.grid?.color || '#b3bac5',
       fontSize: 9,
       fontFamily: style.fontFamily,
@@ -694,7 +694,7 @@ export class GaugeChart extends Chart {
 
     const suffix = this.config.options.valueSuffix || '';
     const prefix = this.config.options.valuePrefix || '';
-    return prefix + formatNumber(value, this.config.options.valueDecimals ?? 0) + suffix;
+    return prefix + super.formatValue(value, this.config.options.valueDecimals ?? 0) + suffix;
   }
 
   /**

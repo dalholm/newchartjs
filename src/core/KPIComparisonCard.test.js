@@ -20,7 +20,7 @@ describe('KPIComparisonCard', () => {
       theme: 'light'
     });
     expect(container.innerHTML).toContain('Revenue');
-    expect(container.innerHTML).toContain('38,900');
+    expect(container.innerHTML).toContain('38.9k');
     card.destroy();
   });
 

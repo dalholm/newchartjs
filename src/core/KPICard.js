@@ -24,7 +24,7 @@
  */
 
 import SparklineChart from '../charts/SparklineChart.js';
-import { formatNumber } from './utils.js';
+import { formatNumber, formatCompact } from './utils.js';
 import { DARK_KPI_COLORS, isDarkMode } from './defaults.js';
 
 /**
@@ -125,13 +125,10 @@ export class KPICard {
    */
   _autoFormat(n) {
     if (typeof n !== 'number') return String(n);
-    if (this.config.decimals > 0) {
+    if (this.config.numberFormat === 'full') {
       return formatNumber(n, this.config.decimals);
     }
-    if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1) + 'M';
-    if (Math.abs(n) >= 1e4) return Math.round(n / 1e3) + 'k';
-    if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(1) + 'k';
-    return formatNumber(n, this.config.decimals);
+    return formatCompact(n, this.config.decimals > 0 ? this.config.decimals : 1);
   }
 
   /**

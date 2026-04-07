@@ -5,7 +5,7 @@
 
 import Chart from '../core/Chart.js';
 import { WATERFALL_DEFAULTS } from '../core/defaults.js';
-import { formatNumber, deepMerge } from '../core/utils.js';
+import { deepMerge } from '../core/utils.js';
 
 export class WaterfallChart extends Chart {
   constructor(element, config = {}) {
@@ -88,7 +88,7 @@ export class WaterfallChart extends Chart {
       });
 
       if (hasYAxis) {
-        this.renderer.text(formatNumber(val, 0), chartX - 8, y, {
+        this.renderer.text(this.formatValue(val, 0), chartX - 8, y, {
           fill: style.axis?.color || style.fontColor,
           fontSize: style.axis?.fontSize || 11,
           fontFamily: style.fontFamily,
@@ -150,7 +150,7 @@ export class WaterfallChart extends Chart {
       const labelY = barTop - 6;
       const prefix = bar.type !== 'total' && bar.delta >= 0 ? '+' : '';
       this.renderer.text(
-        prefix + formatNumber(bar.type === 'total' ? bar.end : bar.delta, 0),
+        prefix + this.formatValue(bar.type === 'total' ? bar.end : bar.delta, 0),
         x + barWidth / 2,
         labelY,
         {
@@ -186,9 +186,9 @@ export class WaterfallChart extends Chart {
             if (other !== el) other.setAttribute('opacity', '0.4');
           });
 
-          const tooltipData = { [bar.label]: formatNumber(bar.type === 'total' ? bar.end : bar.delta, 0) };
+          const tooltipData = { [bar.label]: this.formatValue(bar.type === 'total' ? bar.end : bar.delta, 0) };
           if (bar.type !== 'total') {
-            tooltipData['Running total'] = formatNumber(bar.runningEnd, 0);
+            tooltipData['Running total'] = this.formatValue(bar.runningEnd, 0);
           }
           tooltipData['Type'] = bar.type;
           this.showTooltip(e, tooltipData);

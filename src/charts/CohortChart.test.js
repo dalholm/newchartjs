@@ -90,7 +90,7 @@ describe('CohortChart', () => {
   it('renders absolute count for first column', () => {
     const chart = createChart();
     const texts = Array.from(container.querySelectorAll('text')).map(t => t.textContent);
-    expect(texts.some(t => t.includes('1,000') || t.includes('1000'))).toBe(true);
+    expect(texts.some(t => t.includes('1k') || t.includes('1,000') || t.includes('1000'))).toBe(true);
     chart.destroy();
   });
 });

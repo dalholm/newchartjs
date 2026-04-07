@@ -4,7 +4,7 @@
  */
 
 import { isDarkMode, DARK_KPI_COLORS } from './defaults.js';
-import { formatNumber } from './utils.js';
+import { formatNumber, formatCompact } from './utils.js';
 
 /**
  * @typedef {Object} KPIComparisonConfig
@@ -75,7 +75,10 @@ export class KPIComparisonCard {
     const achievement = c.target ? (c.value / c.target * 100) : null;
 
     // Format value
-    const formattedValue = (c.prefix || '') + formatNumber(c.value, c.decimals || 0) + (c.suffix || '');
+    const fmt = c.numberFormat === 'full'
+      ? (n, d) => formatNumber(n, d)
+      : (n, d) => formatCompact(n, d > 0 ? d : 1);
+    const formattedValue = (c.prefix || '') + fmt(c.value, c.decimals || 0) + (c.suffix || '');
 
     // Sparkline SVG
     let sparklineSVG = '';
@@ -158,8 +161,8 @@ export class KPIComparisonCard {
 
         ${c.previousValue !== undefined ? `
           <div style="font-size:11px;color:${colors.previous};margin-top:6px;">
-            Previous: ${(c.prefix || '') + formatNumber(c.previousValue, c.decimals || 0) + (c.suffix || '')}
-            ${c.target ? ` &middot; Target: ${(c.prefix || '') + formatNumber(c.target, c.decimals || 0) + (c.suffix || '')}` : ''}
+            Previous: ${(c.prefix || '') + fmt(c.previousValue, c.decimals || 0) + (c.suffix || '')}
+            ${c.target ? ` &middot; Target: ${(c.prefix || '') + fmt(c.target, c.decimals || 0) + (c.suffix || '')}` : ''}
           </div>
         ` : ''}
 

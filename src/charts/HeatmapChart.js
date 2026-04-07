@@ -5,7 +5,7 @@
 
 import Chart from '../core/Chart.js';
 import { HEATMAP_DEFAULTS } from '../core/defaults.js';
-import { formatNumber, deepMerge, parseColor } from '../core/utils.js';
+import { deepMerge, parseColor } from '../core/utils.js';
 
 export class HeatmapChart extends Chart {
   constructor(element, config = {}) {
@@ -109,7 +109,7 @@ export class HeatmapChart extends Chart {
 
         // Value text inside cell (if cells are big enough)
         if (w > 28 && h > 18 && heatmap.showValues !== false) {
-          this.renderer.text(formatNumber(value, options.valueDecimals || 0), x + w / 2, y + h / 2, {
+          this.renderer.text(this.formatValue(value, options.valueDecimals || 0), x + w / 2, y + h / 2, {
             fill: t > 0.55 ? '#ffffff' : '#374151',
             fontSize: Math.min(10, h * 0.45),
             fontFamily: style.monoFamily || style.fontFamily,
@@ -131,7 +131,7 @@ export class HeatmapChart extends Chart {
             const yLabel = yLabels[ri] || `Row ${ri + 1}`;
 
             this.showTooltip(e, {
-              [yLabel + ' × ' + xLabel]: formatNumber(value, options.valueDecimals || 0)
+              [yLabel + ' × ' + xLabel]: this.formatValue(value, options.valueDecimals || 0)
             });
           });
 
@@ -189,14 +189,14 @@ export class HeatmapChart extends Chart {
         });
       }
 
-      this.renderer.text(formatNumber(minVal, 0), scaleX, scaleY2 + scaleHeight + 4, {
+      this.renderer.text(this.formatValue(minVal, 0), scaleX, scaleY2 + scaleHeight + 4, {
         fill: style.fontColor,
         fontSize: 9,
         fontFamily: style.fontFamily,
         textAnchor: 'start',
         dominantBaseline: 'hanging'
       });
-      this.renderer.text(formatNumber(maxVal, 0), scaleX + scaleWidth, scaleY2 + scaleHeight + 4, {
+      this.renderer.text(this.formatValue(maxVal, 0), scaleX + scaleWidth, scaleY2 + scaleHeight + 4, {
         fill: style.fontColor,
         fontSize: 9,
         fontFamily: style.fontFamily,

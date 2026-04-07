@@ -4,7 +4,7 @@
 
 import Chart from '../core/Chart.js';
 import { LINE_DEFAULTS } from '../core/defaults.js';
-import { getMinMax, generateScale, formatNumber, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
+import { getMinMax, generateScale, deepMerge, getBezierPath, getMonotonePath } from '../core/utils.js';
 
 export class LineChart extends Chart {
   constructor(element, config = {}) {
@@ -75,7 +75,7 @@ export class LineChart extends Chart {
         });
 
         if (hasYAxis) {
-          this.renderer.text(formatNumber(value, 0), chartX - 10, y, {
+          this.renderer.text(this.formatValue(value, 0), chartX - 10, y, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
@@ -255,7 +255,7 @@ export class LineChart extends Chart {
                 rows.push({
                   color: pt.color,
                   label: pt.datasetLabel || 'Value',
-                  value: formatNumber(pt.value, 0),
+                  value: this.formatValue(pt.value, 0),
                   style: isDashed ? 'dashed' : 'solid'
                 });
 
