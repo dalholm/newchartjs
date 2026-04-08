@@ -128,7 +128,7 @@ export class BulletChart extends Chart {
       }
 
       // Value text on right
-      this.renderer.text(this.formatValue(actual, options.valueDecimals || 0), chartX + chartWidth + 10, y + bulletHeight / 2, {
+      this.renderer.text(this.formatValue(actual, options.valueDecimals || 0, 'label'), chartX + chartWidth + 10, y + bulletHeight / 2, {
         fill: style.fontColor,
         fontSize: 12,
         fontFamily: style.monoFamily || style.fontFamily,
@@ -146,12 +146,12 @@ export class BulletChart extends Chart {
           barEl.style.filter = 'brightness(1.1)';
 
           const tooltipData = {
-            [label]: this.formatValue(actual, 0),
-            'Target': this.formatValue(target, 0),
-            'Achievement': this.formatValue((actual / target) * 100, 1) + '%'
+            [label]: this.formatValue(actual, null, 'tooltip'),
+            'Target': this.formatValue(target, null, 'tooltip'),
+            'Achievement': this.formatValue((actual / target) * 100, 1, 'tooltip') + '%'
           };
           if (dataset.comparative !== undefined) {
-            tooltipData['Previous'] = this.formatValue(dataset.comparative, 0);
+            tooltipData['Previous'] = this.formatValue(dataset.comparative, null, 'tooltip');
           }
           this.showTooltip(e, tooltipData);
         });

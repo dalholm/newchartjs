@@ -179,7 +179,7 @@ export class TreemapChart extends Chart {
 
         // Value
         if (th > 40) {
-          this.renderer.text(this.formatValue(tile.value, 0), tx + 6, ty + 22, {
+          this.renderer.text(this.formatValue(tile.value, null, 'label'), tx + 6, ty + 22, {
             fill: 'rgba(255,255,255,0.8)',
             fontSize: Math.min(11, tw / 9),
             fontFamily: style.monoFamily || style.fontFamily,
@@ -190,7 +190,7 @@ export class TreemapChart extends Chart {
 
         // Growth indicator
         if (tile.growth !== undefined && th > 54) {
-          const growthText = (tile.growth >= 0 ? '+' : '') + this.formatValue(tile.growth, 1) + '%';
+          const growthText = (tile.growth >= 0 ? '+' : '') + this.formatValue(tile.growth, 1, 'label') + '%';
           const growthColor = tile.growth >= 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,200,200,0.9)';
 
           this.renderer.text(growthText, tx + 6, ty + 36, {
@@ -215,10 +215,10 @@ export class TreemapChart extends Chart {
           });
 
           const tooltipData = {
-            [tile.label]: this.formatValue(tile.value, 0)
+            [tile.label]: this.formatValue(tile.value, null, 'tooltip')
           };
           if (tile.growth !== undefined) {
-            tooltipData['Growth'] = (tile.growth >= 0 ? '+' : '') + this.formatValue(tile.growth, 1) + '%';
+            tooltipData['Growth'] = (tile.growth >= 0 ? '+' : '') + this.formatValue(tile.growth, 1, 'tooltip') + '%';
           }
           this.showTooltip(e, tooltipData);
         });

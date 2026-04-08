@@ -109,8 +109,8 @@ export class CohortChart extends Chart {
 
         // Value text
         const displayValue = isSize
-          ? this.formatValue(value, 0)
-          : this.formatValue(value, 1) + '%';
+          ? this.formatValue(value, 0, 'label')
+          : this.formatValue(value, 1, 'label') + '%';
 
         const textColor = (!isSize && t > 0.5) ? '#ffffff' : style.fontColor;
 

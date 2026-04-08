@@ -141,7 +141,7 @@ export class ScatterChart extends Chart {
         });
 
         if (hasYAxis) {
-          this.renderer.text(this.formatValue(value, 0), chartX - 10, y, {
+          this.renderer.text(this.formatValue(value, null, 'axis'), chartX - 10, y, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
@@ -162,7 +162,7 @@ export class ScatterChart extends Chart {
         });
 
         if (hasXAxis) {
-          this.renderer.text(this.formatValue(value, 0), x, chartY + chartHeight + 15, {
+          this.renderer.text(this.formatValue(value, null, 'axis'), x, chartY + chartHeight + 15, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
@@ -298,7 +298,7 @@ export class ScatterChart extends Chart {
             const rows = [{
               color,
               label: dataset.label || `Series ${datasetIndex + 1}`,
-              value: `(${this.formatValue(p.x, 1)}, ${this.formatValue(p.y, 1)})`,
+              value: `(${this.formatValue(p.x, 1, 'tooltip')}, ${this.formatValue(p.y, 1, 'tooltip')})`,
               style: 'solid'
             }];
 
@@ -306,7 +306,7 @@ export class ScatterChart extends Chart {
               rows.push({
                 color: '#8993a4',
                 label: options.sizeLabel || 'Size',
-                value: this.formatValue(p.size, 0),
+                value: this.formatValue(p.size, null, 'tooltip'),
                 style: 'solid'
               });
             }

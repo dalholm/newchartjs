@@ -88,7 +88,7 @@ export class WaterfallChart extends Chart {
       });
 
       if (hasYAxis) {
-        this.renderer.text(this.formatValue(val, 0), chartX - 8, y, {
+        this.renderer.text(this.formatValue(val, null, 'axis'), chartX - 8, y, {
           fill: style.axis?.color || style.fontColor,
           fontSize: style.axis?.fontSize || 11,
           fontFamily: style.fontFamily,
@@ -150,7 +150,7 @@ export class WaterfallChart extends Chart {
       const labelY = barTop - 6;
       const prefix = bar.type !== 'total' && bar.delta >= 0 ? '+' : '';
       this.renderer.text(
-        prefix + this.formatValue(bar.type === 'total' ? bar.end : bar.delta, 0),
+        prefix + this.formatValue(bar.type === 'total' ? bar.end : bar.delta, null, 'label'),
         x + barWidth / 2,
         labelY,
         {
@@ -186,9 +186,9 @@ export class WaterfallChart extends Chart {
             if (other !== el) other.setAttribute('opacity', '0.4');
           });
 
-          const tooltipData = { [bar.label]: this.formatValue(bar.type === 'total' ? bar.end : bar.delta, 0) };
+          const tooltipData = { [bar.label]: this.formatValue(bar.type === 'total' ? bar.end : bar.delta, null, 'tooltip') };
           if (bar.type !== 'total') {
-            tooltipData['Running total'] = this.formatValue(bar.runningEnd, 0);
+            tooltipData['Running total'] = this.formatValue(bar.runningEnd, null, 'tooltip');
           }
           tooltipData['Type'] = bar.type;
           this.showTooltip(e, tooltipData);

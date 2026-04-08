@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   deepMerge,
   formatNumber,
+  formatCompact,
   estimateTextWidth,
   parseColor,
   rgbToHex,
@@ -90,6 +91,112 @@ describe('formatNumber', () => {
     // Regardless of locale, all digits must be present
     const digitsOnly = result.replace(/\D/g, '');
     expect(digitsOnly).toBe('2345678');
+  });
+});
+
+describe('formatCompact', () => {
+  describe('auto-decimals (default)', () => {
+    it('shows 1 decimal for single-digit millions (2.5M)', () => {
+      expect(formatCompact(2500000)).toBe('2.5M');
+    });
+
+    it('shows 1 decimal for 1.9M', () => {
+      expect(formatCompact(1900000)).toBe('1.9M');
+    });
+
+    it('shows 0 decimals for double-digit millions (30M)', () => {
+      expect(formatCompact(30000000)).toBe('30M');
+    });
+
+    it('shows 0 decimals for 150M', () => {
+      expect(formatCompact(150000000)).toBe('150M');
+    });
+
+    it('shows 1 decimal for single-digit thousands (2.5k)', () => {
+      expect(formatCompact(2500)).toBe('2.5k');
+    });
+
+    it('shows 0 decimals for double-digit thousands (50k)', () => {
+      expect(formatCompact(50000)).toBe('50k');
+    });
+
+    it('shows 0 decimals for 100k', () => {
+      expect(formatCompact(100000)).toBe('100k');
+    });
+
+    it('shows 1 decimal for single-digit billions (1.2B)', () => {
+      expect(formatCompact(1200000000)).toBe('1.2B');
+    });
+
+    it('shows 0 decimals for 50B', () => {
+      expect(formatCompact(50000000000)).toBe('50B');
+    });
+
+    it('shows 1 decimal for single-digit trillions (3.5T)', () => {
+      expect(formatCompact(3500000000000)).toBe('3.5T');
+    });
+  });
+
+  describe('explicit decimals override', () => {
+    it('forces 0 decimals when requested', () => {
+      expect(formatCompact(2500000, 0)).toBe('3M');
+    });
+
+    it('forces 2 decimals when requested', () => {
+      expect(formatCompact(2530000, 2)).toBe('2.53M');
+    });
+
+    it('forces 2 decimals for thousands', () => {
+      expect(formatCompact(1234, 2)).toBe('1.23k');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('handles zero', () => {
+      expect(formatCompact(0)).toBe('0');
+    });
+
+    it('handles small numbers (no suffix)', () => {
+      expect(formatCompact(500)).toBe('500');
+    });
+
+    it('handles negative numbers', () => {
+      expect(formatCompact(-2500000)).toBe('-2.5M');
+    });
+
+    it('handles negative double-digit millions', () => {
+      expect(formatCompact(-30000000)).toBe('-30M');
+    });
+
+    it('handles exact million boundary', () => {
+      expect(formatCompact(1000000)).toBe('1M');
+    });
+
+    it('handles exact thousand boundary', () => {
+      expect(formatCompact(1000)).toBe('1k');
+    });
+
+    it('returns string for non-numbers', () => {
+      expect(formatCompact('abc')).toBe('abc');
+    });
+
+    it('handles 9.9M (edge of single-digit)', () => {
+      expect(formatCompact(9900000)).toBe('9.9M');
+    });
+
+    it('handles 10M (boundary to double-digit)', () => {
+      expect(formatCompact(10000000)).toBe('10M');
+    });
+  });
+
+  describe('backward compatibility with decimals=1', () => {
+    it('2500000 with decimals=1 gives 2.5M', () => {
+      expect(formatCompact(2500000, 1)).toBe('2.5M');
+    });
+
+    it('30000000 with decimals=1 gives 30.0M stripped to 30M', () => {
+      expect(formatCompact(30000000, 1)).toBe('30M');
+    });
   });
 });
 

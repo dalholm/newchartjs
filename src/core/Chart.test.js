@@ -309,4 +309,156 @@ describe('Chart base class', () => {
       chart.destroy();
     });
   });
+
+  describe('formatValue', () => {
+    it('uses compact auto-decimals by default', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [2500000] }] },
+        style: { animation: { duration: 0 } }
+      });
+      expect(chart.formatValue(2500000)).toBe('2.5M');
+      expect(chart.formatValue(1900000)).toBe('1.9M');
+      expect(chart.formatValue(30000000)).toBe('30M');
+      chart.destroy();
+    });
+
+    it('respects explicit decimals from call site', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } }
+      });
+      expect(chart.formatValue(2500000, 2)).toBe('2.5M');
+      expect(chart.formatValue(1234, 2)).toBe('1.23k');
+      chart.destroy();
+    });
+
+    it('uses full format when numberFormat is "full"', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } },
+        options: { numberFormat: 'full' }
+      });
+      const result = chart.formatValue(2500000);
+      const digits = result.replace(/\D/g, '');
+      expect(digits).toBe('2500000');
+      chart.destroy();
+    });
+
+    it('supports numberFormat as object with style and decimals', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } },
+        options: { numberFormat: { style: 'compact', decimals: 2 } }
+      });
+      expect(chart.formatValue(1234567)).toBe('1.23M');
+      expect(chart.formatValue(50000)).toBe('50k');
+      chart.destroy();
+    });
+
+    it('supports numberFormat object with style "full" and locale', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } },
+        options: { numberFormat: { style: 'full', decimals: 2, locale: 'en-US' } }
+      });
+      // formatNumber uses toFixed then toLocaleString; trailing zero may be stripped
+      const result = chart.formatValue(1234.5);
+      expect(result).toMatch(/1[,.]?234[,.]?50?/);
+      chart.destroy();
+    });
+
+    it('call-site decimals override config decimals', () => {
+      const chart = new BarChart(container, {
+        data: { labels: ['A'], datasets: [{ values: [10] }] },
+        style: { animation: { duration: 0 } },
+        options: { numberFormat: { style: 'compact', decimals: 2 } }
+      });
+      // Call site says 0, should override config's 2
+      expect(chart.formatValue(2500000, 0)).toBe('3M');
+      chart.destroy();
+    });
+
+    describe('context-specific overrides', () => {
+      it('axis context uses axis.decimals', () => {
+        const chart = new BarChart(container, {
+          data: { labels: ['A'], datasets: [{ values: [10] }] },
+          style: { animation: { duration: 0 } },
+          options: { numberFormat: { style: 'compact', axis: { decimals: 0 } } }
+        });
+        // axis: forced 0 decimals
+        expect(chart.formatValue(2500000, null, 'axis')).toBe('3M');
+        // no context: auto decimals
+        expect(chart.formatValue(2500000)).toBe('2.5M');
+        chart.destroy();
+      });
+
+      it('tooltip context uses tooltip.decimals', () => {
+        const chart = new BarChart(container, {
+          data: { labels: ['A'], datasets: [{ values: [10] }] },
+          style: { animation: { duration: 0 } },
+          options: { numberFormat: { style: 'compact', tooltip: { decimals: 2 } } }
+        });
+        expect(chart.formatValue(1234567, null, 'tooltip')).toBe('1.23M');
+        chart.destroy();
+      });
+
+      it('label context uses label.decimals', () => {
+        const chart = new BarChart(container, {
+          data: { labels: ['A'], datasets: [{ values: [10] }] },
+          style: { animation: { duration: 0 } },
+          options: { numberFormat: { style: 'compact', label: { decimals: 1 } } }
+        });
+        expect(chart.formatValue(50000, null, 'label')).toBe('50k');
+        expect(chart.formatValue(2500000, null, 'label')).toBe('2.5M');
+        chart.destroy();
+      });
+
+      it('context overrides fall back to global decimals', () => {
+        const chart = new BarChart(container, {
+          data: { labels: ['A'], datasets: [{ values: [10] }] },
+          style: { animation: { duration: 0 } },
+          options: { numberFormat: { style: 'compact', decimals: 2 } }
+        });
+        // No axis-specific config, so uses global decimals: 2
+        expect(chart.formatValue(1234567, null, 'axis')).toBe('1.23M');
+        chart.destroy();
+      });
+
+      it('context can override style to full', () => {
+        const chart = new BarChart(container, {
+          data: { labels: ['A'], datasets: [{ values: [10] }] },
+          style: { animation: { duration: 0 } },
+          options: { numberFormat: { style: 'compact', tooltip: { style: 'full', decimals: 0 } } }
+        });
+        // Tooltip uses full format
+        const result = chart.formatValue(2500000, null, 'tooltip');
+        const digits = result.replace(/\D/g, '');
+        expect(digits).toBe('2500000');
+        // Axis still uses compact
+        expect(chart.formatValue(2500000, null, 'axis')).toBe('2.5M');
+        chart.destroy();
+      });
+
+      it('call-site decimals override context decimals', () => {
+        const chart = new BarChart(container, {
+          data: { labels: ['A'], datasets: [{ values: [10] }] },
+          style: { animation: { duration: 0 } },
+          options: { numberFormat: { style: 'compact', axis: { decimals: 2 } } }
+        });
+        // Call site decimals=0 should win over axis.decimals=2
+        expect(chart.formatValue(2500000, 0, 'axis')).toBe('3M');
+        chart.destroy();
+      });
+
+      it('unknown context falls back to global config', () => {
+        const chart = new BarChart(container, {
+          data: { labels: ['A'], datasets: [{ values: [10] }] },
+          style: { animation: { duration: 0 } },
+          options: { numberFormat: { style: 'compact', decimals: 2 } }
+        });
+        expect(chart.formatValue(1234567, null, 'other')).toBe('1.23M');
+        chart.destroy();
+      });
+    });
+  });
 });

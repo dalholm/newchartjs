@@ -201,7 +201,7 @@ export class SankeyChart extends Chart {
 
           this.showTooltip(e, {
             'Flow': `${link.source} → ${link.target}`,
-            'Value': this.formatValue(link.value, 0)
+            'Value': this.formatValue(link.value, null, 'tooltip')
           });
         });
 
@@ -237,7 +237,7 @@ export class SankeyChart extends Chart {
       });
 
       // Value under label
-      this.renderer.text(this.formatValue(node.value, 0), labelX, node.y + node.height / 2 + 14, {
+      this.renderer.text(this.formatValue(node.value, null, 'label'), labelX, node.y + node.height / 2 + 14, {
         fill: style.axis?.color || '#6b7280',
         fontSize: 10,
         fontFamily: style.monoFamily || style.fontFamily,
@@ -257,7 +257,7 @@ export class SankeyChart extends Chart {
           });
 
           this.showTooltip(e, {
-            [node.label || node.id]: this.formatValue(node.value, 0)
+            [node.label || node.id]: this.formatValue(node.value, null, 'tooltip')
           });
         });
 

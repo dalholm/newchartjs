@@ -75,7 +75,7 @@ export class LineChart extends Chart {
         });
 
         if (hasYAxis) {
-          this.renderer.text(this.formatValue(value, 0), chartX - 10, y, {
+          this.renderer.text(this.formatValue(value, null, 'axis'), chartX - 10, y, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
@@ -255,7 +255,7 @@ export class LineChart extends Chart {
                 rows.push({
                   color: pt.color,
                   label: pt.datasetLabel || 'Value',
-                  value: this.formatValue(pt.value, 0),
+                  value: this.formatValue(pt.value, null, 'tooltip'),
                   style: isDashed ? 'dashed' : 'solid'
                 });
 

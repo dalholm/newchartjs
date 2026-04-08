@@ -214,7 +214,7 @@ export class GaugeChart extends Chart {
         // Tick label
         const labelR = outerR + 22;
         this.renderer.text(
-          this.formatValue(tickValue, 0),
+          this.formatValue(tickValue, null, 'axis'),
           cx + labelR * Math.cos(angle),
           cy + labelR * Math.sin(angle),
           {
@@ -248,7 +248,7 @@ export class GaugeChart extends Chart {
       if (options.targetLabel !== false) {
         const targetLabelR = outerR + 32;
         this.renderer.text(
-          options.targetLabel || `Mal: ${this.formatValue(target, 0)}`,
+          options.targetLabel || `Mal: ${this.formatValue(target, null, 'label')}`,
           cx + targetLabelR * Math.cos(targetAngle),
           cy + targetLabelR * Math.sin(targetAngle),
           {
@@ -291,7 +291,7 @@ export class GaugeChart extends Chart {
     const valueColor = this.getValueColor(value, min, max, zones);
 
     this._centerValue = this.renderer.text(
-      this.formatValue(value),
+      this.formatValue(value, null, 'label'),
       cx, cy + (style.gauge?.needle !== false ? 28 : 0),
       {
         fill: valueColor,
@@ -317,7 +317,7 @@ export class GaugeChart extends Chart {
     // Sub-label (e.g., "av 100")
     if (options.showMax !== false) {
       this.renderer.text(
-        `av ${this.formatValue(max, 0)}`,
+        `av ${this.formatValue(max, null, 'label')}`,
         cx, cy + (style.gauge?.needle !== false ? 62 : 36),
         {
           fill: style.grid?.color || '#b3bac5',
@@ -401,7 +401,7 @@ export class GaugeChart extends Chart {
     // Center value
     const valueColor = this.getValueColor(value, min, max, zones);
     this.renderer.text(
-      this.formatValue(value),
+      this.formatValue(value, null, 'label'),
       cx, cy - 4,
       {
         fill: valueColor,
@@ -506,7 +506,7 @@ export class GaugeChart extends Chart {
       );
       // Target label below bar
       this.renderer.text(
-        options.targetLabel || this.formatValue(target, 0),
+        options.targetLabel || this.formatValue(target, null, 'label'),
         targetX, barY + barHeight + 18,
         {
           fill: style.fontColor || '#5e6c84',
@@ -521,7 +521,7 @@ export class GaugeChart extends Chart {
     // Value text above bar
     const valueColor = this.getValueColor(value, min, max, zones);
     this.renderer.text(
-      this.formatValue(value),
+      this.formatValue(value, null, 'label'),
       this.width / 2, barY - 18,
       {
         fill: valueColor,
@@ -545,14 +545,14 @@ export class GaugeChart extends Chart {
     }
 
     // Min/max labels
-    this.renderer.text(this.formatValue(min, 0), barX, barY + barHeight + 14, {
+    this.renderer.text(this.formatValue(min, null, 'axis'), barX, barY + barHeight + 14, {
       fill: style.grid?.color || '#b3bac5',
       fontSize: 9,
       fontFamily: style.fontFamily,
       textAnchor: 'start',
       dominantBaseline: 'middle'
     });
-    this.renderer.text(this.formatValue(max, 0), barX + barWidth, barY + barHeight + 14, {
+    this.renderer.text(this.formatValue(max, null, 'axis'), barX + barWidth, barY + barHeight + 14, {
       fill: style.grid?.color || '#b3bac5',
       fontSize: 9,
       fontFamily: style.fontFamily,
@@ -641,7 +641,7 @@ export class GaugeChart extends Chart {
 
     // Value text
     this.renderer.text(
-      this.formatValue(value),
+      this.formatValue(value, null, 'label'),
       cx, isInside ? cy - radius * 0.35 : cy + 8,
       {
         fill: valueColor,
@@ -688,13 +688,13 @@ export class GaugeChart extends Chart {
    * @param {number} value - Value to format
    * @returns {string} Formatted string
    */
-  formatValue(value) {
+  formatValue(value, decimals, context) {
     const formatter = this.config.options.formatValue;
     if (typeof formatter === 'function') return formatter(value);
 
     const suffix = this.config.options.valueSuffix || '';
     const prefix = this.config.options.valuePrefix || '';
-    return prefix + super.formatValue(value, this.config.options.valueDecimals ?? 0) + suffix;
+    return prefix + super.formatValue(value, decimals ?? this.config.options.valueDecimals ?? 0, context) + suffix;
   }
 
   /**

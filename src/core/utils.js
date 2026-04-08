@@ -42,33 +42,56 @@ export function formatNumber(num, decimals = 0, locale) {
 }
 
 /**
+ * Pick the right number of decimal places for a compact-formatted value.
+ * When the scaled value has only one digit before the decimal (e.g. 2.5M),
+ * at least 1 decimal is needed to preserve useful precision.
+ * @param {number} scaled - The value after dividing by its magnitude (e.g. 2.5 for 2,500,000)
+ * @param {number|null} requested - Explicitly requested decimals, or null for auto
+ * @returns {number} Number of decimal places to use
+ */
+function autoDecimals(scaled, requested) {
+  if (requested !== null && requested !== undefined) return requested;
+  // Values < 10 (e.g. 2.5M) — 1 decimal for precision
+  // Values >= 10 (e.g. 30M) — 0 decimals, integer is precise enough
+  return scaled < 10 ? 1 : 0;
+}
+
+/**
  * Format a number in compact notation (1.5k, 2.3M, etc.)
  * Falls through to regular formatting for numbers < 1000.
+ *
+ * When decimals is null/undefined, auto-detection picks the right precision:
+ * - 2,500,000 → "2.5M" (1 decimal, since scaled value < 10)
+ * - 30,000,000 → "30M" (0 decimals, since scaled value ≥ 10)
+ *
  * @param {number} num - Number to format
- * @param {number} [decimals=1] - Decimal places for the abbreviated value
+ * @param {number|null} [decimals=null] - Decimal places (null = auto-detect)
  * @param {string} [locale] - Locale for fallback formatting
  * @returns {string} Compact formatted string
  */
-export function formatCompact(num, decimals = 1, locale) {
+export function formatCompact(num, decimals = null, locale) {
   if (typeof num !== 'number') return String(num);
 
   const abs = Math.abs(num);
   const sign = num < 0 ? '-' : '';
 
-  if (abs >= 1e12) {
-    return sign + +(abs / 1e12).toFixed(decimals) + 'T';
-  }
-  if (abs >= 1e9) {
-    return sign + +(abs / 1e9).toFixed(decimals) + 'B';
-  }
-  if (abs >= 1e6) {
-    return sign + +(abs / 1e6).toFixed(decimals) + 'M';
-  }
-  if (abs >= 1e3) {
-    return sign + +(abs / 1e3).toFixed(decimals) + 'k';
+  const suffixes = [
+    { threshold: 1e12, divisor: 1e12, suffix: 'T' },
+    { threshold: 1e9, divisor: 1e9, suffix: 'B' },
+    { threshold: 1e6, divisor: 1e6, suffix: 'M' },
+    { threshold: 1e3, divisor: 1e3, suffix: 'k' }
+  ];
+
+  for (const { threshold, divisor, suffix } of suffixes) {
+    if (abs >= threshold) {
+      const scaled = abs / divisor;
+      const d = autoDecimals(scaled, decimals);
+      return sign + +(scaled).toFixed(d) + suffix;
+    }
   }
 
-  return formatNumber(num, decimals > 0 ? decimals : 0, locale);
+  const d = decimals !== null && decimals !== undefined ? decimals : 0;
+  return formatNumber(num, d, locale);
 }
 
 /**

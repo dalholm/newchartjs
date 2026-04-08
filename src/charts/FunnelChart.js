@@ -113,12 +113,12 @@ export class FunnelChart extends Chart {
           el.style.filter = 'brightness(1.08)';
 
           const tooltipData = {
-            [stage.label]: this.formatValue(stage.value, 0)
+            [stage.label]: this.formatValue(stage.value, null, 'tooltip')
           };
           if (stage.index > 0) {
-            tooltipData['Drop-off'] = this.formatValue(stage.dropOff, 1) + '%';
+            tooltipData['Drop-off'] = this.formatValue(stage.dropOff, 1, 'tooltip') + '%';
           }
-          tooltipData['Conversion'] = this.formatValue(stage.conversionRate, 1) + '%';
+          tooltipData['Conversion'] = this.formatValue(stage.conversionRate, 1, 'tooltip') + '%';
 
           this.showTooltip(e, tooltipData);
 
@@ -162,9 +162,9 @@ export class FunnelChart extends Chart {
       });
 
       // Right value + conversion
-      const valueText = this.formatValue(stage.value, 0);
+      const valueText = this.formatValue(stage.value, null, 'label');
       const convText = stage.index > 0
-        ? ` (${this.formatValue(stage.conversionRate, 1)}%)`
+        ? ` (${this.formatValue(stage.conversionRate, 1, 'label')}%)`
         : '';
 
       this.renderer.text(valueText + convText, stage.topX + stage.topWidth + 10, stage.centerY, {
@@ -182,7 +182,7 @@ export class FunnelChart extends Chart {
         const arrowX = stage.topX + stage.topWidth + 10;
 
         this.renderer.text(
-          `▾ −${this.formatValue(stage.dropOff, 1)}%`,
+          `▾ −${this.formatValue(stage.dropOff, 1, 'label')}%`,
           stage.centerX + stage.topWidth / 2 + 50,
           prevStage.y + prevStage.height + 1,
           {

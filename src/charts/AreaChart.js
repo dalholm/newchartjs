@@ -64,7 +64,7 @@ export class AreaChart extends Chart {
         });
 
         if (hasYAxis) {
-          this.renderer.text(this.formatValue(value, 0), chartX - 10, y, {
+          this.renderer.text(this.formatValue(value, null, 'axis'), chartX - 10, y, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
             fontFamily: style.fontFamily,
@@ -230,7 +230,7 @@ export class AreaChart extends Chart {
             this._allPoints.forEach(pt => {
               if (pt.labelIndex === i) {
                 if (pt.element) pt.element.setAttribute('opacity', '1');
-                tooltipData[pt.datasetLabel || 'Value'] = this.formatValue(pt.value, 0);
+                tooltipData[pt.datasetLabel || 'Value'] = this.formatValue(pt.value, null, 'tooltip');
               }
             });
             this.showTooltip(e, tooltipData);

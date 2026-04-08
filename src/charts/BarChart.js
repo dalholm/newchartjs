@@ -320,7 +320,7 @@ export class BarChart extends Chart {
         });
 
         if (hasYAxis) {
-          const label = isPercent ? `${this.formatValue(value, 0)}%` : this.formatValue(value, 0);
+          const label = isPercent ? `${this.formatValue(value, null, 'axis')}%` : this.formatValue(value, null, 'axis');
           this.renderer.text(label, chartX - 10, y, {
             fill: style.axis.color,
             fontSize: style.axis.fontSize,
@@ -531,7 +531,7 @@ export class BarChart extends Chart {
 
           // Actual value label inside bar (if bar is wide enough)
           if (barW > 28 && actualHeight > 16) {
-            this.renderer.text(this.formatValue(actualValue, 0), x + barW / 2, splitY - 6, {
+            this.renderer.text(this.formatValue(actualValue, null, 'label'), x + barW / 2, splitY - 6, {
               fill: '#ffffff',
               fontSize: Math.min(10, barW / 5),
               fontFamily: style.monoFamily || style.fontFamily,
@@ -720,16 +720,16 @@ export class BarChart extends Chart {
                 color: bar.color,
                 label: `${bar.datasetLabel || 'Value'} (actual)`,
                 value: isPercent
-                  ? `${this.formatValue(bar.actualValue, 0)}`
-                  : this.formatValue(bar.actualValue, 0),
+                  ? `${this.formatValue(bar.actualValue, null, 'tooltip')}`
+                  : this.formatValue(bar.actualValue, null, 'tooltip'),
                 style: 'solid'
               });
               rows.push({
                 color: bar.color,
                 label: `${bar.datasetLabel || 'Value'} (forecast)`,
                 value: isPercent
-                  ? `${this.formatValue(bar.value, 0)} (${this.formatValue(bar.displayValue, 1)}%)`
-                  : this.formatValue(bar.value, 0),
+                  ? `${this.formatValue(bar.value, null, 'tooltip')} (${this.formatValue(bar.displayValue, 1, 'tooltip')}%)`
+                  : this.formatValue(bar.value, null, 'tooltip'),
                 style: 'dashed'
               });
             } else {
@@ -737,8 +737,8 @@ export class BarChart extends Chart {
                 color: bar.color,
                 label: (bar.isForecast ? `${bar.datasetLabel || 'Value'} (forecast)` : bar.datasetLabel || 'Value'),
                 value: isPercent
-                  ? `${this.formatValue(bar.value, 0)} (${this.formatValue(bar.displayValue, 1)}%)`
-                  : this.formatValue(bar.value, 0),
+                  ? `${this.formatValue(bar.value, null, 'tooltip')} (${this.formatValue(bar.displayValue, 1, 'tooltip')}%)`
+                  : this.formatValue(bar.value, null, 'tooltip'),
                 style: (isDashed || bar.isForecast) ? 'dashed' : 'solid'
               });
             }
@@ -756,7 +756,7 @@ export class BarChart extends Chart {
             rows.push({
               color: marker.color || '#f08c00',
               label: marker.label || 'Target',
-              value: this.formatValue(markerValue, 0),
+              value: this.formatValue(markerValue, null, 'tooltip'),
               style: 'dashed'
             });
           });
@@ -774,7 +774,7 @@ export class BarChart extends Chart {
             rows.push({
               color: ref.color || '#868e96',
               label: ref.label || 'Ref',
-              value: this.formatValue(refValue, 0),
+              value: this.formatValue(refValue, null, 'tooltip'),
               style: 'dashed'
             });
           });

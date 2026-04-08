@@ -393,7 +393,7 @@ export class Chart {
     // Format the largest scale value to measure its width
     const scale = generateScale(0, maxValue);
     const maxScaleValue = scale[scale.length - 1] || maxValue;
-    const formatted = this.formatValue(maxScaleValue, 0);
+    const formatted = this.formatValue(maxScaleValue, null, 'axis');
     return estimateTextWidth(formatted, fontSize);
   }
 
@@ -550,17 +550,47 @@ export class Chart {
 
   /**
    * Format a number respecting the chart's numberFormat option.
-   * Uses compact notation (1.5k, 2.3M) when numberFormat is 'compact' (default),
-   * or full locale-formatted numbers when 'full'.
+   *
+   * Accepts either a string shorthand or an object for fine control:
+   *   numberFormat: 'compact'                    — auto-precision compact (default)
+   *   numberFormat: 'full'                       — locale-formatted full numbers
+   *   numberFormat: { style: 'compact', decimals: 2 }           — compact with forced 2 decimals
+   *   numberFormat: { style: 'full', locale: 'sv-SE' }          — full with explicit locale
+   *   numberFormat: { style: 'compact', axis: { decimals: 0 }, tooltip: { decimals: 1 } }
+   *
+   * Context-specific overrides (axis, tooltip, label) inherit from the top-level
+   * and only override the fields they specify.
+   *
    * @param {number} num - Number to format
-   * @param {number} [decimals=0] - Decimal places
+   * @param {number|null} [decimals=null] - Decimal places (null = auto for compact)
+   * @param {'axis'|'tooltip'|'label'} [context] - Where this value is displayed
    * @returns {string} Formatted number string
    */
-  formatValue(num, decimals = 0) {
-    if (this.config.options?.numberFormat === 'full') {
-      return formatNumber(num, decimals);
+  formatValue(num, decimals = null, context) {
+    const fmt = this.config.options?.numberFormat || 'compact';
+
+    // String shorthand — no overrides possible
+    if (typeof fmt !== 'object') {
+      const style = fmt;
+      if (style === 'full') {
+        return formatNumber(num, decimals !== null ? decimals : 0);
+      }
+      return formatCompact(num, decimals);
     }
-    return formatCompact(num, decimals);
+
+    // Object form — resolve context-specific overrides
+    const ctx = context && fmt[context]; // e.g. fmt.axis, fmt.tooltip, fmt.label
+    const style = (ctx?.style) || fmt.style || 'compact';
+    const locale = (ctx?.locale) || fmt.locale;
+    const configDecimals = ctx?.decimals !== undefined ? ctx.decimals : fmt.decimals;
+
+    // Priority: call-site decimals > context decimals > global decimals > auto
+    const d = decimals !== null ? decimals : (configDecimals !== undefined ? configDecimals : null);
+
+    if (style === 'full') {
+      return formatNumber(num, d !== null ? d : 0, locale);
+    }
+    return formatCompact(num, d, locale);
   }
 
   /**
