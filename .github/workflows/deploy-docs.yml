@@ -22,13 +22,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
 
       - name: Build library
-        run: npm run build
+        run: NODE_ENV=production npm run build
 
       - name: Build docs
         run: npm run docs:build
