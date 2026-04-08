@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import llmstxt from 'vitepress-plugin-llms'
 
 export default defineConfig({
   base: '/newchartjs/',
@@ -15,7 +16,8 @@ export default defineConfig({
       { text: 'Components', link: '/components' },
       { text: 'Styling', link: '/styling' },
       { text: 'API', link: '/api-reference' },
-      { text: 'Demo', link: '/demo' }
+      { text: 'Demo', link: '/demo' },
+      { text: 'llms.txt', link: '/llms.txt', target: '_blank' }
     ],
 
     sidebar: [
@@ -53,5 +55,11 @@ export default defineConfig({
       message: 'Released under the MIT License.',
       copyright: 'Copyright © 2026 Nyehandel'
     }
+  },
+
+  vite: {
+    plugins: [
+      llmstxt()
+    ]
   }
 })
