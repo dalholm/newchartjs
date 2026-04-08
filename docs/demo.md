@@ -14,10 +14,13 @@ title: Demo Gallery
 
 # Demo Gallery
 
-<iframe class="demo-frame" src="/demo/index.html" id="demo-frame"></iframe>
+<iframe class="demo-frame" :src="demoUrl" id="demo-frame"></iframe>
 
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
+import { withBase } from 'vitepress'
+
+const demoUrl = withBase('/demo/index.html')
 
 function sendTheme() {
   const frame = document.getElementById('demo-frame')
